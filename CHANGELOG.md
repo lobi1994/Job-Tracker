@@ -11,6 +11,12 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.6 – 12.11.2026 (nur Apps Script)
+- Die Antwort an den Kurzbefehl enthält `message` jetzt direkt (nicht nur in `result`). Dadurch braucht der Kurzbefehl nur noch **eine** Aktion „Wörterbuchwert abrufen“ mit Schlüssel `message`. Fehler kommen ebenfalls als lesbare `message`.
+
+**Apps Script: Bereitstellen nötig: ja** – nur `Code.gs` neu kopieren
+**Beschreibung für die Bereitstellung:** `1.6.6 – Kurzbefehl liest message direkt`
+
 ## 1.6.5 – 12.11.2026
 - **Nachfrage vor dem Ersetzen:** Hat ein Job schon eine Anzeige und der Kurzbefehl liefert eine andere, fragt er „Durch die neue ersetzen?“. OK ersetzt, Abbrechen lässt die alte stehen. Gleicher Text: keine Frage. Dafür die Kurzbefehle einmal um die Schritte aus Abschnitt 3 der Kurzbefehl-Seite ergänzen.
 - In der App fragen „Anzeige vom Link speichern“ und „Text einfügen“ ebenfalls nach, bevor eine gespeicherte Anzeige ersetzt wird.

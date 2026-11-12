@@ -76,8 +76,7 @@ td:first-child{white-space:nowrap;color:var(--mute);width:1%}
           <tr><td><code>key</code></td><td>dein <b>Schlüssel</b> (siehe oben)</td></tr>
           <tr><td><code>data</code></td><td>über der Tastatur die Variable <b class="ui">JavaScript-Ergebnis</b> antippen</td></tr>
         </table></li>
-      <li>Suche: <code>Wörterbuchwert</code> → <b class="ui">Wörterbuchwert abrufen</b> → bei „Schlüssel“ <code>result</code> eintragen. Als Eingabe muss <b class="ui">Inhalte von URL</b> stehen.</li>
-      <li>Noch einmal <b class="ui">Wörterbuchwert abrufen</b> → Schlüssel <code>message</code>. Eingabe: <b class="ui">Wörterbuchwert</b>.</li>
+      <li>Suche: <code>Wörterbuchwert</code> → <b class="ui">Wörterbuchwert abrufen</b> → bei „Schlüssel“ <code>message</code> eintragen. Als Eingabe muss <b class="ui">Inhalte von URL</b> stehen.</li>
       <li>Weiter mit <a href="#c">Abschnitt 3 · Nachfrage „ersetzen?“</a>, dann oben rechts <b class="ui">Fertig</b>.</li>
     </ol>
     <p class="note"><b>Test:</b> In Safari eine Stellenanzeige öffnen → <b class="ui">Teilen</b> → ganz nach unten → <b class="ui">Job speichern</b>. Beim ersten Mal fragt das iPhone, ob der Kurzbefehl auf die Seite zugreifen darf: <b class="ui">Erlauben</b>.</p>
@@ -96,7 +95,7 @@ td:first-child{white-space:nowrap;color:var(--mute);width:1%}
           <tr><td><code>key</code></td><td>dein <b>Schlüssel</b></td></tr>
           <tr><td><code>shared</code></td><td>Variable <b class="ui">Kurzbefehleingabe</b></td></tr>
         </table></li>
-      <li>Wie oben: 2× <b class="ui">Wörterbuchwert abrufen</b> (<code>result</code>, dann <code>message</code>), danach <a href="#c">Abschnitt 3</a>.</li>
+      <li>Wie oben: <b class="ui">Wörterbuchwert abrufen</b> mit <code>message</code>, danach <a href="#c">Abschnitt 3</a>.</li>
       <li><b class="ui">Fertig</b>.</li>
     </ol>
     <p class="note"><b>Test in der LinkedIn-App:</b> Job öffnen → <b class="ui">Teilen</b> (Pfeil) → <b class="ui">Teilen über …</b> bzw. <b class="ui">Mehr</b> → <b class="ui">Job-Link speichern</b>.</p>
@@ -106,13 +105,12 @@ td:first-child{white-space:nowrap;color:var(--mute);width:1%}
   <h2 id="c">3 · Nachfrage „ersetzen?“ (für beide Kurzbefehle)</h2>
   <p class="note">Hat ein Job schon eine Anzeige, fragt der Kurzbefehl jetzt, ob die neue sie ersetzen soll. Ohne diese Schritte wird nichts ersetzt, du bekommst dann nur die Frage als Mitteilung. Wenn du die Kurzbefehle schon hast: die alte Aktion <b class="ui">Mitteilung anzeigen</b> am Ende löschen und das hier anhängen.</p>
   <div class="card">
-    <p class="note"><b>Trick:</b> Wir geben den Werten Namen (<code>Antwort</code>, <code>Text</code>, <code>Ersetzen</code>). Dann musst du später nur den Namen antippen. Eine neue Aktion landet immer ganz unten: gedrückt halten und an die richtige Stelle ziehen.<br>
+    <p class="note"><b>Trick:</b> Wir geben den Werten Namen (<code>Text</code>, <code>Ersetzen</code>). Dann musst du später nur den Namen antippen. Eine neue Aktion landet immer ganz unten: gedrückt halten und an die richtige Stelle ziehen.<br>
     <b>Namen einsetzen:</b> ins Feld tippen → über der Tastatur in der Leiste nach rechts wischen → den Namen antippen. Steht er dort nicht: <b class="ui">Variable auswählen</b> → im Kurzbefehl auf die passende Aktion <b class="ui">Variable konfigurieren</b> tippen.</p>
     <ol>
-      <li>Direkt unter die Aktion <b class="ui">Inhalte von URL abrufen</b>: <b class="ui">Variable konfigurieren</b> → Name <code>Antwort</code>. Als Wert steht automatisch „Inhalte von URL“.</li>
-      <li>Direkt unter <b class="ui">Wörterbuchwert abrufen</b> mit <code>message</code>: <b class="ui">Variable konfigurieren</b> → Name <code>Text</code>.</li>
+      <li>Direkt unter <b class="ui">Wörterbuchwert abrufen</b> mit <code>message</code>: <b class="ui">Variable konfigurieren</b> → Name <code>Text</code>. Als Wert steht automatisch „Wörterbuchwert“.</li>
       <li>Die alte <b class="ui">Mitteilung anzeigen</b> löschen (nach links wischen oder ⓧ).</li>
-      <li>Unten anhängen: <b class="ui">Wörterbuchwert abrufen</b> → Schlüssel <div class="copy"><code id="kC">confirm</code><button data-copy="kC">Kopieren</button></div> → auf das blaue Eingabefeld der Aktion tippen und <code>Antwort</code> wählen.</li>
+      <li>Unten anhängen: <b class="ui">Wörterbuchwert abrufen</b> → Schlüssel <div class="copy"><code id="kC">confirm</code><button data-copy="kC">Kopieren</button></div> → als Eingabe <b class="ui">Inhalte von URL</b> (die erste Anfrage oben).</li>
       <li>Darunter: <b class="ui">Variable konfigurieren</b> → Name <code>Ersetzen</code>.</li>
       <li>Darunter: <b class="ui">Wenn</b> → Eingabe <code>Ersetzen</code> → Bedingung <b class="ui">hat einen beliebigen Wert</b>.</li>
       <li>Zwischen <b>Wenn</b> und <b>Sonst</b>:
