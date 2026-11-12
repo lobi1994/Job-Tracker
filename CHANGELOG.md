@@ -11,6 +11,11 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.8 – 12.11.2026 (nur App)
+- Im Job unter „Unterlagen“: **„🌐 Anzeige online öffnen“** ist jetzt ein Knopf neben **„📄 CV öffnen“** (öffnet in Safari).
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.6.7 – 12.11.2026 (nur App)
 - **Einstellungen (Zahnrad) neu:** Statt Textlinks große Knöpfe mit kurzer Erklärung: Tabelle öffnen, Kurzbefehle einrichten, Änderungen, Mails jetzt prüfen, Anders verbinden, Verbindung trennen.
 - Die Knöpfe öffnen die Seiten direkt in Safari (vorher klappte der Link zur Kurzbefehl-Seite oft erst beim zweiten Mal).
