@@ -175,7 +175,7 @@ a{color:var(--acc)}
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.14', NEED_SCRIPT = '1.6.12'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.16', NEED_SCRIPT = '1.6.12'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Job-Tracker ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
@@ -194,21 +194,42 @@ const ls = {
 };
 
 /* ---------- API ---------- */
+/* Nur lesende Aufrufe werden bei Fehlern automatisch wiederholt (schreibende nicht, sonst könnte etwas doppelt passieren). */
+const API_READ = ['apiList', 'apiGetPosting', 'apiSuggestions', 'apiCvLink'];
 async function api(fn, ...args) {
   if (DEMO) return demoApi(fn, args);
+  const tries = API_READ.indexOf(fn) >= 0 ? 3 : 1;
+  let last;
+  for (let i = 0; i < tries; i++) {
+    if (i) await new Promise((r) => setTimeout(r, 700 * i));
+    try { return await apiOnce(fn, args); }
+    catch (e) { last = e; if (e.final) throw e; }
+  }
+  throw last;
+}
+async function apiOnce(fn, args) {
   const HINT = 'Deine Web-App antwortet nicht richtig. Prüfe in Apps Script unter „Bereitstellen → Bereitstellungen verwalten“: Typ Web-App, Ausführen als „Ich“, Zugriff „Jeder“, und dass der App-Link auf /exec endet.';
   let res, raw;
   try {
+    const ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const timer = ctl ? setTimeout(() => ctl.abort(), fn === 'apiFetchMissing' || fn === 'apiCheckMail' ? 330000 : 45000) : 0;
     res = await fetch(CFG.u, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ fn: fn, key: CFG.k, args: args }) });
+      body: JSON.stringify({ fn: fn, key: CFG.k, args: args }), signal: ctl ? ctl.signal : undefined });
     raw = await res.text();
-  } catch (e) { throw new Error('Keine Verbindung (' + e.message + '). ' + HINT); }
+    clearTimeout(timer);
+  } catch (e) {
+    throw new Error(navigator.onLine === false ? 'Keine Internetverbindung.' : 'Google hat nicht geantwortet (' + (e.name === 'AbortError' ? 'Zeitüberschreitung' : e.message) + '). Bitte nochmal versuchen.');
+  }
   let out;
   try { out = JSON.parse(raw); }
-  catch (e) { throw new Error((/accounts\.google|ServiceLogin|signin/i.test(raw) ? 'Google verlangt eine Anmeldung. ' : 'Antwort ist kein JSON (HTTP ' + res.status + '). ') + HINT); }
+  catch (e) {
+    const err = new Error((/accounts\.google|ServiceLogin|signin/i.test(raw) ? 'Google verlangt eine Anmeldung. ' : 'Antwort ist kein JSON (HTTP ' + res.status + '). ') + HINT);
+    if (/accounts\.google|ServiceLogin|signin/i.test(raw)) err.final = true;
+    throw err;
+  }
   if (out.error) {
     if (out.error === 'Kein Zugriff') { showSetup('Der Schlüssel passt nicht (mehr). Bitte deinen aktuellen Einrichtungs-Link öffnen.'); }
-    throw new Error(out.error);
+    const err = new Error(out.error); err.final = true; throw err;
   }
   return out.result;
 }
@@ -518,7 +539,7 @@ function openDetail(id) {
   if ($('aDel')) $('aDel').onclick = async (e) => {
     e.preventDefault();
     if (!confirm('Gespeicherte Anzeige für ' + j.company + ' wirklich löschen? Die Claude-Bewertung wird dabei auch zurückgesetzt.')) return;
-    try { const r = await api('apiDeletePosting', j.id); Object.assign(j, r); render(); openDetail(j.id); toast('Anzeige gelöscht'); }
+    try { const r = await api('apiDeletePosting', j.id); ls.del('jt-post-' + j.id); Object.assign(j, r); render(); openDetail(j.id); toast('Anzeige gelöscht'); }
     catch (err) { toast(err.message, 5000); }
   };
   if ($('aShow')) $('aShow').onclick = () => openPosting(j);
@@ -547,10 +568,14 @@ function openPaste(j) {
   };
 }
 
+/* Gespeicherte Anzeige: sofort aus dem Gerät zeigen (falls schon einmal geladen), parallel frisch aus der Tabelle holen.
+   Klappt das Laden nicht, bleibt die Kopie aus dem Gerät stehen. */
 async function openPosting(j) {
-  openSheet('<h2>Stellenanzeige</h2><p class="sub">' + esc(j.company) + ' · ' + esc(j.role) + '</p><p class="sub">Lade …</p>');
-  try {
-    const p = await api('apiGetPosting', j.id);
+  const key = 'jt-post-' + j.id;
+  const cached = ls.get(key);
+  let shown = null;
+  const show = (p) => {
+    shown = p;
     const f = p ? formatPosting(p.text) : null;
     openSheet(head('Stellenanzeige', j.company + ' · ' + j.role + (p ? ' · gespeichert ' + fmtDate(p.savedAt) : ''), '') +
       (f ? f.nav + '<div id="pFmt">' + skillsHtml(extractSkills(htmlText(p.text), profile)) + f.html + '</div><div id="pRaw" class="ptext" hidden>' + esc(htmlText(p.text)) + '</div>' +
@@ -563,7 +588,18 @@ async function openPosting(j) {
       $('pToggle').textContent = raw ? 'Gegliederte Ansicht' : 'Originaltext anzeigen';
     };
     document.querySelectorAll('.pnav button').forEach((b) => { b.onclick = () => { const t = $(b.dataset.to); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); }; });
-  } catch (e) { toast(e.message, 4000); openDetail(j.id); }
+  };
+  if (cached && cached.text) show(cached);
+  else openSheet('<h2>Stellenanzeige</h2><p class="sub">' + esc(j.company) + ' · ' + esc(j.role) + '</p><p class="sub">Lade …</p>');
+  try {
+    const p = await api('apiGetPosting', j.id);
+    if (p) ls.set(key, p); else ls.del(key);
+    const stillHere = shown ? !!$('tBack') : /Lade …/.test($('sheet').textContent); // nicht in ein anderes Fenster hineinspringen
+    if (stillHere && (!shown || !p || p.text !== shown.text || p.savedAt !== shown.savedAt)) show(p);
+    else if (!stillHere && !shown) { /* Fenster wurde inzwischen gewechselt */ }
+  } catch (e) {
+    if (!shown && /Lade …/.test($('sheet').textContent)) { toast(e.message, 4000); openDetail(j.id); }
+  }
 }
 
 /* ---------- Hard- und Soft-Skills erkennen ----------
