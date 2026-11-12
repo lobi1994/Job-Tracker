@@ -15,7 +15,8 @@ A small web app I use to manage my job applications. The data lives in my own Go
 - **Two ratings:** how much I like the role and how well my CV fits it (1–5 each)
 - **Save the job posting:** from its link, as pasted text, or with an iOS shortcut straight from Safari, so the posting stays readable after it goes offline
 - **Interview dates, salary stated, portal, CV file and notes** per application, with a link to the CV file in Google Drive
-- **Gmail check:** spots rejections, interview invitations and application confirmations in your mail and asks in the app whether to update the status
+- **"Apply now" button:** opens the posting and saves its text automatically
+- **Gmail check:** spots rejections, interview invitations and application confirmations in your mail marks confirmations as applied automatically and asks in the app before changing anything else
 - Works as a home-screen app and shows the last state instantly on start
 
 ## How it is built

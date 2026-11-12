@@ -57,39 +57,18 @@ Am Mac oder PC: Link im Browser öffnen und als Lesezeichen speichern.
 
 > **Wichtig:** Einrichtungs-Link, App-Link und Schlüssel nicht weitergeben. Wer sie hat, kann deine Bewerbungen lesen und ändern. Falls doch: **Job-Tracker → Neuen Schlüssel erzeugen**, dann den neuen Einrichtungs-Link öffnen.
 
-## 6. Kurzbefehl „Job speichern“ (iPhone / iPad)
+## 6. Kurzbefehle „Job speichern“ und „Job-Link speichern“ (iPhone / iPad)
 
-Damit speicherst du eine Stellenanzeige direkt aus Safari: Anzeige öffnen → **Teilen → Job speichern**. Gibt es den Job schon (gleicher Link), wird die Anzeige dort angehängt. Sonst legt der Kurzbefehl einen neuen Job an, mit Firma, Stelle und Ort.
+Die ausführliche Anleitung mit Kopier-Knöpfen steht auf einer eigenen Seite: in der App **Zahnrad → Kurzbefehle „Job speichern“ einrichten** (oder [kurzbefehl.html](https://lobi1994.github.io/Job-Tracker/kurzbefehl.html)). Aus der App geöffnet, stehen dort auch dein App-Link und dein Schlüssel zum Kopieren.
 
-Das klappt auch bei LinkedIn, wenn du in Safari eingeloggt bist.
+- **Job speichern** (aus Safari): speichert die komplette Stellenbeschreibung der offenen Seite, auch bei LinkedIn, wenn du in Safari eingeloggt bist. Script dazu: [kurzbefehle/job-speichern.js](kurzbefehle/job-speichern.js).
+- **Job-Link speichern** (aus der LinkedIn-App und anderen Apps): legt den Job mit Link an; die Beschreibung holt der Job-Tracker selbst, wenn die Seite das zulässt.
 
-**Job-Tracker → App-Link anzeigen** zeigt dir **App-Link** und **Schlüssel**. Beides brauchst du hier.
-
-Öffne die App **Kurzbefehle** → **+** (ca. 5 Minuten):
-
-1. Oben auf den Namen tippen → **Umbenennen** → `Job speichern`.
-2. Unten auf **ⓘ** → **Im Share-Sheet anzeigen** einschalten → **Fertig**. Oben steht jetzt „Empfängt **Alle** aus Share-Sheet“: auf **Alle** tippen, alles abwählen außer **Safari-Webseiten**.
-3. Aktion suchen: **JavaScript auf Webseite ausführen** → hinzufügen. Den Beispieltext darin komplett löschen und den Inhalt von [diesem Skript (Rohtext)](https://raw.githubusercontent.com/lobi1994/Job-Tracker/main/kurzbefehle/job-speichern.js) einfügen (auf dem iPhone öffnen, lange tippen → Alles auswählen → Kopieren).
-4. Aktion **Inhalte von URL abrufen** hinzufügen:
-   - Auf **URL** tippen → deinen **App-Link** einfügen (endet auf `/exec`).
-   - Auf den Pfeil **>** tippen: Methode **POST**, Anfragetext **JSON**.
-   - **Neues Feld hinzufügen → Text**, Schlüssel `fn`, Wert `apiSavePosting`
-   - **Neues Feld hinzufügen → Text**, Schlüssel `key`, Wert: deinen **Schlüssel**
-   - **Neues Feld hinzufügen → Text**, Schlüssel `data`, Wert: über der Tastatur die Variable **JavaScript-Ergebnis** antippen
-5. Aktion **Wörterbuchwert abrufen** → **Wert** für Schlüssel `result` in **Inhalte von URL**.
-6. Noch einmal **Wörterbuchwert abrufen** → **Wert** für Schlüssel `message` in **Wörterbuchwert**.
-7. Aktion **Mitteilung anzeigen** → Text: Variable **Wörterbuchwert**.
-8. Oben rechts **Fertig**.
-
-Test: In Safari eine Stellenanzeige öffnen → **Teilen** → nach unten scrollen → **Job speichern**. Es kommt eine Mitteilung wie „Anzeige gespeichert: Firma – Stelle“ oder „Neuer Job angelegt: …“.
-
-Beim ersten Ausführen fragt Safari, ob der Kurzbefehl auf die Seite zugreifen darf: **Erlauben**.
-
-Kommt eine leere Mitteilung, ist etwas schiefgegangen: Füge zum Prüfen hinter Schritt 4 vorübergehend **Ergebnis anzeigen → Inhalte von URL** ein. Dort steht dann z. B. `"error": "Kein Zugriff"` (falscher Schlüssel) oder ein Hinweis zum App-Link.
+Gibt es den Job schon (gleicher Link), wird die Anzeige dort angehängt, sonst wird ein neuer Job angelegt.
 
 ## 7. Gmail-Abgleich (optional)
 
-Der Job-Tracker kann dein Gmail nach Rückmeldungen durchsuchen: **Absagen, Einladungen und Eingangsbestätigungen**. Er ändert nie selbst etwas. Beim nächsten Öffnen der App fragt er nach, z. B. *„Mail von Firma X: Absage. Als ‚Abgelehnt‘ markieren?“*, und du tippst **Ja**, **Nein** oder **Später**.
+Der Job-Tracker kann dein Gmail nach Rückmeldungen durchsuchen: **Absagen, Einladungen und Eingangsbestätigungen**. Eingangsbestätigungen setzen den Status direkt auf „Beworben“. Bei Absagen und Einladungen ändert er nichts selbst: Beim nächsten Öffnen der App fragt er nach, z. B. *„Mail von Firma X: Absage. Als ‚Abgelehnt‘ markieren?“*, und du tippst **Ja**, **Nein** oder **Später**.
 
 1. In Apps Script links neben „Dateien“ auf **+ → Skript** und die neue Datei `Mail` nennen.
 2. Den Inhalt von [google/Mail.gs](google/Mail.gs) hineinkopieren und speichern. (Falls du `Code.gs` aus einer älteren Version hast: auch diese neu kopieren.)

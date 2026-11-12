@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f3a5f">
+<title>Job-Tracker – Kurzbefehle einrichten</title>
+<link rel="icon" href="icons/icon-32.png">
+<style>
+:root{--bg:#f4f6f9;--card:#fff;--ink:#1f2328;--mute:#68707a;--line:#e1e5ea;--navy:#1f3a5f;--acc:#2563eb;--ok:#2e9e5b}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1318;--card:#1a2029;--ink:#e8ecf1;--mute:#97a0ab;--line:#2a323d;--navy:#9cc0ef;--acc:#7aa7ff}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;-webkit-text-size-adjust:100%}
+main{max-width:680px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 18px) 16px 60px}
+h1{color:var(--navy);font-size:24px;margin:0 0 4px}
+h2{font-size:19px;margin:28px 0 6px}
+.lead{color:var(--mute);margin:0 0 14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:12px 0}
+ol{padding-left:22px;margin:8px 0}
+ol li{margin:8px 0}
+b.ui{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:0 6px;font-weight:600;white-space:nowrap}
+code{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:14.5px;word-break:break-all}
+.copy{display:flex;gap:8px;align-items:center;margin:6px 0}
+.copy code{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:8px 10px}
+button{font:inherit;border:1px solid var(--navy);background:var(--navy);color:#fff;border-radius:10px;padding:8px 14px;cursor:pointer;flex:none}
+@media (prefers-color-scheme:dark){button{color:#0f1318}}
+button.done{background:var(--ok);border-color:var(--ok);color:#fff}
+.note{color:var(--mute);font-size:14px}
+.warn{color:#b42318;font-size:14px}
+table{border-collapse:collapse;width:100%;font-size:15px;margin:6px 0}
+td{border-top:1px solid var(--line);padding:7px 4px;vertical-align:top}
+td:first-child{white-space:nowrap;color:var(--mute);width:1%}
+.tabs{display:flex;gap:8px;margin:14px 0 0}
+.tabs a{flex:1;text-align:center;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);text-decoration:none;font-weight:600;font-size:15px}
+</style>
+</head>
+<body>
+<main>
+  <h1>Kurzbefehle einrichten</h1>
+  <p class="lead">Damit speicherst du Stellenanzeigen mit einem Tipp im Teilen-Menü in deinen Job-Tracker. Einmal einrichten, ca. 5 Minuten pro Kurzbefehl. Am besten diese Seite auf dem iPhone öffnen.</p>
+
+  <div class="tabs"><a href="#a">1 · Job speichern<br><span class="note">aus Safari, mit Text</span></a><a href="#b">2 · Job-Link speichern<br><span class="note">aus LinkedIn &amp; anderen Apps</span></a></div>
+
+  <div class="card" id="mydata">
+    <b>Deine Daten zum Kopieren</b>
+    <div id="cfgYes" hidden>
+      <p class="note">Diese Werte brauchst du in beiden Kurzbefehlen. Nicht weitergeben.</p>
+      <div>App-Link</div>
+      <div class="copy"><code id="vUrl"></code><button data-copy="vUrl">Kopieren</button></div>
+      <div>Schlüssel</div>
+      <div class="copy"><code id="vKey"></code><button data-copy="vKey">Kopieren</button></div>
+    </div>
+    <p id="cfgNo" class="note">Öffne diese Seite aus der App: <b class="ui">Zahnrad</b> → <b class="ui">Kurzbefehle „Job speichern“ einrichten</b>. Dann stehen App-Link und Schlüssel hier zum Kopieren. Alternativ findest du beide in der Tabelle unter <b class="ui">Job-Tracker → App-Link anzeigen</b>.</p>
+  </div>
+
+  <h2 id="a">1 · „Job speichern“ (Safari)</h2>
+  <p class="note">Speichert die komplette Stellenbeschreibung, Firma, Stelle, Ort und Link der Seite, die du in Safari offen hast. Funktioniert auch bei LinkedIn, wenn du in Safari eingeloggt bist.</p>
+  <div class="card">
+    <ol>
+      <li>App <b class="ui">Kurzbefehle</b> öffnen → oben rechts <b class="ui">+</b>.</li>
+      <li>Oben auf den Namen tippen → <b class="ui">Umbenennen</b> → <code>Job speichern</code>.</li>
+      <li>Unten auf <b class="ui">ⓘ</b> → <b class="ui">Im Share-Sheet anzeigen</b> einschalten → <b class="ui">Fertig</b>.<br>
+        Oben steht jetzt „Empfängt <b>Alle</b> aus Share-Sheet“: auf <b>Alle</b> tippen und nur <b class="ui">Safari-Webseiten</b> angehakt lassen.</li>
+      <li>Unten in der Suche <code>JavaScript</code> eingeben → <b class="ui">JavaScript auf Webseite ausführen</b> antippen.<br>
+        Den Beispieltext in der Aktion komplett löschen und diesen Code einfügen:
+        <div class="copy"><code>job-speichern.js (ca. 60 Zeilen)</code><button id="copyJs">Code kopieren</button></div></li>
+      <li>Suche: <code>URL abrufen</code> → <b class="ui">Inhalte von URL abrufen</b>.
+        <ul>
+          <li>Auf <b class="ui">URL</b> tippen → <b>App-Link</b> einfügen.</li>
+          <li>Auf den kleinen Pfeil <b class="ui">&gt;</b> tippen → Methode <b class="ui">POST</b> → Anfragetext <b class="ui">JSON</b>.</li>
+          <li>3× <b class="ui">Neues Feld hinzufügen → Text</b>:</li>
+        </ul>
+        <table>
+          <tr><td>Schlüssel</td><td>Wert</td></tr>
+          <tr><td><code>fn</code></td><td><div class="copy"><code id="fnA">apiSavePosting</code><button data-copy="fnA">Kopieren</button></div></td></tr>
+          <tr><td><code>key</code></td><td>dein <b>Schlüssel</b> (siehe oben)</td></tr>
+          <tr><td><code>data</code></td><td>über der Tastatur die Variable <b class="ui">JavaScript-Ergebnis</b> antippen</td></tr>
+        </table></li>
+      <li>Suche: <code>Wörterbuchwert</code> → <b class="ui">Wörterbuchwert abrufen</b> → bei „Schlüssel“ <code>result</code> eintragen. Als Eingabe muss <b class="ui">Inhalte von URL</b> stehen.</li>
+      <li>Noch einmal <b class="ui">Wörterbuchwert abrufen</b> → Schlüssel <code>message</code>. Eingabe: <b class="ui">Wörterbuchwert</b>.</li>
+      <li>Suche: <code>Mitteilung</code> → <b class="ui">Mitteilung anzeigen</b> → Text: Variable <b class="ui">Wörterbuchwert</b>.</li>
+      <li>Oben rechts <b class="ui">Fertig</b>.</li>
+    </ol>
+    <p class="note"><b>Test:</b> In Safari eine Stellenanzeige öffnen → <b class="ui">Teilen</b> → ganz nach unten → <b class="ui">Job speichern</b>. Beim ersten Mal fragt das iPhone, ob der Kurzbefehl auf die Seite zugreifen darf: <b class="ui">Erlauben</b>.</p>
+  </div>
+
+  <h2 id="b">2 · „Job-Link speichern“ (LinkedIn-App &amp; andere Apps)</h2>
+  <p class="note">Aus Apps bekommt ein Kurzbefehl nur den Link. Der Job wird mit Link angelegt; die Beschreibung holt der Job-Tracker selbst, wenn die Seite das erlaubt. Klappt das nicht, steht in der App „Anzeige noch nicht gespeichert“, und du sicherst sie später mit Kurzbefehl 1 in Safari.</p>
+  <div class="card">
+    <ol>
+      <li>In <b class="ui">Kurzbefehle</b> → <b class="ui">+</b> → umbenennen in <code>Job-Link speichern</code>.</li>
+      <li><b class="ui">ⓘ</b> → <b class="ui">Im Share-Sheet anzeigen</b> einschalten. Bei „Empfängt“ nur <b class="ui">URLs</b> und <b class="ui">Text</b> anhaken.</li>
+      <li><b class="ui">Inhalte von URL abrufen</b> hinzufügen: URL = <b>App-Link</b>, Methode <b class="ui">POST</b>, Anfragetext <b class="ui">JSON</b>, 3× <b class="ui">Neues Feld → Text</b>:
+        <table>
+          <tr><td>Schlüssel</td><td>Wert</td></tr>
+          <tr><td><code>fn</code></td><td><div class="copy"><code id="fnB">apiSaveShared</code><button data-copy="fnB">Kopieren</button></div></td></tr>
+          <tr><td><code>key</code></td><td>dein <b>Schlüssel</b></td></tr>
+          <tr><td><code>shared</code></td><td>Variable <b class="ui">Kurzbefehleingabe</b></td></tr>
+        </table></li>
+      <li>Wie oben: 2× <b class="ui">Wörterbuchwert abrufen</b> (<code>result</code>, dann <code>message</code>) und <b class="ui">Mitteilung anzeigen</b>.</li>
+      <li><b class="ui">Fertig</b>.</li>
+    </ol>
+    <p class="note"><b>Test in der LinkedIn-App:</b> Job öffnen → <b class="ui">Teilen</b> (Pfeil) → <b class="ui">Teilen über …</b> bzw. <b class="ui">Mehr</b> → <b class="ui">Job-Link speichern</b>.</p>
+    <p class="note">Tipp: Fehlt „Job speichern“ im Teilen-Menü (z. B. in der Anzeige, die aus dem Job-Tracker geöffnet wurde), nimm einfach „Job-Link speichern“.</p>
+  </div>
+
+  <h2>Etwas klappt nicht?</h2>
+  <div class="card">
+    <p class="note">Die Mitteilung ist leer: Füge hinter <b class="ui">Inhalte von URL abrufen</b> vorübergehend <b class="ui">Ergebnis anzeigen</b> ein. Dort steht der Grund, z. B. <code>"error": "Kein Zugriff"</code> (Schlüssel falsch) oder eine Seite von Google (App-Link falsch oder Apps Script nicht neu bereitgestellt).</p>
+  </div>
+  <p class="note"><a href="./">← zurück zum Job-Tracker</a></p>
+</main>
+<script>
+'use strict';
+function parseSetup(s) {
+  const m = String(s || '').match(/#setup=([A-Za-z0-9_-]+)/); if (!m) return null;
+  try { const b = m[1].replace(/-/g, '+').replace(/_/g, '/'); return JSON.parse(decodeURIComponent(escape(atob(b + '==='.slice((b.length + 3) % 4))))); } catch (e) { return null; }
+}
+let cfg = parseSetup(location.hash);
+if (!cfg) { try { cfg = JSON.parse(localStorage.getItem('jt-cfg') || 'null'); } catch (e) {} }
+if (cfg && cfg.u && cfg.k) {
+  document.getElementById('vUrl').textContent = cfg.u; document.getElementById('vKey').textContent = cfg.k;
+  document.getElementById('cfgYes').hidden = false; document.getElementById('cfgNo').hidden = true;
+  if (location.hash) history.replaceState(null, '', location.pathname); // Schlüssel nicht in der Adresszeile stehen lassen
+}
+async function copyText(t, btn) {
+  try { await navigator.clipboard.writeText(t); }
+  catch (e) { const ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
+  const old = btn.textContent; btn.textContent = 'Kopiert ✓'; btn.classList.add('done');
+  setTimeout(() => { btn.textContent = old; btn.classList.remove('done'); }, 1800);
+}
+document.querySelectorAll('[data-copy]').forEach((b) => { b.onclick = () => copyText(document.getElementById(b.dataset.copy).textContent, b); });
+let js = '';
+fetch('kurzbefehle/job-speichern.js', { cache: 'no-store' }).then((r) => r.text()).then((t) => { js = t; }).catch(() => {});
+document.getElementById('copyJs').onclick = function () {
+  if (!js) { alert('Code wird noch geladen – bitte gleich nochmal tippen.'); return; }
+  copyText(js, this);
+};
+</script>
+</body>
+</html>
