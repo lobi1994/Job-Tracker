@@ -11,6 +11,13 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.7 – 12.11.2026 (nur App)
+- **Einstellungen (Zahnrad) neu:** Statt Textlinks große Knöpfe mit kurzer Erklärung: Tabelle öffnen, Kurzbefehle einrichten, Änderungen, Mails jetzt prüfen, Anders verbinden, Verbindung trennen.
+- Die Knöpfe öffnen die Seiten direkt in Safari (vorher klappte der Link zur Kurzbefehl-Seite oft erst beim zweiten Mal).
+- Kein falsches „Apps Script alt – bitte aktualisieren“ mehr nach dem Zurückkehren in die App: Die Skript-Version wird jetzt mit der Liste zwischengespeichert. Solange sie noch nicht geladen ist, steht dort „wird geprüft …“.
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.6.6 – 12.11.2026 (nur Apps Script)
 - Die Antwort an den Kurzbefehl enthält `message` jetzt direkt (nicht nur in `result`). Dadurch braucht der Kurzbefehl nur noch **eine** Aktion „Wörterbuchwert abrufen“ mit Schlüssel `message`. Fehler kommen ebenfalls als lesbare `message`.
 
