@@ -181,7 +181,9 @@ $('sSave').onclick = () => {
   let o = parseSetup($('sLink').value);
   if (!o) o = { u: $('sUrl').value.trim().replace(/\?.*$/, ''), k: $('sKey').value.trim() };
   if (!valid(o)) { $('sErr').textContent = 'Link oder Schlüssel stimmen nicht. Der App-Link beginnt mit https://script.google.com/ und endet auf /exec.'; return; }
-  CFG = o; DEMO = false; ls.set(CK, o); ls.del(LK); showApp(); load(true);
+  CFG = o; DEMO = false; ls.set(CK, o); ls.del(LK);
+  location.replace(location.pathname + '#setup=' + btoa(unescape(encodeURIComponent(JSON.stringify({ u: o.u, k: o.k })))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''));
+  showApp(); load(true);
 };
 $('sDemo').onclick = () => { DEMO = true; showApp(); load(true); };
 $('sCancel').onclick = () => { showApp(); };
@@ -404,7 +406,9 @@ function demoApi(fn, args) {
   const f = ls.get(FK); if (f && Array.isArray(f.on)) { filter.on = f.on; filter.sort = f.sort || 'date'; }
   $('sort').value = filter.sort;
   const fromHash = parseSetup(location.hash);
-  if (fromHash) { ls.set(CK, fromHash); ls.del(LK); history.replaceState(null, '', location.pathname); }
+  // Den #setup-Teil absichtlich in der Adresse lassen: „Zum Home-Bildschirm“ übernimmt so die Verbindung
+  // (die Home-Bildschirm-App hat auf dem iPhone einen eigenen Speicher, getrennt von Safari).
+  if (fromHash) { const old = ls.get(CK); if (!old || old.u !== fromHash.u || old.k !== fromHash.k) ls.del(LK); ls.set(CK, fromHash); }
   if (/#demo/.test(location.hash)) { DEMO = true; showApp(); load(); return; }
   CFG = fromHash || ls.get(CK);
   if (!valid(CFG)) { CFG = null; showSetup(); return; }
