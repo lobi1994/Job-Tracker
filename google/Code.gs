@@ -8,7 +8,7 @@
  * (z. B. {fn:"apiSavePosting", key, data:{url, title, text}} – data darf auch JSON-Text sein).
  */
 
-const VERSION = '1.6.0'; // siehe CHANGELOG.md
+const VERSION = '1.6.2'; // siehe CHANGELOG.md
 const APP_PAGE = 'https://lobi1994.github.io/Job-Tracker/';
 const SHEET = 'Bewerbungen';
 const POSTINGS = 'Anzeigen';
@@ -259,6 +259,39 @@ function parseShareText_(t) {
   return { company: '', role: '' };
 }
 
+/** Text säubern: HTML (auch doppelt kodiert, z. B. aus LinkedIn) in lesbaren Text umwandeln. */
+function cleanText_(t) {
+  t = String(t || '').trim();
+  for (let i = 0; i < 2 && /<\/?(p|br|li|ul|strong|div|span|b|em)\b[^>]*>|&lt;\/?(p|br|li|ul|strong)/i.test(t); i++) {
+    t = htmlToText_(decode_(t));
+  }
+  return t;
+}
+
+/** Greenhouse-Anzeige über die öffentliche Schnittstelle (Board-Name wird aus der Karriereseite gelesen). */
+function fetchGreenhouse_(url) {
+  try {
+    const id = (String(url).match(/[?&]gh_jid=(\d+)/) || [])[1];
+    if (!id) return { text: '' };
+    let board = (String(url).match(/greenhouse\.io\/([a-z0-9_-]+)\/jobs/i) || [])[1] || '';
+    if (!board) {
+      const page = UrlFetchApp.fetch(url, { muteHttpExceptions: true, followRedirects: true }).getContentText();
+      board = (page.match(/greenhouse\.io\/(?:embed\/job_board(?:\/js)?\?for=|v1\/boards\/)([a-z0-9_-]+)/i) || [])[1] ||
+              (page.match(/["']?(?:for|board)["']?\s*[:=]\s*["']([a-z0-9_-]+)["']/i) || [])[1] || '';
+    }
+    const tries = board ? [board] : [];
+    const host = (String(url).match(/https?:\/\/(?:www\.)?([a-z0-9-]+)\./i) || [])[1];
+    if (host && tries.indexOf(host) < 0) tries.push(host);
+    for (let i = 0; i < tries.length; i++) {
+      const res = UrlFetchApp.fetch('https://boards-api.greenhouse.io/v1/boards/' + tries[i] + '/jobs/' + id, { muteHttpExceptions: true });
+      if (res.getResponseCode() !== 200) continue;
+      const j = JSON.parse(res.getContentText());
+      return { text: htmlToText_(decode_(String(j.content || ''))), role: j.title || '', location: (j.location && j.location.name) || '', company: '', title: '' };
+    }
+  } catch (e) { /* ignorieren */ }
+  return { text: '' };
+}
+
 /** LinkedIn-Job-ID aus verschiedenen Linkformen. */
 function linkedinId_(url) {
   if (!/linkedin\.com|lnkd\.in/i.test(url)) return '';
@@ -293,9 +326,15 @@ function fetchLinkedin_(id) {
  * linkOnly: Job auch ohne Anzeigentext anlegen (Kurzbefehl aus Apps)
  */
 function savePosting_(data, linkOnly) {
-  let text = String(data.text || '').trim();
+  let text = cleanText_(data.text);
   let url = String(data.url || '').trim();
   let info = {};
+  // Karriereseiten mit eingebettetem Greenhouse (z. B. ?gh_jid=…): Der Kurzbefehl sieht nur die Hülle
+  // („bitte Cookies akzeptieren“). Dann die Anzeige direkt über die Greenhouse-Schnittstelle holen.
+  if (/[?&]gh_jid=\d+/.test(url) && (text.length < 1500 || /cookie/i.test(text))) {
+    const gh = fetchGreenhouse_(url);
+    if (gh.text && gh.text.length >= 200) { text = gh.text; info = gh; }
+  }
   if (!text) {
     if (!url) throw new Error('Kein Text und kein Link übergeben.');
     const li = linkedinId_(url);
@@ -459,7 +498,7 @@ function parsePostingHtml_(html) {
         const loc = [].concat(found.jobLocation || [])[0];
         const a = loc && loc.address;
         out.location = (a && (a.addressLocality || a.addressRegion)) || '';
-        if (found.description) out.text = htmlToText_(String(found.description));
+        if (found.description) out.text = cleanText_(htmlToText_(String(found.description)));
         break;
       }
     } catch (e) { /* kaputtes JSON-LD überspringen */ }
