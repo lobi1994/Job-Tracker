@@ -109,6 +109,8 @@ a{color:var(--acc)}
 .sug{border-left:5px solid var(--c);padding-left:12px;margin:10px 0}
 .sug .meta{color:var(--mute);font-size:12.5px;margin:2px 0 6px}
 .sug blockquote{margin:8px 0;padding:8px 10px;background:var(--bg);border-radius:8px;font-size:13.5px}
+.credit{text-align:center;color:var(--mute);font-size:12px;margin:18px 0 0}
+.credit a{color:inherit}
 .demo{background:#fff7d6;color:#5b4a00;font-size:12.5px;padding:6px 16px;text-align:center}
 @media (prefers-color-scheme:dark){.demo{background:#3a3210;color:#f3e3a0}}
 </style>
@@ -148,6 +150,7 @@ a{color:var(--acc)}
     <div class="acts"><button class="ib pri" id="sSave">Verbinden</button><button class="ib" id="sDemo">Demo ansehen</button><button class="ib" id="sCancel" hidden>Abbrechen</button></div>
     <p id="sErr" style="color:var(--danger)"></p>
   </div>
+  <p class="credit">Created by Matthias Lobinger</p>
 </div>
 
 <div class="ov" id="ov"><div class="sheet" id="sheet"></div></div>
@@ -155,7 +158,8 @@ a{color:var(--acc)}
 
 <script>
 'use strict';
-const APP_VERSION = '1.5.0', NEED_SCRIPT = '1.4.2'; // siehe CHANGELOG.md
+const APP_VERSION = '1.5.1', NEED_SCRIPT = '1.4.2'; // siehe CHANGELOG.md
+const CREDIT = '<p class="credit">Job-Tracker ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt'};
 const CK = 'jt-cfg', LK = 'jt-cache', FK = 'jt-filter';
@@ -235,6 +239,7 @@ $('bSettings').onclick = () => {
     (sheetUrl ? '<p><a href="' + esc(sheetUrl) + '" target="_blank" rel="noopener">Tabelle in Google Sheets öffnen</a></p>' : '') +
     '<p class="sub">App ' + APP_VERSION + ' · Apps Script ' + esc(scriptVersion || 'alt') + (!DEMO && vLess(scriptVersion, NEED_SCRIPT) ? ' – <b style="color:var(--danger)">bitte aktualisieren</b>' : '') +
     ' · <a href="https://github.com/lobi1994/Job-Tracker/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Änderungen</a></p>' +
+    '<p class="sub">Created by Matthias Lobinger</p>' +
     '<p><a href="kurzbefehl.html' + (CFG && !DEMO ? '#setup=' + encSetup(CFG) : '') + '" target="_blank" rel="noopener">Kurzbefehle „Job speichern“ einrichten</a></p>' +
     '<div class="acts">' + (DEMO ? '' : '<button class="ib" id="xMail">Mails jetzt prüfen</button>') + '<button class="ib" id="xRe">Anders verbinden</button>' + (DEMO ? '' : '<button class="ib" id="xOut">Verbindung trennen</button>') +
     '<button class="ib" id="xClose">Schließen</button></div>');
@@ -317,6 +322,7 @@ function render() {
         (j.status === statuses[0] && j.url ? '<button class="capply" data-apply="' + esc(j.id) + '">Bewerben ↗</button>' : '') +
       '</div></div>').join('')
     : '<div class="empty">' + (jobs.length ? 'Keine Jobs für diesen Filter.' : 'Noch keine Jobs. Tipp auf +.') + '</div>';
+  $('list').insertAdjacentHTML('beforeend', CREDIT);
 }
 $('list').onclick = (e) => {
   const a = e.target.closest('[data-apply]');

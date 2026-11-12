@@ -1,5 +1,6 @@
 /**
  * Job-Tracker – Google Apps Script für das Tabellenblatt „Bewerbungen“.
+ * Created by Matthias Lobinger
  *
  * Die App (GitHub Pages) und der iOS-Kurzbefehl schicken jede Anfrage als
  * POST {fn, key, args}. Erlaubt sind nur Funktionen, deren Name mit „api“ beginnt.
