@@ -11,6 +11,13 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.16 – 12.11.2026 (nur App)
+- **Weniger „Laden fehlgeschlagen“:** Google antwortet manchmal beim ersten Mal nicht (z. B. wenn das Skript gerade „aufwacht“). Lesende Abrufe (Liste, gespeicherte Anzeige, Vorschläge, CV-Link) versucht die App jetzt automatisch bis zu 3-mal. Schreibende Aktionen werden nicht wiederholt, damit nichts doppelt passiert.
+- **Gespeicherte Anzeigen öffnen sofort:** Einmal geöffnete Anzeigen merkt sich das Gerät. Beim nächsten Mal erscheinen sie sofort und werden im Hintergrund aktualisiert; klappt das Laden nicht, bleibt die gespeicherte Kopie stehen.
+- Klarere Fehlermeldung bei Verbindungsproblemen („Google hat nicht geantwortet … bitte nochmal versuchen“ statt Hinweis auf falsche Einrichtung). Zeitlimit 45 Sekunden.
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.6.15 – 12.11.2026 (nur Apps Script)
 - **SmartRecruiters** (z. B. Nemetschek) und **Personio** (z. B. Sungrow, Filics) werden jetzt über deren öffentliche Schnittstellen abgerufen. Bei Personio wird die Sprache genommen, in der die Anzeige vorliegt.
 - Enthält 1.6.12 und 1.6.13.
