@@ -64,7 +64,7 @@ Die ausführliche Anleitung mit Kopier-Knöpfen steht auf einer eigenen Seite: i
 - **Job speichern** (aus Safari): speichert die komplette Stellenbeschreibung der offenen Seite, auch bei LinkedIn, wenn du in Safari eingeloggt bist. Script dazu: [kurzbefehle/job-speichern.js](kurzbefehle/job-speichern.js).
 - **Job-Link speichern** (aus der LinkedIn-App und anderen Apps): legt den Job mit Link an; die Beschreibung holt der Job-Tracker selbst, wenn die Seite das zulässt.
 
-Gibt es den Job schon (gleicher Link), wird die Anzeige dort angehängt, sonst wird ein neuer Job angelegt.
+Gibt es den Job schon (gleicher Link), wird die Anzeige dort angehängt, sonst wird ein neuer Job angelegt. Hat der Job schon eine andere Anzeige, fragt der Kurzbefehl „Durch die neue ersetzen?“ (Abschnitt 3 der Kurzbefehl-Seite). Eine falsche Anzeige kannst du in der App im Job unter „Unterlagen“ auch **löschen**.
 
 ## 7. Gmail-Abgleich (optional)
 
