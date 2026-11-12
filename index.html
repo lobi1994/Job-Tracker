@@ -60,6 +60,7 @@ main{padding:12px 16px calc(env(safe-area-inset-bottom) + 90px);max-width:820px;
 .applybtn{display:flex;width:100%;height:48px;margin:6px 0 4px;font-size:16px;font-weight:600;background:var(--s4);border-color:var(--s4);color:#fff;border-radius:12px;text-decoration:none}
 .capply{margin-left:auto;border:1px solid var(--s4);color:var(--s4);border-radius:999px;padding:2px 9px;font-size:12px;font-weight:600;background:transparent;cursor:pointer}
 .miss{color:var(--danger)}
+.del{color:var(--danger)}
 @media (min-width:700px){.ov{align-items:center}.sheet{border-radius:18px}}
 .sheet h2{margin:0 0 2px;font-size:19px}
 .sheet .sub{color:var(--mute);margin:0 0 12px}
@@ -169,7 +170,7 @@ a{color:var(--acc)}
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.4', NEED_SCRIPT = '1.6.4'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.5', NEED_SCRIPT = '1.6.5'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Job-Tracker ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
@@ -448,7 +449,7 @@ function openDetail(id) {
     '<div class="box"><h3>Unterlagen</h3>' +
       (j.url ? '<p><a href="' + esc(j.url) + '" target="_blank" rel="noopener" data-ext="1">Anzeige online öffnen' + (IOS ? ' (Safari)' : '') + '</a></p>' : '<p>Kein Link hinterlegt.</p>') +
       (j.cvLink || j.cv ? '<div class="cvrow"><button class="ib pri" id="aCv">📄 CV öffnen</button>' + (j.cv ? '<span class="sub">' + esc(j.cv) + '</span>' : '') + '</div>' : '') +
-      '<p>' + (j.postingSaved ? 'Anzeige gespeichert am ' + esc(j.postingSaved) + ' · <a href="#" id="aShow">lesen</a>' : '<span class="miss">Anzeige noch nicht gespeichert.</span>') + '</p>' +
+      '<p>' + (j.postingSaved ? 'Anzeige gespeichert am ' + esc(j.postingSaved) + ' · <a href="#" id="aShow">lesen</a> · <a href="#" id="aDel" class="del">löschen</a>' : '<span class="miss">Anzeige noch nicht gespeichert.</span>') + '</p>' +
       '<div class="acts" style="margin-top:6px">' + (j.url ? '<button class="ib" id="bFetch">Anzeige vom Link speichern</button>' : '') +
       '<button class="ib" id="bPaste">Text einfügen</button></div></div>',
     '<button class="ib" id="bClose">Schließen</button><button class="ib pri" id="bSave">Speichern</button>');
@@ -471,11 +472,18 @@ function openDetail(id) {
     catch (e) { toast('Fehler: ' + e.message, 4000); $('bSave').disabled = false; }
   };
   if ($('bFetch')) $('bFetch').onclick = async () => {
+    if (j.postingSaved && !confirm('Für diesen Job ist schon eine Anzeige gespeichert. Durch die Anzeige vom Link ersetzen?')) return;
     $('bFetch').disabled = true; $('bFetch').textContent = 'Lade Anzeige …';
-    try { const r = await api('apiSavePosting', { id: j.id, url: j.url }); Object.assign(j, r.job); render(); openDetail(j.id); toast('Anzeige gespeichert (' + r.chars + ' Zeichen)'); }
+    try { const r = await api('apiSavePosting', { id: j.id, url: j.url, replace: true }); Object.assign(j, r.job); render(); openDetail(j.id); toast('Anzeige gespeichert (' + r.chars + ' Zeichen)'); }
     catch (e) { toast(e.message, 6000); $('bFetch').disabled = false; $('bFetch').textContent = 'Anzeige vom Link speichern'; }
   };
   $('bPaste').onclick = () => openPaste(j);
+  if ($('aDel')) $('aDel').onclick = async (e) => {
+    e.preventDefault();
+    if (!confirm('Gespeicherte Anzeige für ' + j.company + ' wirklich löschen? Die Claude-Bewertung wird dabei auch zurückgesetzt.')) return;
+    try { const r = await api('apiDeletePosting', j.id); Object.assign(j, r); render(); openDetail(j.id); toast('Anzeige gelöscht'); }
+    catch (err) { toast(err.message, 5000); }
+  };
   if ($('aShow')) $('aShow').onclick = (e) => { e.preventDefault(); openPosting(j); };
   if ($('aCv')) $('aCv').onclick = async (e) => {
     e.preventDefault();
@@ -496,7 +504,8 @@ function openPaste(j) {
   $('pBack').onclick = () => openDetail(j.id);
   $('pSave').onclick = async () => {
     const t = $('pText').value.trim(); if (t.length < 50) { toast('Bitte den ganzen Anzeigentext einfügen.'); return; }
-    try { const r = await api('apiSavePosting', { id: j.id, url: j.url, text: t }); Object.assign(j, r.job); render(); openDetail(j.id); toast('Anzeige gespeichert'); }
+    if (j.postingSaved && !confirm('Für diesen Job ist schon eine Anzeige gespeichert. Durch den eingefügten Text ersetzen?')) return;
+    try { const r = await api('apiSavePosting', { id: j.id, url: j.url, text: t, replace: true }); Object.assign(j, r.job); render(); openDetail(j.id); toast('Anzeige gespeichert'); }
     catch (e) { toast(e.message, 5000); }
   };
 }
@@ -715,7 +724,7 @@ $('bAdd').onclick = () => {
       let j = await api('apiAdd', job); jobs.push(j); render();
       const text = $('nText').value.trim();
       if (text.length >= 50 || (job.url && $('nFetch').checked)) {
-        try { const r = await api('apiSavePosting', text.length >= 50 ? { id: j.id, url: job.url, text: text } : { id: j.id, url: job.url }); Object.assign(j, r.job); }
+        try { const r = await api('apiSavePosting', text.length >= 50 ? { id: j.id, url: job.url, text: text, replace: true } : { id: j.id, url: job.url, replace: true }); Object.assign(j, r.job); }
         catch (e) { toast('Job angelegt. Anzeige: ' + e.message, 6000); render(); closeSheet(); return; }
       }
       render(); closeSheet(); toast('Job angelegt');
@@ -746,6 +755,7 @@ function demoApi(fn, args) {
     if (fn === 'apiResolveSuggestion') { const sg = demoSug.find((x) => x.vid === args[0]); demoSug = demoSug.filter((x) => x.vid !== args[0]);
       const j = jobs.find((x) => x.id === (sg || {}).jobId); return res({ job: args[1] && j ? Object.assign({}, j, { status: sg.status }) : null }); }
     if (fn === 'apiGetPosting') return res({ url: '', savedAt: '2026-11-10', text: 'Wir bauen autonome Roboter für die Intralogistik.\n\nDeine Aufgaben\n- Kunden bei technischen Fragen unterstützen (2nd/3rd Level Support)\n- Fehler analysieren und mit der Entwicklung lösen\n- Schulungen für Kunden durchführen\n\nDein Profil\n- Technisches Studium\n- Erfahrung mit Linux, Netzwerktechnik und CAN-Bus\n- Gute Deutsch- und Englischkenntnisse\n- Kundenorientierung, Teamfähigkeit und strukturierte Arbeitsweise\n\nWas wir bieten\n- Hybrides Arbeiten\n- 30 Tage Urlaub' });
+    if (fn === 'apiDeletePosting') { const j = jobs.find((x) => x.id === args[0]) || {}; return res(Object.assign({}, j, { postingSaved: '', fitNote: '' })); }
     if (fn === 'apiSavePosting') { const j = jobs.find((x) => x.id === (args[0] || {}).id) || {}; return res({ chars: 1234, job: Object.assign({}, j, { postingSaved: new Date().toLocaleDateString('de-DE') }) }); }
     rej(new Error('In der Demo nicht verfügbar'));
   }, 150));
