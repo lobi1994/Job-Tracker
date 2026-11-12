@@ -65,24 +65,27 @@ Das klappt auch bei LinkedIn, wenn du in Safari eingeloggt bist.
 
 **Job-Tracker → App-Link anzeigen** zeigt dir **App-Link** und **Schlüssel**. Beides brauchst du hier.
 
-Öffne die App **Kurzbefehle** → **+**:
+Öffne die App **Kurzbefehle** → **+** (ca. 5 Minuten):
 
-1. Oben auf den Namen tippen → **Umbenennen** → `Job speichern`. Unter ⓘ **Im Share-Sheet anzeigen** einschalten und als Eingabe nur **Safari-Webseiten** erlauben.
-2. Aktion **JavaScript auf Webseite ausführen** → Eingabe: **Kurzbefehleingabe**. Den Inhalt von [kurzbefehle/job-speichern.js](kurzbefehle/job-speichern.js) komplett hineinkopieren (vorhandenen Beispieltext vorher löschen).
-3. Aktion **Inhalte von URL abrufen**:
-   - URL: deinen **App-Link** einfügen
-   - Methode: **POST**
-   - Anfragetext: **JSON** mit drei Feldern:
-     - `fn` (Text): `apiSavePosting`
-     - `key` (Text): deinen **Schlüssel**
-     - `data` (Wörterbuch): Variable **JavaScript-Ergebnis**
-4. Aktion **Wörterbuchwert abrufen** → Schlüssel `result` aus **Inhalte der URL**.
-5. Aktion **Wörterbuchwert abrufen** → Schlüssel `message` aus dem vorherigen **Wörterbuchwert**.
-6. Aktion **Mitteilung anzeigen** → **Wörterbuchwert**.
+1. Oben auf den Namen tippen → **Umbenennen** → `Job speichern`.
+2. Unten auf **ⓘ** → **Im Share-Sheet anzeigen** einschalten → **Fertig**. Oben steht jetzt „Empfängt **Alle** aus Share-Sheet“: auf **Alle** tippen, alles abwählen außer **Safari-Webseiten**.
+3. Aktion suchen: **JavaScript auf Webseite ausführen** → hinzufügen. Den Beispieltext darin komplett löschen und den Inhalt von [diesem Skript (Rohtext)](https://raw.githubusercontent.com/lobi1994/Job-Tracker/main/kurzbefehle/job-speichern.js) einfügen (auf dem iPhone öffnen, lange tippen → Alles auswählen → Kopieren).
+4. Aktion **Inhalte von URL abrufen** hinzufügen:
+   - Auf **URL** tippen → deinen **App-Link** einfügen (endet auf `/exec`).
+   - Auf den Pfeil **>** tippen: Methode **POST**, Anfragetext **JSON**.
+   - **Neues Feld hinzufügen → Text**, Schlüssel `fn`, Wert `apiSavePosting`
+   - **Neues Feld hinzufügen → Text**, Schlüssel `key`, Wert: deinen **Schlüssel**
+   - **Neues Feld hinzufügen → Text**, Schlüssel `data`, Wert: über der Tastatur die Variable **JavaScript-Ergebnis** antippen
+5. Aktion **Wörterbuchwert abrufen** → **Wert** für Schlüssel `result` in **Inhalte von URL**.
+6. Noch einmal **Wörterbuchwert abrufen** → **Wert** für Schlüssel `message` in **Wörterbuchwert**.
+7. Aktion **Mitteilung anzeigen** → Text: Variable **Wörterbuchwert**.
+8. Oben rechts **Fertig**.
+
+Test: In Safari eine Stellenanzeige öffnen → **Teilen** → nach unten scrollen → **Job speichern**. Es kommt eine Mitteilung wie „Anzeige gespeichert: Firma – Stelle“ oder „Neuer Job angelegt: …“.
 
 Beim ersten Ausführen fragt Safari, ob der Kurzbefehl auf die Seite zugreifen darf: **Erlauben**.
 
-Kommt keine Mitteilung, steht der Fehler in **Inhalte der URL** unter `error` (z. B. „Kein Zugriff“ bei falschem Schlüssel).
+Kommt eine leere Mitteilung, ist etwas schiefgegangen: Füge zum Prüfen hinter Schritt 4 vorübergehend **Ergebnis anzeigen → Inhalte von URL** ein. Dort steht dann z. B. `"error": "Kein Zugriff"` (falscher Schlüssel) oder ein Hinweis zum App-Link.
 
 ## 7. Gmail-Abgleich (optional)
 

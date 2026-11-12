@@ -1,7 +1,7 @@
 /* Job-Tracker – starts the app from the device cache.
  * App page: shown from the cache immediately, updated in the background (new version on the next start).
  * Fonts: cached once. Calls to Google (your list) are never cached here. */
-var CACHE = 'jt-shell-v5';
+var CACHE = 'jt-shell-v7';
 var SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-32.png'];
 
 self.addEventListener('install', function (e) {

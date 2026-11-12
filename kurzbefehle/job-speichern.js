@@ -52,5 +52,5 @@
   }
   if (typeof out.company !== 'string') out.company = '';
   out.text = out.text.replace(/\n{3,}/g, '\n\n').slice(0, 45000);
-  completion(out);
+  completion(JSON.stringify(out)); // als Text, damit der Kurzbefehl es einfach weitergeben kann
 })();

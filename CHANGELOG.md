@@ -11,6 +11,14 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.3.0 – 12.11.2026
+- Detailansicht fürs iPhone überarbeitet: **Speichern und Schließen oben** (bleiben beim Scrollen sichtbar), Felder untereinander statt verschoben, Abschnitte Status / Bewertung / Details, größere Tipp-Flächen, kein Hineinzoomen beim Tippen.
+- Auch „Neuer Job“, „Text einfügen“ und „Stellenanzeige“ haben die Knöpfe jetzt oben.
+- Kurzbefehl „Job speichern“: einfachere Einrichtung (alle Felder als Text), Anleitung Schritt für Schritt.
+
+**Apps Script: Bereitstellen nötig: ja** – nur `Code.gs` neu kopieren
+**Beschreibung für die Bereitstellung:** `1.3.0 – Kurzbefehl und Design`
+
 ## 1.2.1 – 12.11.2026
 - Versionsnummer in der App (Einstellungen) und im Skript; die App warnt, wenn das Apps Script veraltet ist.
 - Dieses Änderungsverzeichnis.

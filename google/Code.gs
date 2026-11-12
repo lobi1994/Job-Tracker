@@ -4,10 +4,10 @@
  * Die App (GitHub Pages) und der iOS-Kurzbefehl schicken jede Anfrage als
  * POST {fn, key, args}. Erlaubt sind nur Funktionen, deren Name mit „api“ beginnt.
  * Der Kurzbefehl darf statt args auch die Felder direkt mitschicken
- * (z. B. {fn:"apiSavePosting", key, data:{url, title, text}}).
+ * (z. B. {fn:"apiSavePosting", key, data:{url, title, text}} – data darf auch JSON-Text sein).
  */
 
-const VERSION = '1.2.1'; // siehe CHANGELOG.md
+const VERSION = '1.3.0'; // siehe CHANGELOG.md
 const APP_PAGE = 'https://lobi1994.github.io/Job-Tracker/';
 const SHEET = 'Bewerbungen';
 const POSTINGS = 'Anzeigen';
@@ -44,7 +44,9 @@ function doPost(e) {
     const fn = String(body.fn || '');
     check_(body.key);
     if (!/^api[A-Za-z]+$/.test(fn) || typeof globalThis[fn] !== 'function') throw new Error('Unbekannte Funktion: ' + fn);
-    const args = Array.isArray(body.args) ? body.args : [body.data || body];
+    let data = body.data;
+    if (typeof data === 'string') { try { data = JSON.parse(data); } catch (x) { data = { text: data }; } } // Kurzbefehl schickt Text
+    const args = Array.isArray(body.args) ? body.args : [data || body];
     out = { result: globalThis[fn].apply(null, [body.key].concat(args)) };
     if (out.result === undefined) out.result = null;
   } catch (err) {
