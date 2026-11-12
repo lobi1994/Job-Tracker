@@ -1,0 +1,48 @@
+# Änderungsverzeichnis
+
+Versionsnummern: **Haupt.Funktion.Korrektur** (z. B. 1.2.1).
+
+**Apps Script: Bereitstellen nötig?** Nur bei „ja“ musst du etwas tun:
+1. Die genannten Dateien aus `google/` in Apps Script neu kopieren und speichern.
+2. **Bereitstellen → Bereitstellungen verwalten → Stift → Version: Neue Version**, im Feld **Beschreibung** den Text aus „Beschreibung für die Bereitstellung“ eintragen → **Bereitstellen**.
+
+Bei „nein“ kommt die Änderung automatisch über GitHub Pages. App einmal ganz schließen und zweimal neu öffnen.
+Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**.
+
+---
+
+## 1.2.1 – 12.11.2026
+- Versionsnummer in der App (Einstellungen) und im Skript; die App warnt, wenn das Apps Script veraltet ist.
+- Dieses Änderungsverzeichnis.
+
+**Apps Script: Bereitstellen nötig: ja** – `Code.gs` neu kopieren (`Mail.gs` aus 1.2.0 bleibt gleich)
+**Beschreibung für die Bereitstellung:** `1.2.1 – Versionsanzeige`
+
+## 1.2.0 – 12.11.2026
+- **Gmail-Abgleich:** erkennt Absagen, Einladungen und Eingangsbestätigungen in Gmail (alle 30 Minuten) und fragt beim Öffnen der App, ob der Status geändert werden soll (Ja / Nein / Mail öffnen / Später).
+- Neues Blatt „Vorschläge“, neue Menüpunkte „Gmail-Abgleich einrichten“, „Mails jetzt prüfen“, „Gmail-Abgleich ausschalten“.
+- Einstellungen: Knopf „Mails jetzt prüfen“.
+
+**Apps Script: Bereitstellen nötig: ja** – `Code.gs` neu kopieren, neue Datei `Mail.gs` anlegen; danach **Job-Tracker → Gmail-Abgleich einrichten**
+**Beschreibung für die Bereitstellung:** `1.2.0 – Gmail-Abgleich`
+
+## 1.1.2 – 12.11.2026
+- Klare Fehlermeldung statt „Laden fehlgeschlagen“, wenn die Web-App nicht erreichbar ist (z. B. falscher Link, Zugriff nicht „Jeder“).
+
+**Apps Script: Bereitstellen nötig: nein**
+
+## 1.1.1 – 12.11.2026
+- Korrektur: Die Verbindung bleibt im Einrichtungs-Link, damit die App auf dem Home-Bildschirm verbunden ist.
+
+**Apps Script: Bereitstellen nötig: nein**
+
+## 1.1.0 – 12.11.2026
+- „Neuer Job“: Text der Stellenanzeige direkt einfügen (z. B. am PC aus Chrome kopiert).
+
+**Apps Script: Bereitstellen nötig: nein**
+
+## 1.0.0 – 12.11.2026
+- Erste Version: Liste mit Status-Filtern, Suche, Sortierung, Bearbeiten, Neuer Job, Anzeige speichern (Link, Text, iOS-Kurzbefehl), CV-Link in Drive, Demo-Modus.
+
+**Apps Script: Bereitstellen nötig: ja** (Ersteinrichtung, siehe ANLEITUNG.md)
+**Beschreibung für die Bereitstellung:** `1.0.0 – Ersteinrichtung`

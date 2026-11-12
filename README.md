@@ -33,6 +33,10 @@ Deine Daten bleiben in deiner Google-Tabelle. Die Seite auf GitHub enthält kein
 
 Schritt für Schritt in der [Anleitung](ANLEITUNG.md), ca. 15 Minuten.
 
+## Änderungen
+
+Siehe [CHANGELOG.md](CHANGELOG.md). Dort steht bei jeder Version, ob du in Apps Script etwas neu bereitstellen musst.
+
 ## Grenzen
 
 - LinkedIn und manche Workday-Seiten lassen sich nicht über den Link abrufen. Dafür gibt es den Kurzbefehl in Safari oder das Einfügen des Textes.

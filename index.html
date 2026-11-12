@@ -127,10 +127,11 @@ a{color:var(--acc)}
 
 <script>
 'use strict';
+const APP_VERSION = '1.2.1', NEED_SCRIPT = '1.2.1'; // siehe CHANGELOG.md
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt'};
 const CK = 'jt-cfg', LK = 'jt-cache', FK = 'jt-filter';
-let CFG = null, DEMO = false, jobs = [], statuses = STATUS_DEF.slice(), sheetUrl = '';
+let CFG = null, DEMO = false, jobs = [], statuses = STATUS_DEF.slice(), sheetUrl = '', scriptVersion = '';
 let filter = { on: STATUS_DEF.slice(), q: '', sort: 'date' };
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -203,6 +204,8 @@ $('sCancel').onclick = () => { showApp(); };
 $('bSettings').onclick = () => {
   openSheet('<h2>Einstellungen</h2><p class="sub">' + (DEMO ? 'Demo-Modus' : 'Verbunden mit deiner Google-Tabelle') + '</p>' +
     (sheetUrl ? '<p><a href="' + esc(sheetUrl) + '" target="_blank" rel="noopener">Tabelle in Google Sheets öffnen</a></p>' : '') +
+    '<p class="sub">App ' + APP_VERSION + ' · Apps Script ' + esc(scriptVersion || 'vor 1.2.1') + (!DEMO && vLess(scriptVersion, NEED_SCRIPT) ? ' – <b style="color:var(--danger)">bitte aktualisieren</b>' : '') +
+    ' · <a href="https://github.com/lobi1994/Job-Tracker/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Änderungen</a></p>' +
     '<div class="acts">' + (DEMO ? '' : '<button class="ib" id="xMail">Mails jetzt prüfen</button>') + '<button class="ib" id="xRe">Anders verbinden</button>' + (DEMO ? '' : '<button class="ib" id="xOut">Verbindung trennen</button>') +
     '<button class="ib" id="xClose">Schließen</button></div>');
   $('xRe').onclick = () => { closeSheet(); showSetup(); };
@@ -216,11 +219,17 @@ $('bSettings').onclick = () => {
 };
 
 /* ---------- Laden und Anzeigen ---------- */
+function vLess(a, b) {
+  const x = String(a || '0').split('.').map(Number), y = String(b).split('.').map(Number);
+  for (let i = 0; i < 3; i++) { if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) < (y[i] || 0); }
+  return false;
+}
 async function load(spin) {
   if (spin) $('bRefresh').classList.add('spin');
   try {
     const r = await api('apiList');
-    jobs = r.jobs || []; statuses = r.statuses || STATUS_DEF; sheetUrl = r.sheetUrl || '';
+    jobs = r.jobs || []; statuses = r.statuses || STATUS_DEF; sheetUrl = r.sheetUrl || ''; scriptVersion = DEMO ? APP_VERSION : (r.version || '');
+    if (!DEMO && vLess(scriptVersion, NEED_SCRIPT) && !load._warned) { load._warned = true; toast('Dein Apps Script ist veraltet (' + (scriptVersion || 'vor 1.2.1') + '). Bitte Code aus GitHub neu kopieren und neue Version bereitstellen – siehe CHANGELOG.', 9000); }
     if (!DEMO) ls.set(LK, { jobs: jobs, statuses: statuses, sheetUrl: sheetUrl, at: Date.now() });
     render();
     loadSuggestions(!shownSug);
