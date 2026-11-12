@@ -11,6 +11,12 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.17 – 12.11.2026 (nur App)
+- **Automatischer Rundgang für Demo-Videos:** `lobi1994.github.io/Job-Tracker/#tour` spielt die App mit Beispieldaten selbst ab (ca. 50 Sekunden): Liste, Filter, Sortierung, Job öffnen, Bewertung, Claudes Einschätzung, gespeicherte Anzeige mit Skills, CV anfordern, Status ändern, Gmail-Rückmeldung. Kurze Texte unten erklären jeden Schritt. Keine echten Bewerbungen, nichts wird gespeichert.
+- Demo hat jetzt 10 Beispiel-Jobs (inkl. „Nicht bewerben“).
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.6.16 – 12.11.2026 (nur App)
 - **Weniger „Laden fehlgeschlagen“:** Google antwortet manchmal beim ersten Mal nicht (z. B. wenn das Skript gerade „aufwacht“). Lesende Abrufe (Liste, gespeicherte Anzeige, Vorschläge, CV-Link) versucht die App jetzt automatisch bis zu 3-mal. Schreibende Aktionen werden nicht wiederholt, damit nichts doppelt passiert.
 - **Gespeicherte Anzeigen öffnen sofort:** Einmal geöffnete Anzeigen merkt sich das Gerät. Beim nächsten Mal erscheinen sie sofort und werden im Hintergrund aktualisiert; klappt das Laden nicht, bleibt die gespeicherte Kopie stehen.
