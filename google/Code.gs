@@ -8,7 +8,7 @@
  * (z. B. {fn:"apiSavePosting", key, data:{url, title, text}} – data darf auch JSON-Text sein).
  */
 
-const VERSION = '1.5.3'; // siehe CHANGELOG.md
+const VERSION = '1.6.0'; // siehe CHANGELOG.md
 const APP_PAGE = 'https://lobi1994.github.io/Job-Tracker/';
 const SHEET = 'Bewerbungen';
 const POSTINGS = 'Anzeigen';
@@ -21,8 +21,9 @@ const COLS = {
   'Beworben am': 'appliedOn', 'Gespräch am': 'interview', 'Gefällt mir (1-5)': 'like',
   'CV passt (1-5)': 'fit', 'Gehalt angegeben': 'salary', 'Weg / Portal': 'channel',
   'Link Anzeige': 'url', 'CV-Datei': 'cv', 'Notizen': 'notes', 'ID': 'id',
-  'Anzeige gespeichert': 'postingSaved'
+  'Anzeige gespeichert': 'postingSaved', 'Fit-Begründung': 'fitNote', 'CV-Auftrag': 'cvRequest', 'CV-Link': 'cvLink'
 };
+const PROFILE = 'Profil';
 const EDITABLE = ['company', 'role', 'location', 'status', 'appliedOn', 'interview', 'like', 'fit', 'salary', 'channel', 'url', 'cv', 'notes'];
 
 /* ------------------------------------------------------------------ */
@@ -139,7 +140,34 @@ function apiList(key) {
   const rows = last < 2 ? [] : sh.getRange(2, 1, last - 1, sh.getLastColumn()).getValues();
   const jobs = rows.filter(function (r) { return String(r[map.company - 1] || r[map.role - 1]).trim(); })
     .map(function (r) { return rowToJob_(r, map); });
-  return { jobs: jobs, statuses: STATUS, sheetUrl: SpreadsheetApp.getActiveSpreadsheet().getUrl(), version: VERSION };
+  return { jobs: jobs, statuses: STATUS, sheetUrl: SpreadsheetApp.getActiveSpreadsheet().getUrl(), version: VERSION, profile: profile_() };
+}
+
+/** Eigene Skills aus dem Blatt „Profil“ (Spalte A: Skill, Spalte B: Hard/Soft). */
+function profile_() {
+  const ps = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(PROFILE);
+  if (!ps || ps.getLastRow() < 2) return [];
+  return ps.getRange(2, 1, ps.getLastRow() - 1, 2).getValues()
+    .filter(function (r) { return String(r[0]).trim(); })
+    .map(function (r) { return { skill: String(r[0]).trim(), type: /soft/i.test(String(r[1])) ? 'soft' : 'hard' }; });
+}
+
+/**
+ * Zugeschnittenen CV bei Claude anfordern. Die geplante Claude-Aufgabe sucht nach „angefordert“,
+ * baut den CV, legt ihn in Google Drive ab und trägt den Link in „CV-Link“ ein.
+ */
+function apiRequestCv(key, id) {
+  check_(key);
+  return withLock_(function () {
+    const sh = sheet_();
+    const map = colMap_(sh);
+    if (!map.cvRequest) throw new Error('Spalte „CV-Auftrag“ fehlt. Bitte „Job-Tracker → Einrichten“ ausführen.');
+    const r = findRow_(sh, map, id);
+    if (!r) throw new Error('Job nicht gefunden.');
+    sh.getRange(r, map.cvRequest).setValue('angefordert ' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'dd.MM.yyyy HH:mm'));
+    if (map.cvLink) sh.getRange(r, map.cvLink).setValue('');
+    return rowToJob_(sh.getRange(r, 1, 1, sh.getLastColumn()).getValues()[0], map);
+  });
 }
 
 /** Ändert einzelne Felder eines Jobs. Setzt bei „Beworben“ automatisch das Datum, falls leer. */
@@ -498,7 +526,7 @@ function jtEinrichten() {
     sh.getRange(1, 1, 1, 13).setValues([Object.keys(COLS).slice(0, 13)]);
   }
   const head = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(String);
-  ['ID', 'Anzeige gespeichert'].forEach(function (h) {
+  ['ID', 'Anzeige gespeichert', 'Fit-Begründung', 'CV-Auftrag', 'CV-Link'].forEach(function (h) {
     if (head.indexOf(h) < 0) {
       const c = sh.getLastColumn() + 1;
       sh.getRange(1, c).setValue(h).setFontWeight('bold');
@@ -513,6 +541,11 @@ function jtEinrichten() {
     rng.setValues(ids);
   }
   postingsSheet_();
+  if (!ss.getSheetByName(PROFILE)) {
+    const pr = ss.insertSheet(PROFILE);
+    pr.getRange(1, 1, 1, 3).setValues([['Skill', 'Art (Hard/Soft)', 'Hinweis']]).setFontWeight('bold');
+    pr.setFrozenRows(1);
+  }
   const props = PropertiesService.getScriptProperties();
   if (!schluessel_()) props.setProperty('appKey', zufallsSchluessel_());
   SpreadsheetApp.getUi().alert('Job-Tracker',
