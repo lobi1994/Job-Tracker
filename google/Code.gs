@@ -8,7 +8,7 @@
  * (z. B. {fn:"apiSavePosting", key, data:{url, title, text}} – data darf auch JSON-Text sein).
  */
 
-const VERSION = '1.6.4'; // siehe CHANGELOG.md
+const VERSION = '1.6.5'; // siehe CHANGELOG.md
 const APP_PAGE = 'https://lobi1994.github.io/Job-Tracker/';
 const SHEET = 'Bewerbungen';
 const POSTINGS = 'Anzeigen';
@@ -52,13 +52,20 @@ function doPost(e) {
     const args = Array.isArray(body.args) ? body.args : [data || body];
     out = { result: globalThis[fn].apply(null, [body.key].concat(args)) };
     if (out.result === undefined) out.result = null;
+    if (out.result && out.result.confirm) out.confirm = out.result.confirm; // für den Kurzbefehl: Rückfrage „ersetzen?“
   } catch (err) {
     out = { error: String((err && err.message) || err) };
   }
   return ContentService.createTextOutput(JSON.stringify(out)).setMimeType(ContentService.MimeType.JSON);
 }
 
-function doGet() {
+function doGet(e) {
+  const token = e && e.parameter && e.parameter.confirm;
+  if (token) {
+    let msg;
+    try { msg = confirmReplace_(String(token)); } catch (err) { msg = 'Fehler: ' + ((err && err.message) || err); }
+    return ContentService.createTextOutput(msg).setMimeType(ContentService.MimeType.TEXT);
+  }
   return ContentService.createTextOutput('Job-Tracker ' + VERSION + ' läuft. Die App findest du unter ' + APP_PAGE)
     .setMimeType(ContentService.MimeType.TEXT);
 }
@@ -377,13 +384,78 @@ function savePosting_(data, linkOnly) {
     const ps = postingsSheet_();
     const now = new Date();
     const existing = findPosting_(ps, id);
+    if (existing && !created && !data.replace) {
+      const old = ps.getRange(existing, 1, 1, 4).getValues()[0];
+      if (sameText_(old[3], text)) return { created: false, job: job0, chars: String(old[3]).length, message: 'Anzeige war schon gespeichert (unverändert): ' + name };
+      // Nicht still überschreiben: neue Anzeige parken und nachfragen. Bestätigt wird über confirmUrl (Kurzbefehl) oder replace:true (App).
+      const token = Utilities.getUuid().replace(/-/g, '');
+      ps.getRange(existing, 5, 1, 3).setValues([[text.slice(0, MAX_TEXT), url, token + '|' + now.getTime()]]);
+      const savedOn = old[2] instanceof Date ? Utilities.formatDate(old[2], Session.getScriptTimeZone(), 'dd.MM.yyyy') : String(old[2]);
+      return { created: false, job: job0, chars: 0, ask: true,
+        confirm: ScriptApp.getService().getUrl() + '?confirm=' + token,
+        message: 'Für ' + name + ' ist schon eine Anzeige gespeichert (' + savedOn + '). Durch die neue ersetzen?' };
+    }
     const values = [[id, url, now, text.slice(0, MAX_TEXT)]];
-    if (existing) ps.getRange(existing, 1, 1, 4).setValues(values);
+    if (existing) { ps.getRange(existing, 1, 1, 4).setValues(values); ps.getRange(existing, 5, 1, 3).clearContent(); }
     else ps.appendRow(values[0]);
-    if (map.postingSaved) sh.getRange(r, map.postingSaved).setValue(Utilities.formatDate(now, Session.getScriptTimeZone(), 'dd.MM.yyyy'));
+    markPostingChanged_(sh, map, r, now);
     const job = rowToJob_(sh.getRange(r, 1, 1, sh.getLastColumn()).getValues()[0], map);
     return { created: created, job: job, chars: Math.min(text.length, MAX_TEXT),
       message: (created ? 'Neuer Job angelegt: ' : 'Anzeige gespeichert: ') + name };
+  });
+}
+
+/** Nach neuer oder gelöschter Anzeige: Datum setzen und alte Claude-Bewertung leeren (wird dann neu bewertet). */
+function markPostingChanged_(sh, map, r, when) {
+  if (map.postingSaved) sh.getRange(r, map.postingSaved).setValue(when ? Utilities.formatDate(when, Session.getScriptTimeZone(), 'dd.MM.yyyy') : '');
+  if (map.fitNote) sh.getRange(r, map.fitNote).setValue('');
+}
+
+function sameText_(a, b) {
+  const n = function (t) { return String(t || '').replace(/\s+/g, ' ').trim().slice(0, MAX_TEXT - 100); };
+  return n(a) === n(b);
+}
+
+/** Bestätigung aus dem Kurzbefehl: geparkte neue Anzeige übernehmen (Link gilt 30 Minuten). */
+function confirmReplace_(token) {
+  if (!/^[a-f0-9]{32}$/.test(token)) throw new Error('Ungültiger Link.');
+  return withLock_(function () {
+    const ps = postingsSheet_();
+    const last = ps.getLastRow();
+    if (last < 2) throw new Error('Nichts zu ersetzen.');
+    const rows = ps.getRange(2, 1, last - 1, 7).getValues();
+    for (let i = 0; i < rows.length; i++) {
+      const parts = String(rows[i][6] || '').split('|');
+      if (parts[0] !== token) continue;
+      if (Date.now() - Number(parts[1]) > 30 * 60 * 1000) { ps.getRange(i + 2, 5, 1, 3).clearContent(); throw new Error('Zu spät – bitte den Kurzbefehl nochmal ausführen.'); }
+      const now = new Date();
+      ps.getRange(i + 2, 1, 1, 7).setValues([[rows[i][0], rows[i][5] || rows[i][1], now, rows[i][4], '', '', '']]);
+      const sh = sheet_(), map = colMap_(sh);
+      const r = findRow_(sh, map, rows[i][0]);
+      if (r) markPostingChanged_(sh, map, r, now);
+      // Link des Jobs mitziehen, wenn er leer ist oder auf die alte (falsche) Seite zeigte
+      if (r && map.url && rows[i][5]) {
+        const cur = String(sh.getRange(r, map.url).getValue() || '');
+        if (!cur || normUrl_(cur) === normUrl_(rows[i][1])) sh.getRange(r, map.url).setValue(rows[i][5]);
+      }
+      return 'Anzeige ersetzt ✓';
+    }
+    throw new Error('Nicht gefunden – bitte den Kurzbefehl nochmal ausführen.');
+  });
+}
+
+/** Gespeicherte Anzeige eines Jobs löschen (App: „Anzeige löschen“). */
+function apiDeletePosting(key, id) {
+  check_(key);
+  return withLock_(function () {
+    const sh = sheet_(), map = colMap_(sh);
+    const r = findRow_(sh, map, id);
+    if (!r) throw new Error('Job nicht gefunden.');
+    const ps = postingsSheet_();
+    const p = findPosting_(ps, id);
+    if (p) ps.deleteRow(p);
+    markPostingChanged_(sh, map, r, null);
+    return rowToJob_(sh.getRange(r, 1, 1, sh.getLastColumn()).getValues()[0], map);
   });
 }
 
@@ -419,6 +491,8 @@ function postingsSheet_() {
     ps.setFrozenRows(1);
     ps.setColumnWidth(4, 600);
   }
+  if (ps.getMaxColumns() >= 7 && !ps.getRange(1, 5).getValue()) ps.getRange(1, 5, 1, 3).setValues([['Neu (wartet auf Bestätigung)', 'Neuer Link', 'Bestätigungs-Code']]).setFontWeight('bold');
+  else if (ps.getMaxColumns() < 7) { ps.insertColumnsAfter(ps.getMaxColumns(), 7 - ps.getMaxColumns()); ps.getRange(1, 5, 1, 3).setValues([['Neu (wartet auf Bestätigung)', 'Neuer Link', 'Bestätigungs-Code']]).setFontWeight('bold'); }
   return ps;
 }
 
@@ -453,14 +527,17 @@ function findSameJob_(sh, map, company, role, url) {
   if (last < 2) return 0;
   const norm = function (t) { return String(t || '').toLowerCase().replace(/\((m|w|d|f|x|all genders?|alle)[^)]*\)/g, ' ').replace(/[^a-z0-9äöüß]+/g, ''); };
   const ids = function (u) { return (String(u || '').match(/[A-Za-z0-9]{8,}/g) || []).filter(function (x) { return /\d/.test(x) && !/^(https?|linkedin|personio|greenhouse|workable)$/i.test(x); }); };
-  const myIds = ids(url), c = norm(company), ro = norm(role);
+  // Firmenname ohne Rechtsform/Region vergleichen: „Spheros Germany GmbH“ = „Spheros“
+  const normC = function (t) { return norm(String(t || '').toLowerCase().replace(/\b(gmbh|mbh|ag|se|kg|kgaa|co|inc|ltd|llc|bv|sa|sas|plc|germany|deutschland|europe|europa|emea|group|gruppe|holding)\b\.?/g, ' ')); };
+  const sameCo = function (a, b) { return a === b || (Math.min(a.length, b.length) >= 4 && (a.indexOf(b) === 0 || b.indexOf(a) === 0)); };
+  const myIds = ids(url), c = normC(company), ro = norm(role);
   const rows = sh.getRange(2, 1, last - 1, sh.getLastColumn()).getValues();
   for (let i = 0; i < rows.length; i++) {
     const r = rows[i];
     const theirIds = map.url ? ids(r[map.url - 1]) : [];
     if (myIds.some(function (x) { return theirIds.indexOf(x) >= 0; })) return i + 2;
-    const rc = norm(r[map.company - 1]), rr = norm(r[map.role - 1]);
-    if (c && ro && rc === c && rr && (rr === ro || (Math.min(rr.length, ro.length) >= 12 && (rr.indexOf(ro) >= 0 || ro.indexOf(rr) >= 0)))) return i + 2;
+    const rc = normC(r[map.company - 1]), rr = norm(r[map.role - 1]);
+    if (c && ro && rc && sameCo(rc, c) && rr && (rr === ro || (Math.min(rr.length, ro.length) >= 12 && (rr.indexOf(ro) >= 0 || ro.indexOf(rr) >= 0)))) return i + 2;
   }
   return 0;
 }

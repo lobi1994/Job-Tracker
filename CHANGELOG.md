@@ -11,6 +11,16 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.5 – 12.11.2026
+- **Nachfrage vor dem Ersetzen:** Hat ein Job schon eine Anzeige und der Kurzbefehl liefert eine andere, fragt er „Durch die neue ersetzen?“. OK ersetzt, Abbrechen lässt die alte stehen. Gleicher Text: keine Frage. Dafür die Kurzbefehle einmal um die Schritte aus Abschnitt 3 der Kurzbefehl-Seite ergänzen.
+- In der App fragen „Anzeige vom Link speichern“ und „Text einfügen“ ebenfalls nach, bevor eine gespeicherte Anzeige ersetzt wird.
+- **Anzeige löschen:** Im Job unter „Unterlagen“ neben „lesen“ jetzt „löschen“.
+- Nach Ersetzen oder Löschen wird Claudes Fit-Begründung geleert, damit der Job neu bewertet wird. Zeigte der Link des Jobs auf die falsche Seite, wird er mit ersetzt.
+- **Firmen besser wiedererkannt:** „Spheros Germany GmbH“ und „Spheros“ gelten jetzt als dieselbe Firma (Rechtsform und Land werden ignoriert). Vorher entstand dadurch ein doppelter Job.
+
+**Apps Script: Bereitstellen nötig: ja** – `Code.gs` und `Mail.gs` neu kopieren (enthält alles ab 1.3.0; 1.6.4 musst du nicht extra bereitstellen)
+**Beschreibung für die Bereitstellung:** `1.6.5 – Skills, Claude-Bewertung, CV erstellen, Greenhouse, Nicht bewerben, Anzeige ersetzen/löschen`
+
 ## 1.6.4 – 12.11.2026
 - Neuer Status **„Nicht bewerben“** (grau): für Jobs, die nach dem Lesen der Anzeige doch nicht passen. Eigener Filter-Chip, steht in der Liste ganz unten.
 - Bei „Nicht bewerben“ wird kein Bewerbungsdatum gesetzt, der Gmail-Abgleich ignoriert diese Jobs, und Claude bewertet sie nicht und baut keinen CV dafür.

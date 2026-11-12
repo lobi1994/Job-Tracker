@@ -78,8 +78,7 @@ td:first-child{white-space:nowrap;color:var(--mute);width:1%}
         </table></li>
       <li>Suche: <code>Wörterbuchwert</code> → <b class="ui">Wörterbuchwert abrufen</b> → bei „Schlüssel“ <code>result</code> eintragen. Als Eingabe muss <b class="ui">Inhalte von URL</b> stehen.</li>
       <li>Noch einmal <b class="ui">Wörterbuchwert abrufen</b> → Schlüssel <code>message</code>. Eingabe: <b class="ui">Wörterbuchwert</b>.</li>
-      <li>Suche: <code>Mitteilung</code> → <b class="ui">Mitteilung anzeigen</b> → Text: Variable <b class="ui">Wörterbuchwert</b>.</li>
-      <li>Oben rechts <b class="ui">Fertig</b>.</li>
+      <li>Weiter mit <a href="#c">Abschnitt 3 · Nachfrage „ersetzen?“</a>, dann oben rechts <b class="ui">Fertig</b>.</li>
     </ol>
     <p class="note"><b>Test:</b> In Safari eine Stellenanzeige öffnen → <b class="ui">Teilen</b> → ganz nach unten → <b class="ui">Job speichern</b>. Beim ersten Mal fragt das iPhone, ob der Kurzbefehl auf die Seite zugreifen darf: <b class="ui">Erlauben</b>.</p>
   </div>
@@ -97,11 +96,30 @@ td:first-child{white-space:nowrap;color:var(--mute);width:1%}
           <tr><td><code>key</code></td><td>dein <b>Schlüssel</b></td></tr>
           <tr><td><code>shared</code></td><td>Variable <b class="ui">Kurzbefehleingabe</b></td></tr>
         </table></li>
-      <li>Wie oben: 2× <b class="ui">Wörterbuchwert abrufen</b> (<code>result</code>, dann <code>message</code>) und <b class="ui">Mitteilung anzeigen</b>.</li>
+      <li>Wie oben: 2× <b class="ui">Wörterbuchwert abrufen</b> (<code>result</code>, dann <code>message</code>), danach <a href="#c">Abschnitt 3</a>.</li>
       <li><b class="ui">Fertig</b>.</li>
     </ol>
     <p class="note"><b>Test in der LinkedIn-App:</b> Job öffnen → <b class="ui">Teilen</b> (Pfeil) → <b class="ui">Teilen über …</b> bzw. <b class="ui">Mehr</b> → <b class="ui">Job-Link speichern</b>.</p>
     <p class="note">Tipp: Fehlt „Job speichern“ im Teilen-Menü (z. B. in der Anzeige, die aus dem Job-Tracker geöffnet wurde), nimm einfach „Job-Link speichern“.</p>
+  </div>
+
+  <h2 id="c">3 · Nachfrage „ersetzen?“ (für beide Kurzbefehle)</h2>
+  <p class="note">Hat ein Job schon eine Anzeige, fragt der Kurzbefehl jetzt, ob die neue sie ersetzen soll. Ohne diese Schritte wird nichts ersetzt, du bekommst dann nur die Frage als Mitteilung. Wenn du die Kurzbefehle schon hast: die alte Aktion <b class="ui">Mitteilung anzeigen</b> am Ende löschen und das hier anhängen.</p>
+  <div class="card">
+    <p class="note">So wählst du eine bestimmte Variable: ins Feld tippen → über der Tastatur <b class="ui">Variable auswählen</b> → im Kurzbefehl auf die Aktion tippen, deren Ergebnis du willst.</p>
+    <ol>
+      <li><b class="ui">Wörterbuchwert abrufen</b> → Schlüssel <div class="copy"><code id="kC">confirm</code><button data-copy="kC">Kopieren</button></div>
+        Als Eingabe <b class="ui">Inhalte von URL</b> wählen (die Antwort vom Job-Tracker, nicht „Wörterbuchwert“).</li>
+      <li>Suche: <code>Wenn</code> → <b class="ui">Wenn</b>. Eingabe: das Ergebnis aus Schritt 1 (<b class="ui">Wörterbuchwert</b> mit <code>confirm</code>). Bedingung: <b class="ui">hat einen beliebigen Wert</b>.</li>
+      <li>Zwischen <b>Wenn</b> und <b>Sonst</b> einfügen:
+        <ul>
+          <li><b class="ui">Hinweis anzeigen</b> → Text: Variable <b class="ui">Wörterbuchwert</b> der Aktion mit Schlüssel <code>message</code>. „Abbrechen-Taste anzeigen“ bleibt an.</li>
+          <li><b class="ui">Inhalte von URL abrufen</b> → URL: Variable aus Schritt 1 (<code>confirm</code>). Methode bleibt <b class="ui">GET</b>, keine Felder.</li>
+          <li><b class="ui">Mitteilung anzeigen</b> → Text: <b class="ui">Inhalte von URL</b> (der eben abgerufenen).</li>
+        </ul></li>
+      <li>Zwischen <b>Sonst</b> und <b>Ende Wenn</b>: <b class="ui">Mitteilung anzeigen</b> → Text: Variable <b class="ui">Wörterbuchwert</b> mit Schlüssel <code>message</code>.</li>
+    </ol>
+    <p class="note"><b>Ablauf:</b> Neue Anzeige für einen Job, der schon eine hat → Frage „Durch die neue ersetzen?“ → <b class="ui">OK</b> ersetzt sie (Mitteilung „Anzeige ersetzt ✓“), <b class="ui">Abbrechen</b> lässt die alte stehen. Die Frage gilt 30 Minuten. Ist der Text gleich, kommt keine Frage.</p>
   </div>
 
   <h2>Etwas klappt nicht?</h2>
