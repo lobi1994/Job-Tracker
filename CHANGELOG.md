@@ -11,6 +11,12 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.3 – 12.11.2026
+- Unter „Unterlagen“ jetzt ein Knopf **„📄 CV öffnen“** statt Textlink (öffnet den zugeschnittenen CV aus Google Drive bzw. sucht die CV-Datei dort).
+- Der Bereich **„CV mit Claude erstellen“** erscheint nur noch bei Jobs mit Status „Noch nicht beworben“.
+
+**Apps Script: Bereitstellen nötig: nein** (für 1.6.2 weiterhin ja)
+
 ## 1.6.2 – 12.11.2026
 - **Karriereseiten mit eingebettetem Greenhouse** (z. B. LucaNet, Link mit `?gh_jid=…`): Der Kurzbefehl sah dort nur den Hinweis „bitte Cookies akzeptieren“, weil die eigentliche Anzeige in einem eingebetteten Fenster steckt. Das Skript holt die Anzeige jetzt direkt über die Greenhouse-Schnittstelle.
 - **Anzeigen mit HTML-Code** (u. a. von LinkedIn: `<p>`, `<li>` …) werden jetzt sauber als Text angezeigt, auch bei bereits gespeicherten Anzeigen. Neue Anzeigen werden direkt sauber gespeichert.

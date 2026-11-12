@@ -103,6 +103,9 @@ main{padding:12px 16px calc(env(safe-area-inset-bottom) + 90px);max-width:820px;
 .sk.have{border-color:var(--s4);color:var(--ink);background:color-mix(in srgb,var(--s4) 14%,var(--card))}
 .psec.skills{--pc:var(--acc)}
 .fitline{margin:2px 0 8px}
+.cvrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0}
+.cvrow .ib{height:42px;padding:0 16px;font-weight:600}
+.cvrow .sub{font-size:12.5px;word-break:break-all}
 .cvbox{border:1px dashed var(--acc);border-radius:12px;padding:10px 12px;margin:10px 0}
 .cvbox p{margin:4px 0}
 .fitnote{font-size:13.5px;color:var(--mute);margin:-4px 0 8px}
@@ -166,7 +169,7 @@ a{color:var(--acc)}
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.2', NEED_SCRIPT = '1.6.2'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.3', NEED_SCRIPT = '1.6.2'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Job-Tracker ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt'};
@@ -352,7 +355,7 @@ document.addEventListener('click', (e) => {
 
 /* Zugeschnittener CV über Claude: Auftrag in die Tabelle schreiben; die geplante Claude-Aufgabe baut ihn */
 function cvBoxHtml(j) {
-  if (j.cvLink) return '<p><b>Zugeschnittener CV ist fertig</b></p><p><a href="' + esc(j.cvLink) + '" target="_blank" rel="noopener">CV öffnen</a> · <a href="#" id="cvAgain">neu erstellen lassen</a></p>';
+  if (j.cvLink) return '<p><b>Zugeschnittener CV ist fertig</b></p><p class="sub">Unten bei „Unterlagen“ öffnen.</p><button class="ib" id="cvAgain">Neu erstellen lassen</button>';
   if (/^angefordert/i.test(j.cvRequest || '')) return '<p><b>CV ' + esc(j.cvRequest) + '</b></p><p class="sub">Claude erstellt ihn bei der nächsten geplanten Runde (meist innerhalb von 2 Stunden). Dann erscheint hier „CV öffnen“.</p>';
   if (/^fehler/i.test(j.cvRequest || '')) return '<p class="miss">' + esc(j.cvRequest) + '</p><button class="ib" id="cvReq">Nochmal versuchen</button>';
   return '<p><b>Zugeschnittener CV</b></p><p class="sub">Claude baut einen CV passend zu dieser Stelle (nur wahre Inhalte, Sprache der Anzeige).</p><button class="ib pri" id="cvReq">CV mit Claude erstellen</button>';
@@ -434,7 +437,7 @@ function openDetail(id) {
     '<div class="fl"><span>Gefällt mir</span>' + starRow('fLike', j.like) + '</div>' +
     '<div class="fl"><span>CV passt (Einschätzung)</span>' + starRow('fFit', j.fit, 'fit') + '</div>' +
     (j.fitNote ? '<p class="fitnote">Claude: ' + esc(j.fitNote) + '</p>' : '') +
-    '<div class="cvbox" id="cvBox">' + cvBoxHtml(j) + '</div>' +
+    (j.status === statuses[0] ? '<div class="cvbox" id="cvBox">' + cvBoxHtml(j) + '</div>' : '') +
     '<div class="sec">Details</div>' +
     '<div class="row2 stack">' + inp('fSalary', 'Gehalt angegeben', j.salary) + inp('fChannel', 'Weg / Portal', j.channel) + '</div>' +
     '<label class="fl"><span>Notizen</span><textarea id="fNotes">' + esc(j.notes) + '</textarea></label>' +
@@ -443,7 +446,7 @@ function openDetail(id) {
       inp('fUrl', 'Link Anzeige', j.url, 'url') + inp('fCv', 'CV-Datei', j.cv) + '</details>' +
     '<div class="box"><h3>Unterlagen</h3>' +
       (j.url ? '<p><a href="' + esc(j.url) + '" target="_blank" rel="noopener" data-ext="1">Anzeige online öffnen' + (IOS ? ' (Safari)' : '') + '</a></p>' : '<p>Kein Link hinterlegt.</p>') +
-      (j.cv ? '<p>CV: ' + esc(j.cv) + ' <a href="#" id="aCv">in Drive suchen</a></p>' : '') +
+      (j.cvLink || j.cv ? '<div class="cvrow"><button class="ib pri" id="aCv">📄 CV öffnen</button>' + (j.cv ? '<span class="sub">' + esc(j.cv) + '</span>' : '') + '</div>' : '') +
       '<p>' + (j.postingSaved ? 'Anzeige gespeichert am ' + esc(j.postingSaved) + ' · <a href="#" id="aShow">lesen</a>' : '<span class="miss">Anzeige noch nicht gespeichert.</span>') + '</p>' +
       '<div class="acts" style="margin-top:6px">' + (j.url ? '<button class="ib" id="bFetch">Anzeige vom Link speichern</button>' : '') +
       '<button class="ib" id="bPaste">Text einfügen</button></div></div>',
@@ -475,8 +478,13 @@ function openDetail(id) {
   if ($('aShow')) $('aShow').onclick = (e) => { e.preventDefault(); openPosting(j); };
   if ($('aCv')) $('aCv').onclick = async (e) => {
     e.preventDefault();
-    try { const u = await api('apiCvLink', j.cv); if (u) window.open(u, '_blank'); else toast('Datei nicht in Google Drive gefunden.'); }
-    catch (err) { toast(err.message, 4000); }
+    if (j.cvLink) { window.open(j.cvLink, '_blank', 'noopener'); return; }
+    const w = window.open('', '_blank'); // sofort öffnen, sonst blockiert Safari das Fenster nach dem Warten
+    try {
+      const u = await api('apiCvLink', j.cv);
+      if (u) { if (w) w.location.href = u; else location.href = u; }
+      else { if (w) w.close(); toast('Datei nicht in Google Drive gefunden.'); }
+    } catch (err) { if (w) w.close(); toast(err.message, 4000); }
   };
 }
 
