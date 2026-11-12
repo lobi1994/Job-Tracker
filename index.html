@@ -140,9 +140,16 @@ const ls = {
 /* ---------- API ---------- */
 async function api(fn, ...args) {
   if (DEMO) return demoApi(fn, args);
-  const res = await fetch(CFG.u, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ fn: fn, key: CFG.k, args: args }) });
-  const out = await res.json();
+  const HINT = 'Deine Web-App antwortet nicht richtig. Prüfe in Apps Script unter „Bereitstellen → Bereitstellungen verwalten“: Typ Web-App, Ausführen als „Ich“, Zugriff „Jeder“, und dass der App-Link auf /exec endet.';
+  let res, raw;
+  try {
+    res = await fetch(CFG.u, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ fn: fn, key: CFG.k, args: args }) });
+    raw = await res.text();
+  } catch (e) { throw new Error('Keine Verbindung (' + e.message + '). ' + HINT); }
+  let out;
+  try { out = JSON.parse(raw); }
+  catch (e) { throw new Error((/accounts\.google|ServiceLogin|signin/i.test(raw) ? 'Google verlangt eine Anmeldung. ' : 'Antwort ist kein JSON (HTTP ' + res.status + '). ') + HINT); }
   if (out.error) {
     if (out.error === 'Kein Zugriff') { showSetup('Der Schlüssel passt nicht (mehr). Bitte deinen aktuellen Einrichtungs-Link öffnen.'); }
     throw new Error(out.error);
