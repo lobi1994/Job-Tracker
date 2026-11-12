@@ -22,7 +22,10 @@
   function strip(html) {
     var d = document.createElement('div');
     d.innerHTML = String(html).replace(/<br\s*\/?>/gi, '\n').replace(/<\/(p|div|li|h[1-6]|ul|ol)>/gi, '$&\n').replace(/<li[^>]*>/gi, '$&- ');
-    return (d.textContent || '').replace(/[ \t\u00a0]+/g, ' ').replace(/ *\n */g, '\n').trim();
+    let t = (d.textContent || '').replace(/[ \t\u00a0]+/g, ' ').replace(/ *\n */g, '\n').trim();
+    // LinkedIn liefert die Beschreibung teils doppelt kodiert (&lt;p&gt;) – dann noch einmal umwandeln
+    if (/<\/?(p|br|li|ul|strong)\b/i.test(t) && !strip.again) { strip.again = true; t = strip(t); strip.again = false; }
+    return t;
   }
 
   var out = { url: location.href.split('#')[0], title: document.title, company: '', role: '', location: '', text: '' };

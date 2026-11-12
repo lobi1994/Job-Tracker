@@ -11,6 +11,14 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.2 – 12.11.2026
+- **Karriereseiten mit eingebettetem Greenhouse** (z. B. LucaNet, Link mit `?gh_jid=…`): Der Kurzbefehl sah dort nur den Hinweis „bitte Cookies akzeptieren“, weil die eigentliche Anzeige in einem eingebetteten Fenster steckt. Das Skript holt die Anzeige jetzt direkt über die Greenhouse-Schnittstelle.
+- **Anzeigen mit HTML-Code** (u. a. von LinkedIn: `<p>`, `<li>` …) werden jetzt sauber als Text angezeigt, auch bei bereits gespeicherten Anzeigen. Neue Anzeigen werden direkt sauber gespeichert.
+- Mehr englische Überschriften erkannt („Key responsibilities“, „Qualification and experience“, „About the role“).
+
+**Apps Script: Bereitstellen nötig: ja** – `Code.gs` und `Mail.gs` neu kopieren (enthält alles ab 1.3.0)
+**Beschreibung für die Bereitstellung:** `1.6.2 – Skills, Claude-Bewertung, CV erstellen, Greenhouse-Anzeigen`
+
 ## 1.6.1 – 12.11.2026
 - Korrektur iPhone: Beim Scrollen in einem offenen Fenster (z. B. Stellenanzeige) scrollte die Liste im Hintergrund mit. Der Hintergrund ist jetzt gesperrt, solange ein Fenster offen ist; danach steht die Liste wieder an derselben Stelle.
 

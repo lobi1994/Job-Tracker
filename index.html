@@ -166,7 +166,7 @@ a{color:var(--acc)}
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.1', NEED_SCRIPT = '1.6.0'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.2', NEED_SCRIPT = '1.6.2'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Job-Tracker ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt'};
@@ -498,7 +498,7 @@ async function openPosting(j) {
     const p = await api('apiGetPosting', j.id);
     const f = p ? formatPosting(p.text) : null;
     openSheet(head('Stellenanzeige', j.company + ' · ' + j.role + (p ? ' · gespeichert ' + fmtDate(p.savedAt) : ''), '') +
-      (f ? f.nav + '<div id="pFmt">' + skillsHtml(extractSkills(p.text, profile)) + f.html + '</div><div id="pRaw" class="ptext" hidden>' + esc(p.text) + '</div>' +
+      (f ? f.nav + '<div id="pFmt">' + skillsHtml(extractSkills(htmlText(p.text), profile)) + f.html + '</div><div id="pRaw" class="ptext" hidden>' + esc(htmlText(p.text)) + '</div>' +
         '<button class="toggle" id="pToggle">Originaltext anzeigen</button>' : '<p>Nichts gespeichert.</p>'),
       '<button class="ib" id="tBack">Zurück</button>' + (p && p.url ? '<a class="ib" href="' + esc(p.url) + '" target="_blank" rel="noopener" data-ext="1">Original öffnen</a>' : ''));
     $('tBack').onclick = () => openDetail(j.id);
@@ -581,8 +581,8 @@ function skillsHtml(sk) {
    Nur Darstellung: Der gespeicherte Text bleibt unverändert. Jede Zeile landet in genau einem Abschnitt,
    die Reihenfolge bleibt wie im Original – es geht nichts verloren. */
 const PSEC = [
-  { key: 'tasks', name: 'Aufgaben', c: 'var(--s1)', re: /^(ihre|deine|eure|unsere)?\s*(aufgaben|tätigkeiten|tätigkeitsbereich|aufgabengebiet|verantwortung(en|sbereich)?)|^(was (sie|du) (bei uns )?(erwartet|machen|bewegen)|das erwartet (sie|dich)|dein job|ihr job|your (tasks|responsibilities|role|impact|mission)|responsibilities|what you('ll| will) do|the role|in this role|key responsibilities|tasks)\b/i },
-  { key: 'profile', name: 'Profil', c: 'var(--s2)', re: /^(ihr|dein|euer)\s*profil|^(profil|anforderungen|qualifikation(en)?|voraussetzungen|das bringst du mit|das bringen sie mit|was (sie|du) mitbring(en|st)|was wir (von dir |von ihnen )?erwarten|wen wir suchen|your profile|requirements|qualifications|what you bring|who you are|about you|what we('re| are) looking for|skills|must[- ]have|nice[- ]to[- ]have)\b/i },
+  { key: 'tasks', name: 'Aufgaben', c: 'var(--s1)', re: /^(ihre|deine|eure|unsere)?\s*(aufgaben|tätigkeiten|tätigkeitsbereich|aufgabengebiet|verantwortung(en|sbereich)?)|^(was (sie|du) (bei uns )?(erwartet|machen|bewegen)|das erwartet (sie|dich)|dein job|ihr job|your (tasks|responsibilities|role|impact|mission)|responsibilities|key responsibilities|what you('ll| will) do|(about )?the role|in this role|key responsibilities|tasks)\b/i },
+  { key: 'profile', name: 'Profil', c: 'var(--s2)', re: /^(ihr|dein|euer)\s*profil|^(profil|anforderungen|qualifikation(en)?|voraussetzungen|das bringst du mit|das bringen sie mit|was (sie|du) mitbring(en|st)|was wir (von dir |von ihnen )?erwarten|wen wir suchen|your profile|requirements|qualifications?( and experience)?|experience and qualifications|what you bring|who you are|about you|what we('re| are) looking for|skills|must[- ]have|nice[- ]to[- ]have)\b/i },
   { key: 'offer', name: 'Wir bieten', c: 'var(--s4)', re: /^(was )?wir bieten|^(ihre|deine) (vorteile|benefits)|^(benefits|vorteile|unser angebot|das bieten wir|darauf (kannst du|können sie) dich|warum (wir|zu uns)|why (join|us)|what we offer|we offer|perks|our offer)\b/i },
   { key: 'company', name: 'Über die Firma', c: 'var(--s3)', re: /^(über uns|wer wir sind|das unternehmen|unternehmen|about us|about the company|who we are|our company|company|über (die|das) )/i },
   { key: 'contact', name: 'Bewerbung & Kontakt', c: 'var(--navy)', re: /^(interesse geweckt|kontakt|ansprechpartner|bewerbung|so bewirbst du dich|jetzt bewerben|haben wir dein interesse|klingt (gut|spannend)|contact|how to apply|apply now|interested)/i }
@@ -593,8 +593,18 @@ function headingOf(line) {
   for (const s of PSEC) if (s.re.test(t)) return { sec: s, title: t };
   return null;
 }
+function htmlText(t) {
+  // Ältere Einträge enthalten teils HTML (z. B. von LinkedIn) – nur für die Anzeige in Text umwandeln
+  for (let i = 0; i < 2 && /<\/?(p|br|li|ul|strong|div|span|b|em)\b[^>]*>/i.test(t); i++) {
+    const d = document.createElement('div');
+    d.innerHTML = t.replace(/<br\s*\/?>/gi, '\n').replace(/<\/(p|div|li|h[1-6]|ul|ol)>/gi, '$&\n').replace(/<li[^>]*>/gi, '$&- ').replace(/<(strong|b)>([^<]{2,70})<\/\1>/gi, '\n$2\n');
+    t = (d.textContent || '').replace(/[ \t\u00a0]+/g, ' ').replace(/ *\n */g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+  }
+  return t;
+}
 function formatPosting(text) {
-  const lines = String(text || '').replace(/\r/g, '').split('\n');
+  text = htmlText(String(text || ''));
+  const lines = text.replace(/\r/g, '').split('\n');
   const secs = [];
   let cur = { sec: null, title: 'Einleitung', lines: [] };
   const push = () => { if (cur.lines.some((l) => l.trim())) secs.push(cur); };
