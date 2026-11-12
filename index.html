@@ -22,7 +22,7 @@ header{position:sticky;top:0;z-index:5;background:var(--bg);padding:calc(env(saf
 .top{display:flex;align-items:center;gap:8px}
 .top h1{font-size:21px;margin:0;flex:1;color:var(--navy)}
 .top small{color:var(--mute);font-weight:400;font-size:13px;margin-left:6px}
-.ib{border:0;background:var(--card);border:1px solid var(--line);border-radius:10px;height:36px;min-width:36px;padding:0 10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.ib{text-decoration:none;color:inherit;border:0;background:var(--card);border:1px solid var(--line);border-radius:10px;height:36px;min-width:36px;padding:0 10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
 .ib.pri{background:var(--navy);color:#fff;border-color:var(--navy)}
 @media (prefers-color-scheme:dark){.ib.pri{color:#0f1318}}
 .ib svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -88,7 +88,17 @@ main{padding:12px 16px calc(env(safe-area-inset-bottom) + 90px);max-width:820px;
 .box{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:12px 0;background:var(--bg)}
 .box h3{margin:0 0 4px;font-size:14px}
 .box p{margin:4px 0;color:var(--mute);font-size:13px}
-.ptext{white-space:pre-wrap;font-size:13.5px;line-height:1.5}
+.ptext{white-space:pre-wrap;font-size:15px;line-height:1.6}
+.pnav{display:flex;gap:6px;overflow-x:auto;margin:4px 0 6px;scrollbar-width:none}
+.pnav::-webkit-scrollbar{display:none}
+.pnav button{flex:none;border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:5px 12px;font-size:13px;cursor:pointer}
+.psec{background:var(--bg);border:1px solid var(--line);border-left:5px solid var(--pc,var(--mute));border-radius:12px;padding:10px 14px;margin:10px 0}
+.psec h3{margin:0 0 6px;font-size:16px;color:var(--pc,var(--ink))}
+.psec h4{margin:10px 0 4px;font-size:14.5px}
+.psec p{margin:6px 0;font-size:15px;line-height:1.6}
+.psec ul{margin:6px 0;padding-left:20px}
+.psec li{margin:5px 0;font-size:15px;line-height:1.5}
+.toggle{background:none;border:0;color:var(--acc);padding:4px 0;font-size:14px;cursor:pointer}
 a{color:var(--acc)}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 86px);background:#222;color:#fff;padding:9px 14px;border-radius:10px;font-size:14px;z-index:40;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw}
 .toast.show{opacity:.95}
@@ -145,7 +155,7 @@ a{color:var(--acc)}
 
 <script>
 'use strict';
-const APP_VERSION = '1.4.2', NEED_SCRIPT = '1.4.2'; // siehe CHANGELOG.md
+const APP_VERSION = '1.5.0', NEED_SCRIPT = '1.4.2'; // siehe CHANGELOG.md
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt'};
 const CK = 'jt-cfg', LK = 'jt-cache', FK = 'jt-filter';
@@ -435,11 +445,80 @@ async function openPosting(j) {
   openSheet('<h2>Stellenanzeige</h2><p class="sub">' + esc(j.company) + ' · ' + esc(j.role) + '</p><p class="sub">Lade …</p>');
   try {
     const p = await api('apiGetPosting', j.id);
+    const f = p ? formatPosting(p.text) : null;
     openSheet(head('Stellenanzeige', j.company + ' · ' + j.role + (p ? ' · gespeichert ' + fmtDate(p.savedAt) : ''), '') +
-      '<div class="ptext">' + esc(p ? p.text : 'Nichts gespeichert.') + '</div>',
+      (f ? f.nav + '<div id="pFmt">' + f.html + '</div><div id="pRaw" class="ptext" hidden>' + esc(p.text) + '</div>' +
+        '<button class="toggle" id="pToggle">Originaltext anzeigen</button>' : '<p>Nichts gespeichert.</p>'),
       '<button class="ib" id="tBack">Zurück</button>' + (p && p.url ? '<a class="ib" href="' + esc(p.url) + '" target="_blank" rel="noopener" data-ext="1">Original öffnen</a>' : ''));
     $('tBack').onclick = () => openDetail(j.id);
+    if ($('pToggle')) $('pToggle').onclick = () => {
+      const raw = $('pRaw').hidden; $('pRaw').hidden = !raw; $('pFmt').hidden = raw;
+      document.querySelectorAll('.pnav').forEach((n) => { n.hidden = raw; });
+      $('pToggle').textContent = raw ? 'Gegliederte Ansicht' : 'Originaltext anzeigen';
+    };
+    document.querySelectorAll('.pnav button').forEach((b) => { b.onclick = () => { const t = $(b.dataset.to); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); }; });
   } catch (e) { toast(e.message, 4000); openDetail(j.id); }
+}
+
+/* ---------- Stellenanzeige gegliedert anzeigen ----------
+   Nur Darstellung: Der gespeicherte Text bleibt unverändert. Jede Zeile landet in genau einem Abschnitt,
+   die Reihenfolge bleibt wie im Original – es geht nichts verloren. */
+const PSEC = [
+  { key: 'tasks', name: 'Aufgaben', c: 'var(--s1)', re: /^(ihre|deine|eure|unsere)?\s*(aufgaben|tätigkeiten|tätigkeitsbereich|aufgabengebiet|verantwortung(en|sbereich)?)|^(was (sie|du) (bei uns )?(erwartet|machen|bewegen)|das erwartet (sie|dich)|dein job|ihr job|your (tasks|responsibilities|role|impact|mission)|responsibilities|what you('ll| will) do|the role|in this role|key responsibilities|tasks)\b/i },
+  { key: 'profile', name: 'Profil', c: 'var(--s2)', re: /^(ihr|dein|euer)\s*profil|^(profil|anforderungen|qualifikation(en)?|voraussetzungen|das bringst du mit|das bringen sie mit|was (sie|du) mitbring(en|st)|was wir (von dir |von ihnen )?erwarten|wen wir suchen|your profile|requirements|qualifications|what you bring|who you are|about you|what we('re| are) looking for|skills|must[- ]have|nice[- ]to[- ]have)\b/i },
+  { key: 'offer', name: 'Wir bieten', c: 'var(--s4)', re: /^(was )?wir bieten|^(ihre|deine) (vorteile|benefits)|^(benefits|vorteile|unser angebot|das bieten wir|darauf (kannst du|können sie) dich|warum (wir|zu uns)|why (join|us)|what we offer|we offer|perks|our offer)\b/i },
+  { key: 'company', name: 'Über die Firma', c: 'var(--s3)', re: /^(über uns|wer wir sind|das unternehmen|unternehmen|about us|about the company|who we are|our company|company|über (die|das) )/i },
+  { key: 'contact', name: 'Bewerbung & Kontakt', c: 'var(--navy)', re: /^(interesse geweckt|kontakt|ansprechpartner|bewerbung|so bewirbst du dich|jetzt bewerben|haben wir dein interesse|klingt (gut|spannend)|contact|how to apply|apply now|interested)/i }
+];
+function headingOf(line) {
+  const t = line.replace(/^[#*\s]+|[*\s]+$/g, '').replace(/[:：]$/, '').trim();
+  if (!t || t.length > 70 || /^[-•·]/.test(line.trim())) return null;
+  for (const s of PSEC) if (s.re.test(t)) return { sec: s, title: t };
+  return null;
+}
+function formatPosting(text) {
+  const lines = String(text || '').replace(/\r/g, '').split('\n');
+  const secs = [];
+  let cur = { sec: null, title: 'Einleitung', lines: [] };
+  const push = () => { if (cur.lines.some((l) => l.trim())) secs.push(cur); };
+  lines.forEach((raw) => {
+    const line = raw.replace(/\s+$/, '');
+    // „Ihre Aufgaben: Tests planen …“ in einer Zeile → Überschrift abtrennen
+    if (/^\s*(•••|\*\*\*|---|___)\s*$/.test(line)) { push(); cur = { sec: null, title: 'Weitere Informationen', lines: [] }; return; }
+    const inl = line.match(/^(.{3,40}?):\s+(.+)$/);
+    const hi = inl && headingOf(inl[1]);
+    if (hi) { push(); cur = { sec: hi.sec, title: hi.title, lines: [inl[2]] }; return; }
+    const h = headingOf(line);
+    if (h) { push(); cur = { sec: h.sec, title: h.title, lines: [] }; return; }
+    cur.lines.push(line);
+  });
+  push();
+  const blocks = (ls) => {
+    let out = '', list = [], para = [];
+    const flushP = () => { if (para.length) { out += '<p>' + esc(para.join(' ')) + '</p>'; para = []; } };
+    const flushL = () => { if (list.length) { out += '<ul>' + list.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul>'; list = []; } };
+    ls.forEach((l) => {
+      const t = l.trim();
+      if (!t) { flushP(); flushL(); return; }
+      const b = t.match(/^([-–•·*▪◦●]|\d{1,2}[.)])\s+(.*)$/);
+      if (b) { flushP(); list.push(b[2]); return; }
+      flushL();
+      if (t.length <= 60 && !/[.!,;]$/.test(t) && /^[A-ZÄÖÜ0-9]/.test(t) && para.length === 0) { out += '<h4>' + esc(t) + '</h4>'; return; }
+      para.push(t);
+    });
+    flushP(); flushL();
+    return out;
+  };
+  let n = 0;
+  const html = secs.map((s) => {
+    const id = 'psec' + (n++);
+    s.id = id;
+    const name = s.sec ? s.sec.name : s.title;
+    const sub = s.sec && s.title.toLowerCase() !== s.sec.name.toLowerCase() ? '<span style="font-weight:400;color:var(--mute);font-size:13px"> · ' + esc(s.title) + '</span>' : '';
+    return '<section class="psec" id="' + id + '" style="--pc:' + (s.sec ? s.sec.c : 'var(--mute)') + '"><h3>' + esc(name) + sub + '</h3>' + blocks(s.lines) + '</section>';
+  }).join('');
+  const nav = secs.length > 1 ? '<div class="pnav">' + secs.map((s) => '<button data-to="' + s.id + '">' + esc(s.sec ? s.sec.name : s.title) + '</button>').join('') + '</div>' : '';
+  return { html: html, nav: nav };
 }
 
 /* ---------- Rückmeldungen aus Gmail ---------- */

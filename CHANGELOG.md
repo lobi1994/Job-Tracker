@@ -11,6 +11,12 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.5.0 – 12.11.2026
+- **Stellenanzeige gegliedert:** Die gespeicherte Anzeige wird in Abschnitte aufgeteilt – Aufgaben, Profil, Wir bieten, Über die Firma, Bewerbung & Kontakt – mit Farben, Aufzählungen, größerer Schrift und Sprung-Knöpfen oben. Erkennt deutsche und englische Überschriften, auch „Ihre Aufgaben: …“ in einer Zeile.
+- Es geht nichts verloren: Der gespeicherte Text bleibt unverändert, die Reihenfolge bleibt wie im Original, Unbekanntes landet unter „Einleitung“ bzw. „Weitere Informationen“. Unten jederzeit „Originaltext anzeigen“.
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.4.2 – 12.11.2026
 - Korrektur: „Job speichern“ erkennt einen Job jetzt auch, wenn die Anzeige unter einem **anderen Link** gespeichert wird (z. B. Teltonika-Karriereseite statt Workable). Erkannt wird über die Stellen-ID im Link oder gleiche Firma + Stelle. Vorher entstand ein doppelter Job.
 
