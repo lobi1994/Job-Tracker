@@ -11,6 +11,13 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.15 – 12.11.2026 (nur Apps Script)
+- **SmartRecruiters** (z. B. Nemetschek) und **Personio** (z. B. Sungrow, Filics) werden jetzt über deren öffentliche Schnittstellen abgerufen. Bei Personio wird die Sprache genommen, in der die Anzeige vorliegt.
+- Enthält 1.6.12 und 1.6.13.
+
+**Apps Script: Bereitstellen nötig: ja** – nur `Code.gs` neu kopieren
+**Beschreibung für die Bereitstellung:** `1.6.15 – SmartRecruiters und Personio`
+
 ## 1.6.14 – 12.11.2026 (nur App)
 - „Anzeige vom Link speichern“ und „Text einfügen“ fragen jetzt zuverlässig „ersetzen?“, wenn schon eine Anzeige gespeichert ist. Ob eine da ist, entscheidet jetzt die Tabelle und nicht mehr der zwischengespeicherte Stand in der App (der konnte veraltet sein, dann kam keine Frage).
 - Ist der Text gleich, kommt keine Frage, nur „unverändert“.

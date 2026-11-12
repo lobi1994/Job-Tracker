@@ -8,7 +8,7 @@
  * (z. B. {fn:"apiSavePosting", key, data:{url, title, text}} – data darf auch JSON-Text sein).
  */
 
-const VERSION = '1.6.13'; // siehe CHANGELOG.md
+const VERSION = '1.6.15'; // siehe CHANGELOG.md
 const APP_PAGE = 'https://lobi1994.github.io/Job-Tracker/';
 const SHEET = 'Bewerbungen';
 const POSTINGS = 'Anzeigen';
@@ -344,6 +344,21 @@ function fetchAny_(url) {
         const job = (JSON.parse(res.getContentText()).jobs || []).filter(function (x) { return x.id === m[2]; })[0];
         if (job) info = { text: job.descriptionPlain || htmlToText_(job.descriptionHtml || ''), role: job.title || '', location: job.location || '' };
       }
+    } else if (/smartrecruiters\.com\/[^/]+\/(\d{9,})/i.test(url)) {
+      const m = url.match(/smartrecruiters\.com\/([^/]+)\/(\d{9,})/i);
+      const res = UrlFetchApp.fetch('https://api.smartrecruiters.com/v1/companies/' + m[1] + '/postings/' + m[2], { muteHttpExceptions: true });
+      if (res.getResponseCode() === 200) {
+        const j = JSON.parse(res.getContentText());
+        const sec = (j.jobAd && j.jobAd.sections) || {};
+        const parts = ['companyDescription', 'jobDescription', 'qualifications', 'additionalInformation'].map(function (k) {
+          const x = sec[k]; return x && x.text ? (x.title ? x.title + '\n' : '') + htmlToText_(x.text) : '';
+        }).filter(String);
+        const loc = j.location ? [j.location.city, j.location.country].filter(String).join(', ') : '';
+        info = { text: parts.join('\n\n'), role: j.name || '', company: (j.company && j.company.name) || '', location: loc };
+      }
+    } else if (/\.jobs\.personio\.(com|de)\/job\/(\d+)/i.test(url)) {
+      const m = url.match(/\/\/([a-z0-9-]+)\.jobs\.personio\.(com|de)\/job\/(\d+)/i);
+      info = fetchPersonio_(m[1], m[2], m[3]) || fetchPosting_(url);
     } else {
       info = fetchPosting_(url);
       // Ohne strukturierte Anzeige (JSON-LD) nur längere Seitentexte nehmen – sonst ist es oft nur Cookie-Hinweis oder Startseite
@@ -354,6 +369,25 @@ function fetchAny_(url) {
   info.text = cleanText_(info.text || '');
   if (info.text.length < 200) info.text = '';
   return info;
+}
+
+/** Personio: öffentlicher XML-Feed aller Stellen der Firma. */
+function fetchPersonio_(company, tld, id) {
+  const langs = ['de', 'en'];
+  for (let i = 0; i < langs.length; i++) {
+    const res = UrlFetchApp.fetch('https://' + company + '.jobs.personio.' + tld + '/xml?language=' + langs[i], { muteHttpExceptions: true });
+    if (res.getResponseCode() !== 200) continue;
+    const root = XmlService.parse(res.getContentText()).getRootElement();
+    const pos = root.getChildren('position').filter(function (p) { return p.getChildText('id') === String(id); })[0];
+    if (!pos) continue;
+    const jd = pos.getChild('jobDescriptions');
+    const parts = jd ? jd.getChildren('jobDescription').map(function (d) { return d.getChildText('name') + '\n' + htmlToText_(d.getChildText('value') || ''); }) : [];
+    if (!parts.length) continue; // Anzeige gibt es nur in der anderen Sprache
+    const head = [pos.getChildText('name'), pos.getChildText('subcompany'), pos.getChildText('office'), pos.getChildText('recruitingCategory')].filter(String).join('\n');
+    parts.unshift(head);
+    return { text: parts.join('\n\n'), role: pos.getChildText('name') || '', location: pos.getChildText('office') || '', company: '' };
+  }
+  return null;
 }
 
 /** Für alle Jobs mit Link, aber ohne gespeicherte Anzeige, die Anzeige holen (höchstens max pro Lauf). */
