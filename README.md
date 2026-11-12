@@ -15,6 +15,7 @@ Eine kleine Web-App, mit der ich meine Bewerbungen verwalte. Die Daten liegen in
 - **Zwei Bewertungen:** wie gut mir die Stelle gefällt und wie gut mein CV zur Stelle passt (jeweils 1–5)
 - **Stellenanzeige speichern:** per Link, per eingefügtem Text oder per iOS-Kurzbefehl direkt aus Safari. So bleibt die Anzeige lesbar, auch wenn sie offline geht.
 - **Gesprächstermine, Gehaltsangabe, Portal, CV-Datei und Notizen** pro Bewerbung, mit Link zur CV-Datei in Google Drive
+- **Gmail-Abgleich:** erkennt Absagen, Einladungen und Eingangsbestätigungen in deinen Mails und fragt in der App nach, ob der Status geändert werden soll
 - Funktioniert als App auf dem Home-Bildschirm und zeigt beim Start sofort den letzten Stand
 
 ## Aufbau
@@ -22,7 +23,7 @@ Eine kleine Web-App, mit der ich meine Bewerbungen verwalte. Die Daten liegen in
 | Teil | Technik | Aufgabe |
 |---|---|---|
 | Datenbank | Google Sheets | ein Blatt „Bewerbungen“, ein Blatt „Anzeigen“ für die Texte |
-| Schnittstelle | Google Apps Script (`google/Code.gs`) | Web-App mit JSON-API, Schlüsselprüfung, Abruf und Auswertung von Stellenanzeigen (JSON-LD `JobPosting`) |
+| Schnittstelle | Google Apps Script (`google/Code.gs`, `google/Mail.gs`) | Web-App mit JSON-API, Schlüsselprüfung, Abruf und Auswertung von Stellenanzeigen (JSON-LD `JobPosting`) |
 | Oberfläche | HTML, CSS, JavaScript ohne Framework (`index.html`) | läuft auf GitHub Pages, Service Worker für schnellen Start |
 | Kurzbefehl | iOS-Kurzbefehle + `kurzbefehle/job-speichern.js` | liest die geöffnete Anzeige in Safari aus und schickt sie an die Tabelle |
 

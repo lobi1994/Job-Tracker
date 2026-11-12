@@ -381,6 +381,10 @@ function onOpen() {
     .addItem('App-Link anzeigen', 'jtAppLink')
     .addItem('Web-App-Link ändern', 'jtLinkAendern')
     .addSeparator()
+    .addItem('Gmail-Abgleich einrichten', 'jtMailEinrichten')
+    .addItem('Mails jetzt prüfen', 'jtMailJetzt')
+    .addItem('Gmail-Abgleich ausschalten', 'jtMailAus')
+    .addSeparator()
     .addItem('Neuen Schlüssel erzeugen', 'jtNeuerSchluessel')
     .addToUi();
 }

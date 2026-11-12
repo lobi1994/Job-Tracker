@@ -84,6 +84,20 @@ Beim ersten Ausführen fragt Safari, ob der Kurzbefehl auf die Seite zugreifen d
 
 Kommt keine Mitteilung, steht der Fehler in **Inhalte der URL** unter `error` (z. B. „Kein Zugriff“ bei falschem Schlüssel).
 
+## 7. Gmail-Abgleich (optional)
+
+Der Job-Tracker kann dein Gmail nach Rückmeldungen durchsuchen: **Absagen, Einladungen und Eingangsbestätigungen**. Er ändert nie selbst etwas. Beim nächsten Öffnen der App fragt er nach, z. B. *„Mail von Firma X: Absage. Als ‚Abgelehnt‘ markieren?“*, und du tippst **Ja**, **Nein** oder **Später**.
+
+1. In Apps Script links neben „Dateien“ auf **+ → Skript** und die neue Datei `Mail` nennen.
+2. Den Inhalt von [google/Mail.gs](google/Mail.gs) hineinkopieren und speichern. (Falls du `Code.gs` aus einer älteren Version hast: auch diese neu kopieren.)
+3. **Bereitstellen → Bereitstellungen verwalten → Stift → Version: Neue Version → Bereitstellen.** Sonst kennt die App die neuen Funktionen nicht.
+4. Tabelle neu laden → **Job-Tracker → Gmail-Abgleich einrichten**. Google fragt einmal nach Zugriff auf Gmail (wieder: Erweitert → unsicher → Zulassen).
+5. Fertig. Das Skript prüft alle 30 Minuten neue Mails und beim Einrichten einmal die letzten 30 Tage. Die Vorschläge stehen im Blatt **„Vorschläge“**.
+
+**Wie wird erkannt?** Die Mail muss den Firmennamen aus deiner Liste enthalten (Absender, Betreff oder Text) und typische Formulierungen wie „leider … anderen Kandidaten“, „laden Sie zu einem Gespräch ein“ oder „Eingang Ihrer Bewerbung“, auf Deutsch und Englisch. Gibt es zwei Stellen bei derselben Firma, entscheidet der Stellentitel in der Mail. Ist das nicht eindeutig, kommt lieber kein Vorschlag als ein falscher.
+
+**Ausschalten:** Job-Tracker → Gmail-Abgleich ausschalten. Deine Mails verlassen dein Google-Konto nicht.
+
 ## Häufige Fragen
 
 **„Die Seite liefert keinen lesbaren Text“** – LinkedIn und manche Workday-Seiten lassen sich nicht über den Link abrufen. Nimm den Kurzbefehl in Safari oder **Text einfügen** in der App.

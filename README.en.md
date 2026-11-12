@@ -15,6 +15,7 @@ A small web app I use to manage my job applications. The data lives in my own Go
 - **Two ratings:** how much I like the role and how well my CV fits it (1–5 each)
 - **Save the job posting:** from its link, as pasted text, or with an iOS shortcut straight from Safari, so the posting stays readable after it goes offline
 - **Interview dates, salary stated, portal, CV file and notes** per application, with a link to the CV file in Google Drive
+- **Gmail check:** spots rejections, interview invitations and application confirmations in your mail and asks in the app whether to update the status
 - Works as a home-screen app and shows the last state instantly on start
 
 ## How it is built
@@ -22,7 +23,7 @@ A small web app I use to manage my job applications. The data lives in my own Go
 | Part | Technology | Job |
 |---|---|---|
 | Database | Google Sheets | one tab "Bewerbungen" (applications), one tab "Anzeigen" (posting texts) |
-| API | Google Apps Script (`google/Code.gs`) | web app with a JSON API, key check, fetching and parsing job postings (JSON-LD `JobPosting`) |
+| API | Google Apps Script (`google/Code.gs`, `google/Mail.gs`) | web app with a JSON API, key check, fetching and parsing job postings (JSON-LD `JobPosting`) |
 | Front end | plain HTML, CSS and JavaScript (`index.html`) | hosted on GitHub Pages, service worker for a fast start |
 | Shortcut | iOS Shortcuts + `kurzbefehle/job-speichern.js` | reads the open posting in Safari and sends it to the sheet |
 
