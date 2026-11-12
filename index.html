@@ -76,6 +76,11 @@ a{color:var(--acc)}
 .toast.show{opacity:.95}
 .setup{max-width:520px;margin:30px auto;padding:0 16px}
 .setup .box{background:var(--card)}
+.mailbar{display:none;margin-top:8px;width:100%;border:1px solid var(--s2);background:color-mix(in srgb,var(--s2) 14%,var(--card));border-radius:10px;padding:8px 11px;text-align:left;cursor:pointer;font-size:14px}
+.mailbar.show{display:block}
+.sug{border-left:5px solid var(--c);padding-left:12px;margin:10px 0}
+.sug .meta{color:var(--mute);font-size:12.5px;margin:2px 0 6px}
+.sug blockquote{margin:8px 0;padding:8px 10px;background:var(--bg);border-radius:8px;font-size:13.5px}
 .demo{background:#fff7d6;color:#5b4a00;font-size:12.5px;padding:6px 16px;text-align:center}
 @media (prefers-color-scheme:dark){.demo{background:#3a3210;color:#f3e3a0}}
 </style>
@@ -88,6 +93,7 @@ a{color:var(--acc)}
     <button class="ib" id="bRefresh" title="Aktualisieren" aria-label="Aktualisieren"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/></svg></button>
     <button class="ib" id="bSettings" title="Einstellungen" aria-label="Einstellungen"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
   </div>
+  <button class="mailbar" id="mailbar"></button>
   <div class="chips" id="chips"></div>
   <div class="bar">
     <input id="q" type="search" placeholder="Firma oder Stelle suchen" autocomplete="off">
@@ -197,9 +203,14 @@ $('sCancel').onclick = () => { showApp(); };
 $('bSettings').onclick = () => {
   openSheet('<h2>Einstellungen</h2><p class="sub">' + (DEMO ? 'Demo-Modus' : 'Verbunden mit deiner Google-Tabelle') + '</p>' +
     (sheetUrl ? '<p><a href="' + esc(sheetUrl) + '" target="_blank" rel="noopener">Tabelle in Google Sheets öffnen</a></p>' : '') +
-    '<div class="acts"><button class="ib" id="xRe">Anders verbinden</button>' + (DEMO ? '' : '<button class="ib" id="xOut">Verbindung trennen</button>') +
+    '<div class="acts">' + (DEMO ? '' : '<button class="ib" id="xMail">Mails jetzt prüfen</button>') + '<button class="ib" id="xRe">Anders verbinden</button>' + (DEMO ? '' : '<button class="ib" id="xOut">Verbindung trennen</button>') +
     '<button class="ib" id="xClose">Schließen</button></div>');
   $('xRe').onclick = () => { closeSheet(); showSetup(); };
+  if ($('xMail')) $('xMail').onclick = async () => {
+    $('xMail').disabled = true; $('xMail').textContent = 'Prüfe Mails …';
+    try { const r = await api('apiCheckMail'); closeSheet(); toast(r.added ? r.added + ' neue Rückmeldung(en) gefunden' : 'Keine neuen Rückmeldungen'); loadSuggestions(true); }
+    catch (e) { toast(e.message, 6000); $('xMail').disabled = false; $('xMail').textContent = 'Mails jetzt prüfen'; }
+  };
   if ($('xOut')) $('xOut').onclick = () => { if (confirm('Verbindung auf diesem Gerät trennen?')) { ls.del(CK); ls.del(LK); CFG = null; closeSheet(); showSetup(); } };
   $('xClose').onclick = closeSheet;
 };
@@ -212,8 +223,9 @@ async function load(spin) {
     jobs = r.jobs || []; statuses = r.statuses || STATUS_DEF; sheetUrl = r.sheetUrl || '';
     if (!DEMO) ls.set(LK, { jobs: jobs, statuses: statuses, sheetUrl: sheetUrl, at: Date.now() });
     render();
+    loadSuggestions(!shownSug);
   } catch (e) {
-    if (e.message !== 'Kein Zugriff') toast('Laden fehlgeschlagen: ' + e.message, 4000);
+    if (e.message !== 'Kein Zugriff') toast('Laden fehlgeschlagen: ' + e.message, 8000);
   } finally { $('bRefresh').classList.remove('spin'); }
 }
 $('bRefresh').onclick = () => load(true);
@@ -363,6 +375,48 @@ async function openPosting(j) {
   } catch (e) { toast(e.message, 4000); openDetail(j.id); }
 }
 
+/* ---------- Rückmeldungen aus Gmail ---------- */
+let suggestions = [], shownSug = false;
+async function loadSuggestions(autoOpen) {
+  try { suggestions = await api('apiSuggestions') || []; }
+  catch (e) { suggestions = []; }  // Gmail-Abgleich nicht eingerichtet oder alte Skriptversion: still ignorieren
+  const bar = $('mailbar');
+  bar.classList.toggle('show', suggestions.length > 0);
+  bar.textContent = '✉️ ' + suggestions.length + (suggestions.length === 1 ? ' neue Rückmeldung per Mail' : ' neue Rückmeldungen per Mail') + ' – ansehen';
+  if (autoOpen && suggestions.length && !$('ov').classList.contains('show')) { shownSug = true; openSuggestion(0); }
+}
+$('mailbar').onclick = () => openSuggestion(0);
+
+function openSuggestion(i) {
+  const s = suggestions[i]; if (!s) { closeSheet(); return; }
+  const verb = { 'Abgelehnt': 'als „Abgelehnt“ markieren', 'Zum Gespräch eingeladen': 'auf „Zum Gespräch eingeladen“ setzen',
+    'Persönliches Gespräch': 'auf „Persönliches Gespräch“ setzen', 'Beworben': 'als „Beworben“ markieren' }[s.status] || 'auf „' + s.status + '“ setzen';
+  openSheet('<h2>Rückmeldung per Mail</h2><p class="sub">' + (i + 1) + ' von ' + suggestions.length + '</p>' +
+    '<div class="sug" style="--c:' + col(s.status) + '"><b>' + esc(s.company) + '</b> · ' + esc(s.role) +
+      '<div class="meta">' + esc(s.art) + ' · ' + esc(fmtDate(s.date)) + ' · ' + esc(s.from) + '</div>' +
+      '<div><b>' + esc(s.subject) + '</b></div>' + (s.excerpt ? '<blockquote>' + esc(s.excerpt) + '</blockquote>' : '') + '</div>' +
+    '<p>Soll ich die Bewerbung <b>' + verb + '</b>?</p>' +
+    '<div class="acts"><button class="ib pri" id="gYes">Ja, ' + esc(s.status) + '</button><button class="ib" id="gNo">Nein, ignorieren</button>' +
+      (s.link ? '<a class="ib" href="' + esc(s.link) + '" target="_blank" rel="noopener">Mail öffnen</a>' : '') +
+      '<button class="ib" id="gLater">Später</button></div>');
+  const done = async (accept) => {
+    $('gYes').disabled = $('gNo').disabled = true;
+    try {
+      const r = await api('apiResolveSuggestion', s.vid, accept);
+      if (r && r.job) { const j = jobs.find((x) => x.id === r.job.id); if (j) Object.assign(j, r.job); }
+      suggestions.splice(i, 1); render(); loadBar(); toast(accept ? 'Status geändert' : 'Ignoriert');
+      if (suggestions.length) openSuggestion(Math.min(i, suggestions.length - 1)); else closeSheet();
+    } catch (e) { toast(e.message, 5000); $('gYes').disabled = $('gNo').disabled = false; }
+  };
+  $('gYes').onclick = () => done(true);
+  $('gNo').onclick = () => done(false);
+  $('gLater').onclick = closeSheet;
+}
+function loadBar() {
+  const bar = $('mailbar'); bar.classList.toggle('show', suggestions.length > 0);
+  bar.textContent = '✉️ ' + suggestions.length + (suggestions.length === 1 ? ' neue Rückmeldung per Mail' : ' neue Rückmeldungen per Mail') + ' – ansehen';
+}
+
 /* ---------- Neuer Job ---------- */
 $('bAdd').onclick = () => {
   openSheet('<h2>Neuer Job</h2><p class="sub">Am iPhone geht das auch direkt aus Safari mit dem Kurzbefehl „Job speichern“.</p>' +
@@ -397,11 +451,17 @@ const DEMO_JOBS = [
   { id: 'd5', company: 'Vireo Software', role: 'Product Owner IoT-Plattform', location: 'München', status: 'Abgelehnt', appliedOn: '2026-10-28', interview: '', like: 3, fit: 2, salary: '72.000 €', channel: 'Greenhouse', url: '', cv: '', notes: 'Absage nach 1 Woche', postingSaved: '' },
   { id: 'd6', company: 'Seewald Energie', role: 'Projektingenieur Batteriespeicher', location: 'Regensburg', status: 'Jobangebot', appliedOn: '2026-10-20', interview: '', like: 4, fit: 4, salary: '69.000 €', channel: 'E-Mail', url: '', cv: '', notes: 'Angebot bis 25.11. prüfen', postingSaved: '' }
 ];
+let demoSug = [{ vid: 's1', jobId: 'd2', company: 'Alpenwerk Medizintechnik', role: 'Junior Projektmanager Produktentwicklung', art: 'Absage', status: 'Abgelehnt',
+  date: '2026-11-12', from: 'Alpenwerk Recruiting <jobs@example.com>', subject: 'Ihre Bewerbung als Junior Projektmanager',
+  excerpt: 'Leider müssen wir Ihnen mitteilen, dass wir uns für einen anderen Kandidaten entschieden haben.', link: '' }];
 function demoApi(fn, args) {
   return new Promise((res, rej) => setTimeout(() => {
     if (fn === 'apiList') return res({ jobs: JSON.parse(JSON.stringify(DEMO_JOBS)), statuses: STATUS_DEF, sheetUrl: '' });
     if (fn === 'apiUpdate') { const j = jobs.find((x) => x.id === args[0]); return res(Object.assign({}, j, args[1])); }
     if (fn === 'apiAdd') return res(Object.assign({ id: 'd' + Date.now(), status: STATUS_DEF[0], like: null, fit: null, appliedOn: '', postingSaved: '' }, args[0]));
+    if (fn === 'apiSuggestions') return res(demoSug);
+    if (fn === 'apiResolveSuggestion') { const sg = demoSug.find((x) => x.vid === args[0]); demoSug = demoSug.filter((x) => x.vid !== args[0]);
+      const j = jobs.find((x) => x.id === (sg || {}).jobId); return res({ job: args[1] && j ? Object.assign({}, j, { status: sg.status }) : null }); }
     if (fn === 'apiGetPosting') return res({ url: '', savedAt: '2026-11-10', text: 'Beispieltext einer gespeicherten Stellenanzeige.\n\nDeine Aufgaben\n- Kunden bei technischen Fragen unterstützen\n- Fehler analysieren und mit der Entwicklung lösen\n\nDein Profil\n- Technisches Studium\n- Erfahrung im Support' });
     if (fn === 'apiSavePosting') { const j = jobs.find((x) => x.id === (args[0] || {}).id) || {}; return res({ chars: 1234, job: Object.assign({}, j, { postingSaved: new Date().toLocaleDateString('de-DE') }) }); }
     rej(new Error('In der Demo nicht verfügbar'));
