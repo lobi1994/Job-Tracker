@@ -11,6 +11,11 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.1 – 12.11.2026
+- Korrektur iPhone: Beim Scrollen in einem offenen Fenster (z. B. Stellenanzeige) scrollte die Liste im Hintergrund mit. Der Hintergrund ist jetzt gesperrt, solange ein Fenster offen ist; danach steht die Liste wieder an derselben Stelle.
+
+**Apps Script: Bereitstellen nötig: nein** (für 1.6.0 weiterhin ja)
+
 ## 1.6.0 – 12.11.2026
 - **Hard und Soft Skills:** In der gespeicherten Stellenanzeige erscheint oben „Skills aus der Anzeige“ mit Hard- und Soft-Skills. Grün mit ✓ = steht in deinem Profil, grau = fehlt dort. Dazu **„Passung Hard Skills: x %“**.
 - **Neues Blatt „Profil“** in der Tabelle: deine Skills (aus dem CV vorbefüllt, Soft Skills bitte prüfen). Ergänzen oder löschen jederzeit möglich.
