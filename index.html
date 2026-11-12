@@ -13,7 +13,7 @@
 <link rel="icon" href="icons/icon-32.png?v=2">
 <style>
 :root{--bg:#f4f6f9;--card:#fff;--ink:#1f2328;--mute:#68707a;--line:#e1e5ea;--navy:#1f3a5f;--acc:#2563eb;--danger:#b42318;
---s0:#9aa1a9;--s1:#3b82f6;--s2:#d4a017;--s3:#e8792b;--s4:#2e9e5b;--s5:#c2413b;--rad:14px}
+--s0:#9aa1a9;--s1:#3b82f6;--s2:#d4a017;--s3:#e8792b;--s4:#2e9e5b;--s5:#c2413b;--s6:#5b6470;--rad:14px}
 @media (prefers-color-scheme:dark){:root{--bg:#0f1318;--card:#1a2029;--ink:#e8ecf1;--mute:#97a0ab;--line:#2a323d;--navy:#9cc0ef;--acc:#7aa7ff}}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;-webkit-text-size-adjust:100%}
@@ -169,10 +169,10 @@ a{color:var(--acc)}
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.3', NEED_SCRIPT = '1.6.3'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.4', NEED_SCRIPT = '1.6.4'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Job-Tracker ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
-const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt'];
-const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt'};
+const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
+const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
 const CK = 'jt-cfg', LK = 'jt-cache', FK = 'jt-filter';
 let CFG = null, DEMO = false, jobs = [], statuses = STATUS_DEF.slice(), sheetUrl = '', scriptVersion = '', profile = [];
 let filter = { on: STATUS_DEF.slice(), q: '', sort: 'date' };
@@ -303,6 +303,7 @@ $('sort').onchange = () => { filter.sort = $('sort').value; ls.set(FK, filter); 
 function dots(n, max) { n = Number(n) || 0; return n ? '●'.repeat(n) + '○'.repeat(max - n) : ''; }
 function fmtDate(iso) { const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? m[3] + '.' + m[2] + '.' + m[1].slice(2) : String(iso || ''); }
 
+const rankS = (st) => (st === 'Nicht bewerben' ? -1 : statuses.indexOf(st)); // „Nicht bewerben“ ganz unten
 function visible() {
   const q = filter.q.trim().toLowerCase();
   let v = jobs.filter((j) => filter.on.includes(j.status) && (!q || (j.company + ' ' + j.role + ' ' + j.location).toLowerCase().includes(q)));
@@ -310,7 +311,7 @@ function visible() {
     date: (a, b) => String(b.appliedOn || '').localeCompare(String(a.appliedOn || '')),
     fit: (a, b) => (b.fit || 0) - (a.fit || 0),
     like: (a, b) => (b.like || 0) - (a.like || 0),
-    status: (a, b) => statuses.indexOf(b.status) - statuses.indexOf(a.status),
+    status: (a, b) => rankS(b.status) - rankS(a.status),
     company: (a, b) => String(a.company).localeCompare(String(b.company), 'de')
   }[filter.sort] || (() => 0);
   return v.slice().sort((a, b) => by(a, b) || String(a.company).localeCompare(String(b.company), 'de'));

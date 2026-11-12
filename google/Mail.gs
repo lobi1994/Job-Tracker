@@ -149,7 +149,7 @@ function jobsForMatching_() {
   if (last < 2) return [];
   return sh.getRange(2, 1, last - 1, sh.getLastColumn()).getValues().map(function (r) {
     return { id: String(r[map.id - 1]), company: String(r[map.company - 1]), role: String(r[map.role - 1]), status: String(r[map.status - 1]) };
-  }).filter(function (j) { return j.id && j.company; });
+  }).filter(function (j) { return j.id && j.company && j.status !== NOT_APPLYING; }); // „Nicht bewerben“ ignorieren
 }
 
 /** Prüft neue Mails seit dem letzten Lauf. Gibt die Zahl neuer Vorschläge zurück. */
