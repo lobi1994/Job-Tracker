@@ -7,7 +7,7 @@
  * (z. B. {fn:"apiSavePosting", key, data:{url, title, text}} – data darf auch JSON-Text sein).
  */
 
-const VERSION = '1.3.0'; // siehe CHANGELOG.md
+const VERSION = '1.4.0'; // siehe CHANGELOG.md
 const APP_PAGE = 'https://lobi1994.github.io/Job-Tracker/';
 const SHEET = 'Bewerbungen';
 const POSTINGS = 'Anzeigen';
@@ -144,6 +144,10 @@ function apiList(key) {
 /** Ändert einzelne Felder eines Jobs. Setzt bei „Beworben“ automatisch das Datum, falls leer. */
 function apiUpdate(key, id, changes) {
   check_(key);
+  return updateJob_(id, changes);
+}
+
+function updateJob_(id, changes) {
   return withLock_(function () {
     const sh = sheet_();
     const map = colMap_(sh);
@@ -200,16 +204,78 @@ function lastDataRow_(sh, map) {
  */
 function apiSavePosting(key, data) {
   check_(key);
+  return savePosting_(data || {}, false);
+}
+
+/**
+ * Für den Kurzbefehl „Job-Link speichern“ (geteilt aus einer App, z. B. LinkedIn).
+ * data.shared: der geteilte Text oder Link. Legt den Job auch dann an, wenn die Anzeige nicht geladen werden kann.
+ */
+function apiSaveShared(key, data) {
+  check_(key);
   data = data || {};
+  const shared = String(data.shared || data.text || data.url || '').trim();
+  const m = shared.match(/https?:\/\/[^\s<>"']+/);
+  if (!m) throw new Error('Im geteilten Inhalt ist kein Link.');
+  const url = m[0].replace(/[).,]+$/, '');
+  const hint = parseShareText_(shared.replace(m[0], ' '));
+  return savePosting_({ url: url, hintCompany: hint.company, hintRole: hint.role }, true);
+}
+
+/** „Schau dir diesen Job bei Firma an: Titel“ / „Check out this job at Company: Title“ grob auswerten. */
+function parseShareText_(t) {
+  t = String(t || '').replace(/\s+/g, ' ').trim();
+  let m = t.match(/(?:\bbei|\bat)\s+(.+?)(?:\s+an)?\s*[:–-]\s+(.+)$/i);
+  if (m) return { company: m[1].trim(), role: m[2].trim() };
+  return { company: '', role: '' };
+}
+
+/** LinkedIn-Job-ID aus verschiedenen Linkformen. */
+function linkedinId_(url) {
+  if (!/linkedin\.com|lnkd\.in/i.test(url)) return '';
+  const m = String(url).match(/currentJobId=(\d{6,})/) || String(url).match(/\/jobs\/view\/(?:[^/?]*?-)?(\d{6,})/) || String(url).match(/(\d{8,})/);
+  return m ? m[1] : '';
+}
+
+/** Öffentliche LinkedIn-Jobansicht (ohne Login). Kann von LinkedIn blockiert werden. */
+function fetchLinkedin_(id) {
+  try {
+    const res = UrlFetchApp.fetch('https://www.linkedin.com/jobs-guest/jobs/api/jobPosting/' + id, { muteHttpExceptions: true,
+      headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15', 'Accept-Language': 'de,en;q=0.8' } });
+    if (res.getResponseCode() !== 200) return { text: '' };
+    const h = res.getContentText();
+    const pick = function (re) { const x = h.match(re); return x ? decode_(htmlToText_(x[1])).trim() : ''; };
+    return {
+      role: pick(/<h2[^>]*top-card-layout__title[^>]*>([\s\S]*?)<\/h2>/i),
+      company: pick(/<a[^>]*topcard__org-name-link[^>]*>([\s\S]*?)<\/a>/i),
+      location: pick(/<span[^>]*topcard__flavor--bullet[^>]*>([\s\S]*?)<\/span>/i),
+      text: pick(/<div[^>]*show-more-less-html__markup[^>]*>([\s\S]*?)<\/div>/i),
+      title: ''
+    };
+  } catch (e) { return { text: '' }; }
+}
+
+/**
+ * Speichert eine Stellenanzeige.
+ * data: {id?, url?, title?, company?, role?, location?, text?}
+ * - mit id: hängt die Anzeige an diesen Job
+ * - ohne id: sucht einen Job mit demselben Link, sonst wird ein neuer Job angelegt
+ * - ohne text: die Seite wird hier abgerufen (LinkedIn über die öffentliche Jobansicht)
+ * linkOnly: Job auch ohne Anzeigentext anlegen (Kurzbefehl aus Apps)
+ */
+function savePosting_(data, linkOnly) {
   let text = String(data.text || '').trim();
-  const url = String(data.url || '').trim();
+  let url = String(data.url || '').trim();
   let info = {};
   if (!text) {
     if (!url) throw new Error('Kein Text und kein Link übergeben.');
-    info = fetchPosting_(url);
-    text = info.text;
-    if (!text || text.length < 200) {
-      throw new Error('Die Seite liefert keinen lesbaren Text (z. B. LinkedIn oder Workday). Bitte die Anzeige über den Kurzbefehl in Safari speichern oder den Text einfügen.');
+    const li = linkedinId_(url);
+    if (li) url = 'https://www.linkedin.com/jobs/view/' + li + '/';
+    info = li ? fetchLinkedin_(li) : fetchPosting_(url);
+    text = info.text || '';
+    if (text.length < 200) {
+      text = '';
+      if (!linkOnly) throw new Error('Die Seite liefert keinen lesbaren Text (z. B. LinkedIn oder Workday). Bitte in Safari über Teilen → „Job speichern“ sichern oder den Text einfügen.');
     }
   }
   return withLock_(function () {
@@ -221,16 +287,22 @@ function apiSavePosting(key, data) {
     if (!r) {
       const parsed = splitTitle_(data.title || info.title || '');
       addRow_({
-        company: data.company || info.company || parsed.company,
-        role: data.role || info.role || parsed.role,
+        company: data.company || info.company || data.hintCompany || parsed.company,
+        role: data.role || info.role || data.hintRole || parsed.role || (linkedinId_(url) ? 'LinkedIn-Job (bitte ergänzen)' : 'Neuer Job (bitte ergänzen)'),
         location: data.location || info.location || '',
         url: url,
-        notes: 'per Kurzbefehl gespeichert'
+        notes: text ? 'per Kurzbefehl gespeichert' : 'per Kurzbefehl gespeichert – Anzeige fehlt noch'
       });
       r = lastDataRow_(sh, map);
       created = true;
     }
-    const id = String(sh.getRange(r, map.id).getValue());
+    const job0 = rowToJob_(sh.getRange(r, 1, 1, sh.getLastColumn()).getValues()[0], map);
+    const name = [job0.company, job0.role].filter(String).join(' – ');
+    if (!text) {
+      return { created: created, job: job0, chars: 0,
+        message: (created ? 'Job angelegt: ' : 'Job schon vorhanden: ') + name + '. Anzeige konnte nicht geladen werden – in Safari „Job speichern“ nutzen.' };
+    }
+    const id = String(job0.id);
     const ps = postingsSheet_();
     const now = new Date();
     const existing = findPosting_(ps, id);
@@ -240,7 +312,7 @@ function apiSavePosting(key, data) {
     if (map.postingSaved) sh.getRange(r, map.postingSaved).setValue(Utilities.formatDate(now, Session.getScriptTimeZone(), 'dd.MM.yyyy'));
     const job = rowToJob_(sh.getRange(r, 1, 1, sh.getLastColumn()).getValues()[0], map);
     return { created: created, job: job, chars: Math.min(text.length, MAX_TEXT),
-      message: (created ? 'Neuer Job angelegt: ' : 'Anzeige gespeichert: ') + [job.company, job.role].filter(String).join(' – ') };
+      message: (created ? 'Neuer Job angelegt: ' : 'Anzeige gespeichert: ') + name };
   });
 }
 

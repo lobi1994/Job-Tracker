@@ -11,12 +11,22 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.4.0 – 12.11.2026
+- **Schließen / Speichern unten:** große Knöpfe in einer festen Leiste, immer sichtbar beim Scrollen (Detail, Neuer Job, Text einfügen, Stellenanzeige, Mail-Rückmeldung).
+- **„Jetzt bewerben ↗“**: erscheint nur bei „Noch nicht beworben“ (in der Detailansicht und auf der Karte). Öffnet die hinterlegte Anzeige und speichert dabei den Anzeigentext automatisch im Hintergrund, falls noch keiner da ist (klappt bei Personio, Greenhouse, softgarden, JOIN, Lever & Co.).
+- **Neuer Kurzbefehl „Job-Link speichern“** für die LinkedIn-App und andere Apps: legt den Job mit Link an und versucht, die Beschreibung über die öffentliche LinkedIn-Jobansicht zu holen. Klappt das nicht, steht in der App „Anzeige noch nicht gespeichert“.
+- **Eingangsbestätigungen per Mail** setzen den Status jetzt **automatisch** auf „Beworben“ (inkl. Datum und Notiz). Absagen und Einladungen fragen weiter nach.
+- **Neue Seite „Kurzbefehle einrichten“** (in der App: Zahnrad → Kurzbefehle) mit Schritt-für-Schritt-Anleitung und Kopier-Knöpfen für Code, App-Link und Schlüssel.
+
+**Apps Script: Bereitstellen nötig: ja** – `Code.gs` **und** `Mail.gs` neu kopieren (enthält auch die Änderungen aus 1.3.0)
+**Beschreibung für die Bereitstellung:** `1.4.0 – Bewerben-Knopf, LinkedIn-Link, Bestätigung automatisch`
+
 ## 1.3.0 – 12.11.2026
 - Detailansicht fürs iPhone überarbeitet: **Speichern und Schließen oben** (bleiben beim Scrollen sichtbar), Felder untereinander statt verschoben, Abschnitte Status / Bewertung / Details, größere Tipp-Flächen, kein Hineinzoomen beim Tippen.
 - Auch „Neuer Job“, „Text einfügen“ und „Stellenanzeige“ haben die Knöpfe jetzt oben.
 - Kurzbefehl „Job speichern“: einfachere Einrichtung (alle Felder als Text), Anleitung Schritt für Schritt.
 
-**Apps Script: Bereitstellen nötig: ja** – nur `Code.gs` neu kopieren
+**Apps Script: Bereitstellen nötig: ja** – nur `Code.gs` neu kopieren (übersprungen? Dann reicht die Bereitstellung von 1.4.0)
 **Beschreibung für die Bereitstellung:** `1.3.0 – Kurzbefehl und Design`
 
 ## 1.2.1 – 12.11.2026

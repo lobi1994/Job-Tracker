@@ -3,7 +3,8 @@
  *
  * Durchsucht neue Mails nach Rückmeldungen zu deinen Bewerbungen (Absage, Einladung,
  * Eingangsbestätigung) und legt Vorschläge im Blatt „Vorschläge“ an.
- * Der Status wird NIE automatisch geändert: Die App fragt nach, du bestätigst.
+ * Eingangsbestätigungen setzen den Status direkt auf „Beworben“. Absagen und Einladungen
+ * ändern nichts automatisch: Die App fragt nach, du bestätigst.
  * Deine Mails bleiben in deinem Google-Konto; das Skript schickt nichts nach außen.
  */
 
@@ -176,8 +177,19 @@ function jtMailPruefen() {
         const sug = suggestForMail_(jobs, mail);
         known[id] = 1;
         if (!sug) return;
+        let done = '';
+        if (sug.art === 'Bestaetigung') {
+          // Eingangsbestätigungen werden direkt übernommen (geringes Risiko), alles andere fragt die App nach.
+          const d = m.getDate();
+          const cur = apiListOne_(sug.job.id);
+          const note = 'Eingangsbestätigung per Mail (' + Utilities.formatDate(d, Session.getScriptTimeZone(), 'dd.MM.yyyy') + ')';
+          updateJob_(sug.job.id, { status: 'Beworben', appliedOn: (cur && cur.appliedOn) || Utilities.formatDate(d, Session.getScriptTimeZone(), 'yyyy-MM-dd'),
+            notes: cur && cur.notes ? cur.notes + '; ' + note : note });
+          sug.job.status = 'Beworben';
+          done = 'automatisch';
+        }
         rows.push([Utilities.getUuid().slice(0, 8), sug.job.id, sug.job.company, sug.job.role, ART_NAME[sug.art], sug.status,
-          m.getDate(), from, mail.subject, excerpt_(mail.body), 'https://mail.google.com/mail/u/0/#all/' + t.getId(), '', id]);
+          m.getDate(), from, mail.subject, excerpt_(mail.body), 'https://mail.google.com/mail/u/0/#all/' + t.getId(), done, id]);
       });
     });
     if (threads.length < 100) break;
@@ -216,7 +228,7 @@ function apiResolveSuggestion(key, vid, accept) {
       const d = vals[i][6] instanceof Date ? Utilities.formatDate(vals[i][6], Session.getScriptTimeZone(), 'dd.MM.yyyy') : '';
       const cur = apiListOne_(String(vals[i][1]));
       const note = vals[i][4] + ' per Mail' + (d ? ' (' + d + ')' : '');
-      job = apiUpdate(key, String(vals[i][1]), {
+      job = updateJob_(String(vals[i][1]), {
         status: String(vals[i][5]),
         notes: cur && cur.notes ? cur.notes + '; ' + note : note
       });

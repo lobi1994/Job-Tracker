@@ -15,7 +15,8 @@ Eine kleine Web-App, mit der ich meine Bewerbungen verwalte. Die Daten liegen in
 - **Zwei Bewertungen:** wie gut mir die Stelle gefällt und wie gut mein CV zur Stelle passt (jeweils 1–5)
 - **Stellenanzeige speichern:** per Link, per eingefügtem Text oder per iOS-Kurzbefehl direkt aus Safari. So bleibt die Anzeige lesbar, auch wenn sie offline geht.
 - **Gesprächstermine, Gehaltsangabe, Portal, CV-Datei und Notizen** pro Bewerbung, mit Link zur CV-Datei in Google Drive
-- **Gmail-Abgleich:** erkennt Absagen, Einladungen und Eingangsbestätigungen in deinen Mails und fragt in der App nach, ob der Status geändert werden soll
+- **„Jetzt bewerben“-Knopf:** öffnet die Anzeige und sichert den Anzeigentext dabei automatisch
+- **Gmail-Abgleich:** erkennt Absagen, Einladungen und Eingangsbestätigungen in deinen Mails setzt Eingangsbestätigungen automatisch auf „Beworben“ und fragt bei Absagen und Einladungen in der App nach
 - Funktioniert als App auf dem Home-Bildschirm und zeigt beim Start sofort den letzten Stand
 
 ## Aufbau
