@@ -37,7 +37,9 @@ const RULES = {
     [/(eingang|erhalt) (ihrer|deiner) bewerbung/i, 3],
     [/bewerbung (ist )?(gut |erfolgreich )?(bei uns )?eingegangen|bewerbung (haben wir )?erhalten/i, 3],
     [/(vielen |herzlichen )?dank für (ihre|deine) bewerbung/i, 1],
-    [/(we have |we've )?received your application|thank you for (your )?(applying|application)|application (has been )?(received|submitted)/i, 3]
+    [/(we have |we've )?received your application|thank you for (your )?(applying|application)|application (has been )?(received|submitted)/i, 3],
+    // LinkedIn Easy Apply: „Ihre Bewerbung wurde an Firma gesendet“ / „Your application was sent to Company“
+    [/bewerbung wurde (erfolgreich )?an .{1,80}? (gesendet|übermittelt|verschickt)|application was sent to/i, 3]
   ]
 };
 const ART_STATUS = { Absage: 'Abgelehnt', Einladung: 'Zum Gespräch eingeladen', Bestaetigung: 'Beworben' };

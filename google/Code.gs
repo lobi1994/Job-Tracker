@@ -8,7 +8,7 @@
  * (z. B. {fn:"apiSavePosting", key, data:{url, title, text}} – data darf auch JSON-Text sein).
  */
 
-const VERSION = '1.4.2'; // siehe CHANGELOG.md
+const VERSION = '1.5.3'; // siehe CHANGELOG.md
 const APP_PAGE = 'https://lobi1994.github.io/Job-Tracker/';
 const SHEET = 'Bewerbungen';
 const POSTINGS = 'Anzeigen';
