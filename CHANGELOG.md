@@ -11,6 +11,14 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.4 – 12.11.2026
+- Neuer Status **„Nicht bewerben“** (grau): für Jobs, die nach dem Lesen der Anzeige doch nicht passen. Eigener Filter-Chip, steht in der Liste ganz unten.
+- Bei „Nicht bewerben“ wird kein Bewerbungsdatum gesetzt, der Gmail-Abgleich ignoriert diese Jobs, und Claude bewertet sie nicht und baut keinen CV dafür.
+- Im Sheet: Auswahlliste, graue Formatierung und Zählung in „Übersicht“ ergänzt.
+
+**Apps Script: Bereitstellen nötig: ja** – `Code.gs` und `Mail.gs` neu kopieren (enthält alles ab 1.3.0)
+**Beschreibung für die Bereitstellung:** `1.6.4 – Skills, Claude-Bewertung, CV erstellen, Greenhouse, Nicht bewerben`
+
 ## 1.6.3 – 12.11.2026
 - App und Apps Script wieder auf derselben Nummer (Skript inhaltlich wie 1.6.2).
 - Unter „Unterlagen“ jetzt ein Knopf **„📄 CV öffnen“** statt Textlink (öffnet den zugeschnittenen CV aus Google Drive bzw. sucht die CV-Datei dort).

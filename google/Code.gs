@@ -8,11 +8,12 @@
  * (z. B. {fn:"apiSavePosting", key, data:{url, title, text}} – data darf auch JSON-Text sein).
  */
 
-const VERSION = '1.6.3'; // siehe CHANGELOG.md
+const VERSION = '1.6.4'; // siehe CHANGELOG.md
 const APP_PAGE = 'https://lobi1994.github.io/Job-Tracker/';
 const SHEET = 'Bewerbungen';
 const POSTINGS = 'Anzeigen';
-const STATUS = ['Noch nicht beworben', 'Beworben', 'Zum Gespräch eingeladen', 'Persönliches Gespräch', 'Jobangebot', 'Abgelehnt'];
+const STATUS = ['Noch nicht beworben', 'Beworben', 'Zum Gespräch eingeladen', 'Persönliches Gespräch', 'Jobangebot', 'Abgelehnt', 'Nicht bewerben'];
+const NOT_APPLYING = 'Nicht bewerben';
 const MAX_TEXT = 45000; // Zellgrenze in Google Sheets liegt bei 50.000 Zeichen
 
 // Spaltenname in der Tabelle -> Feldname in der App
@@ -186,7 +187,7 @@ function updateJob_(id, changes) {
       if (EDITABLE.indexOf(f) < 0 || !map[f]) return;
       sh.getRange(r, map[f]).setValue(toCell_(f, changes[f]));
     });
-    if (changes && changes.status && changes.status !== STATUS[0] && map.appliedOn && !sh.getRange(r, map.appliedOn).getValue()) {
+    if (changes && changes.status && changes.status !== STATUS[0] && changes.status !== NOT_APPLYING && map.appliedOn && !sh.getRange(r, map.appliedOn).getValue()) {
       sh.getRange(r, map.appliedOn).setValue(new Date());
     }
     return rowToJob_(sh.getRange(r, 1, 1, sh.getLastColumn()).getValues()[0], map);
