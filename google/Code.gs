@@ -7,7 +7,7 @@
  * (z. B. {fn:"apiSavePosting", key, data:{url, title, text}} – data darf auch JSON-Text sein).
  */
 
-const VERSION = '1.4.0'; // siehe CHANGELOG.md
+const VERSION = '1.4.2'; // siehe CHANGELOG.md
 const APP_PAGE = 'https://lobi1994.github.io/Job-Tracker/';
 const SHEET = 'Bewerbungen';
 const POSTINGS = 'Anzeigen';
@@ -283,9 +283,11 @@ function savePosting_(data, linkOnly) {
     const map = colMap_(sh);
     let r = data.id ? findRow_(sh, map, data.id) : 0;
     if (!r && url && map.url) r = findByUrl_(sh, map, url);
+    const parsed = splitTitle_(data.title || info.title || '');
+    if (!r) r = findSameJob_(sh, map, data.company || info.company || data.hintCompany || parsed.company,
+      data.role || info.role || data.hintRole || parsed.role, url);
     let created = false;
     if (!r) {
-      const parsed = splitTitle_(data.title || info.title || '');
       addRow_({
         company: data.company || info.company || data.hintCompany || parsed.company,
         role: data.role || info.role || data.hintRole || parsed.role || (linkedinId_(url) ? 'LinkedIn-Job (bitte ergänzen)' : 'Neuer Job (bitte ergänzen)'),
@@ -369,6 +371,28 @@ function findByUrl_(sh, map, url) {
   const want = normUrl_(url);
   const v = sh.getRange(2, map.url, last - 1, 1).getValues();
   for (let i = 0; i < v.length; i++) if (want && normUrl_(v[i][0]) === want) return i + 2;
+  return 0;
+}
+
+/**
+ * Derselbe Job unter anderem Link? (z. B. Karriereseite vs. Workable/LinkedIn)
+ * Treffer, wenn beide Links dieselbe Stellen-ID enthalten (mind. 8 Zeichen, mit Ziffer)
+ * oder Firma gleich ist und die Stellenbezeichnungen (ohne m/w/d, Satzzeichen) übereinstimmen.
+ */
+function findSameJob_(sh, map, company, role, url) {
+  const last = lastDataRow_(sh, map);
+  if (last < 2) return 0;
+  const norm = function (t) { return String(t || '').toLowerCase().replace(/\((m|w|d|f|x|all genders?|alle)[^)]*\)/g, ' ').replace(/[^a-z0-9äöüß]+/g, ''); };
+  const ids = function (u) { return (String(u || '').match(/[A-Za-z0-9]{8,}/g) || []).filter(function (x) { return /\d/.test(x) && !/^(https?|linkedin|personio|greenhouse|workable)$/i.test(x); }); };
+  const myIds = ids(url), c = norm(company), ro = norm(role);
+  const rows = sh.getRange(2, 1, last - 1, sh.getLastColumn()).getValues();
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i];
+    const theirIds = map.url ? ids(r[map.url - 1]) : [];
+    if (myIds.some(function (x) { return theirIds.indexOf(x) >= 0; })) return i + 2;
+    const rc = norm(r[map.company - 1]), rr = norm(r[map.role - 1]);
+    if (c && ro && rc === c && rr && (rr === ro || (Math.min(rr.length, ro.length) >= 12 && (rr.indexOf(ro) >= 0 || ro.indexOf(rr) >= 0)))) return i + 2;
+  }
   return 0;
 }
 

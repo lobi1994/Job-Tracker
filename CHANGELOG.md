@@ -11,6 +11,12 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.4.2 – 12.11.2026
+- Korrektur: „Job speichern“ erkennt einen Job jetzt auch, wenn die Anzeige unter einem **anderen Link** gespeichert wird (z. B. Teltonika-Karriereseite statt Workable). Erkannt wird über die Stellen-ID im Link oder gleiche Firma + Stelle. Vorher entstand ein doppelter Job.
+
+**Apps Script: Bereitstellen nötig: ja** – `Code.gs` und `Mail.gs` neu kopieren (enthält 1.3.0 bis 1.4.2; ersetzt die Bereitstellung von 1.4.0)
+**Beschreibung für die Bereitstellung:** `1.4.2 – Bewerben-Knopf, LinkedIn-Link, Bestätigung automatisch, Doppelte vermeiden`
+
 ## 1.4.1 – 12.11.2026
 - Stellenanzeigen öffnen sich auf iPhone/iPad jetzt **immer in Safari** (auch LinkedIn-Links, statt in der LinkedIn-App). So funktioniert dort direkt „Job speichern“. Gilt für „Jetzt bewerben“, „Anzeige online öffnen“ und „Original öffnen“. Voraussetzung: iOS 17 oder neuer.
 
