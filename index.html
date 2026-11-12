@@ -109,6 +109,7 @@ main{padding:12px 16px calc(env(safe-area-inset-bottom) + 90px);max-width:820px;
 .psec.skills{--pc:var(--acc)}
 .fitline{margin:2px 0 8px}
 .cvrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0}
+.cvrow .ib{flex:1 1 140px}
 .cvrow .ib{height:42px;padding:0 16px;font-weight:600}
 .cvrow .sub{font-size:12.5px;word-break:break-all}
 .cvbox{border:1px dashed var(--acc);border-radius:12px;padding:10px 12px;margin:10px 0}
@@ -174,7 +175,7 @@ a{color:var(--acc)}
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.7', NEED_SCRIPT = '1.6.5'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.8', NEED_SCRIPT = '1.6.5'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Job-Tracker ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
@@ -460,8 +461,11 @@ function openDetail(id) {
       inp('fCompany', 'Firma', j.company) + inp('fRole', 'Stelle', j.role) + inp('fLocation', 'Ort / Remote', j.location) +
       inp('fUrl', 'Link Anzeige', j.url, 'url') + inp('fCv', 'CV-Datei', j.cv) + '</details>' +
     '<div class="box"><h3>Unterlagen</h3>' +
-      (j.url ? '<p><a href="' + esc(j.url) + '" target="_blank" rel="noopener" data-ext="1">Anzeige online öffnen' + (IOS ? ' (Safari)' : '') + '</a></p>' : '<p>Kein Link hinterlegt.</p>') +
-      (j.cvLink || j.cv ? '<div class="cvrow"><button class="ib pri" id="aCv">📄 CV öffnen</button>' + (j.cv ? '<span class="sub">' + esc(j.cv) + '</span>' : '') + '</div>' : '') +
+      ((j.url || j.cvLink || j.cv) ? '<div class="cvrow">' +
+        (j.url ? '<button class="ib" id="aUrl">🌐 Anzeige online öffnen</button>' : '') +
+        (j.cvLink || j.cv ? '<button class="ib pri" id="aCv">📄 CV öffnen</button>' : '') + '</div>' +
+        (j.cv ? '<p class="sub">' + esc(j.cv) + '</p>' : '') : '') +
+      (j.url ? '' : '<p>Kein Link hinterlegt.</p>') +
       '<p>' + (j.postingSaved ? 'Anzeige gespeichert am ' + esc(j.postingSaved) + ' · <a href="#" id="aShow">lesen</a> · <a href="#" id="aDel" class="del">löschen</a>' : '<span class="miss">Anzeige noch nicht gespeichert.</span>') + '</p>' +
       '<div class="acts" style="margin-top:6px">' + (j.url ? '<button class="ib" id="bFetch">Anzeige vom Link speichern</button>' : '') +
       '<button class="ib" id="bPaste">Text einfügen</button></div></div>',
@@ -498,6 +502,7 @@ function openDetail(id) {
     catch (err) { toast(err.message, 5000); }
   };
   if ($('aShow')) $('aShow').onclick = (e) => { e.preventDefault(); openPosting(j); };
+  if ($('aUrl')) $('aUrl').onclick = () => openExt(j.url);
   if ($('aCv')) $('aCv').onclick = async (e) => {
     e.preventDefault();
     if (j.cvLink) { window.open(j.cvLink, '_blank', 'noopener'); return; }
