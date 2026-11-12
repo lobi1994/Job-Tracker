@@ -11,6 +11,11 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.9 – 12.11.2026 (nur App)
+- Gespeicherte Anzeige: **„📖 Gespeicherte Anzeige lesen“** und **„🗑 Anzeige löschen“** sind jetzt Knöpfe statt Textlinks.
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.6.8 – 12.11.2026 (nur App)
 - Im Job unter „Unterlagen“: **„🌐 Anzeige online öffnen“** ist jetzt ein Knopf neben **„📄 CV öffnen“** (öffnet in Safari).
 

@@ -175,7 +175,7 @@ a{color:var(--acc)}
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.8', NEED_SCRIPT = '1.6.5'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.9', NEED_SCRIPT = '1.6.5'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Job-Tracker ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
@@ -466,7 +466,7 @@ function openDetail(id) {
         (j.cvLink || j.cv ? '<button class="ib pri" id="aCv">📄 CV öffnen</button>' : '') + '</div>' +
         (j.cv ? '<p class="sub">' + esc(j.cv) + '</p>' : '') : '') +
       (j.url ? '' : '<p>Kein Link hinterlegt.</p>') +
-      '<p>' + (j.postingSaved ? 'Anzeige gespeichert am ' + esc(j.postingSaved) + ' · <a href="#" id="aShow">lesen</a> · <a href="#" id="aDel" class="del">löschen</a>' : '<span class="miss">Anzeige noch nicht gespeichert.</span>') + '</p>' +
+      (j.postingSaved ? '<p class="sub">Anzeige gespeichert am ' + esc(j.postingSaved) + '</p><div class="cvrow"><button class="ib pri" id="aShow">📖 Gespeicherte Anzeige lesen</button><button class="ib del" id="aDel">🗑 Anzeige löschen</button></div>' : '<p><span class="miss">Anzeige noch nicht gespeichert.</span></p>') +
       '<div class="acts" style="margin-top:6px">' + (j.url ? '<button class="ib" id="bFetch">Anzeige vom Link speichern</button>' : '') +
       '<button class="ib" id="bPaste">Text einfügen</button></div></div>',
     '<button class="ib" id="bClose">Schließen</button><button class="ib pri" id="bSave">Speichern</button>');
@@ -501,7 +501,7 @@ function openDetail(id) {
     try { const r = await api('apiDeletePosting', j.id); Object.assign(j, r); render(); openDetail(j.id); toast('Anzeige gelöscht'); }
     catch (err) { toast(err.message, 5000); }
   };
-  if ($('aShow')) $('aShow').onclick = (e) => { e.preventDefault(); openPosting(j); };
+  if ($('aShow')) $('aShow').onclick = () => openPosting(j);
   if ($('aUrl')) $('aUrl').onclick = () => openExt(j.url);
   if ($('aCv')) $('aCv').onclick = async (e) => {
     e.preventDefault();
