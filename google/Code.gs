@@ -8,7 +8,7 @@
  * (z. B. {fn:"apiSavePosting", key, data:{url, title, text}} – data darf auch JSON-Text sein).
  */
 
-const VERSION = '1.6.12'; // siehe CHANGELOG.md
+const VERSION = '1.6.13'; // siehe CHANGELOG.md
 const APP_PAGE = 'https://lobi1994.github.io/Job-Tracker/';
 const SHEET = 'Bewerbungen';
 const POSTINGS = 'Anzeigen';
@@ -676,9 +676,76 @@ function parsePostingHtml_(html) {
       }
     } catch (e) { /* kaputtes JSON-LD überspringen */ }
   }
-  if (!out.text) out.text = htmlToText_(html);
+  if (!out.text) out.text = mainText_(html);
   if (typeof out.company !== 'string') out.company = '';
   return out;
+}
+
+/* ---- Seiten ohne JSON-LD: nur den Anzeigenteil nehmen, Cookie-Banner, Menüs, Suche, Fußzeile weglassen ---- */
+
+/** Ende (Index nach dem schließenden Tag) des Elements, das bei start beginnt; -1 wenn nicht gefunden. */
+function elementEnd_(html, start) {
+  const tag = (html.slice(start).match(/^<([a-z0-9]+)/i) || [])[1];
+  if (!tag) return -1;
+  if (/^(br|img|input|meta|link|hr)$/i.test(tag)) return html.indexOf('>', start) + 1;
+  const re = new RegExp('<(/?)' + tag + '\\b[^>]*>', 'gi');
+  re.lastIndex = start;
+  let depth = 0, m;
+  while ((m = re.exec(html))) {
+    if (/\/>$/.test(m[0]) && !m[1]) continue;
+    depth += m[1] ? -1 : 1;
+    if (depth === 0) return re.lastIndex;
+  }
+  return -1;
+}
+
+/** Inhalt des ersten Elements, dessen öffnendes Tag auf re passt. */
+function elementByAttr_(html, re) {
+  const m = re.exec(html);
+  if (!m) return '';
+  const end = elementEnd_(html, m.index);
+  return end > m.index ? html.slice(m.index, end) : '';
+}
+
+const NOISE_ = /(^|[\s_-])(cookie\w*|consent\w*|onetrust\w*|gdpr|privacy-banner|nav|navbar|navigation|menu\w*|footer\w*|header|search\w*|savesearch\w*|language\w*|locale\w*|langselect\w*|modal|breadcrumbs?|social\w*|share\w*|skip\w*|sitemap)([\s_-]|$)/i;
+
+function mainText_(html) {
+  html = String(html).replace(/<(script|style|noscript|svg|template)[\s\S]*?<\/\1>/gi, ' ').replace(/<!--[\s\S]*?-->/g, ' ');
+  // 1) Strukturierte Anzeige (Microdata, z. B. SAP SuccessFactors): Kopfdaten + Beschreibung
+  const desc = elementByAttr_(html, /<[a-z0-9]+[^>]*itemprop=["']description["'][^>]*>/i);
+  if (desc && htmlToText_(desc).length >= 300) {
+    const head = [];
+    const pick = function (re) { const x = elementByAttr_(html, re); return x ? htmlToText_(x).replace(/\s+/g, ' ').trim() : ''; };
+    const t = pick(/<[a-z0-9]+[^>]*itemprop=["']title["'][^>]*>/i);
+    const d = pick(/<[a-z0-9]+[^>]*id=["']job-date["'][^>]*>/i) || pick(/<[a-z0-9]+[^>]*itemprop=["']datePosted["'][^>]*>/i);
+    const l = pick(/<[a-z0-9]+[^>]*id=["']job-location["'][^>]*>/i) || pick(/<[a-z0-9]+[^>]*itemprop=["']jobLocation["'][^>]*>/i);
+    const c = pick(/<[a-z0-9]+[^>]*id=["']job-company["'][^>]*>/i);
+    if (t) head.push(t);
+    [d, l, c].forEach(function (x) { if (x) head.push(x); });
+    return (head.length ? head.join('\n') + '\n\n' : '') + htmlToText_(desc);
+  }
+  // 2) Sonst: Hauptbereich (<main>/<article>), daraus Rauschen entfernen
+  let part = elementByAttr_(html, /<main\b[^>]*>/i) || elementByAttr_(html, /<[a-z0-9]+[^>]*role=["']main["'][^>]*>/i) || elementByAttr_(html, /<article\b[^>]*>/i);
+  if (!part || htmlToText_(part).length < 300) part = (html.match(/<body[\s\S]*<\/body>/i) || [html])[0];
+  return htmlToText_(stripNoise_(part));
+}
+
+/** Entfernt Menüs, Kopf-/Fußzeilen, Formulare und Blöcke mit Cookie-/Such-/Sprach-Klassen. */
+function stripNoise_(h) {
+  h = h.replace(/<(select|button)\b[\s\S]*?<\/\1>/gi, ' ');
+  const re = /<([a-z0-9]+)\b([^>]*)>/gi;
+  let out = '', pos = 0, m;
+  while ((m = re.exec(h))) {
+    const tag = m[1].toLowerCase(), attrs = m[2] || '';
+    const cls = ((attrs.match(/\b(?:class|id)=["']([^"']*)["']/gi) || []).join(' ')).replace(/\b(?:class|id)=["']/gi, ' ').replace(/["']/g, ' ');
+    const noisy = /^(nav|header|footer|aside|form|dialog)$/.test(tag) || cls.split(/\s+/).some(function (c) { return c && NOISE_.test(c); }) || /aria-hidden=["']true["']/i.test(attrs);
+    if (!noisy) continue;
+    const end = elementEnd_(h, m.index);
+    if (end <= m.index) continue;
+    out += h.slice(pos, m.index) + ' ';
+    pos = end; re.lastIndex = end;
+  }
+  return out + h.slice(pos);
 }
 
 function findJobPosting_(o) {
@@ -691,7 +758,7 @@ function findJobPosting_(o) {
 }
 
 function htmlToText_(h) {
-  return decode_(String(h)
+  return decode_(String(h).replace(/\r/g, '')
     .replace(/<(script|style|noscript|svg|head)[\s\S]*?<\/\1>/gi, ' ')
     .replace(/<br\s*\/?>/gi, '\n')
     .replace(/<\/(p|div|li|h[1-6]|tr|section|ul|ol)>/gi, '\n')

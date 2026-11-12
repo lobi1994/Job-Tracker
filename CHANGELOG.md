@@ -11,6 +11,14 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.13 – 12.11.2026 (nur Apps Script)
+- **Sauberere Anzeigen von Karriereseiten** (z. B. Arthrex / SAP SuccessFactors): Statt der ganzen Seite wird nur noch die Anzeige gespeichert, mit Titel, Datum, Ort und Firma oben. Cookie-Hinweise, Sprach- und Regionsauswahl, Suche, Menüs, Login-Links und Fußzeile fallen weg.
+- Seiten ohne erkennbare Anzeige: Es wird der Hauptbereich der Seite genommen, und nur eindeutige Bereiche (Cookie-Banner, Navigation, Kopf- und Fußzeile, Suche, Sprachauswahl, Formulare) werden entfernt. Im Zweifel bleibt Text drin.
+- Enthält 1.6.12 (Fehlende Anzeigen holen). 1.6.12 musst du nicht extra bereitstellen.
+
+**Apps Script: Bereitstellen nötig: ja** – nur `Code.gs` neu kopieren
+**Beschreibung für die Bereitstellung:** `1.6.13 – Fehlende Anzeigen holen, saubere Anzeigentexte`
+
 ## 1.6.12 – 12.11.2026
 - **Fehlende Anzeigen holen:** Neuer Knopf im Zahnrad (und im Tabellen-Menü **Job-Tracker → Fehlende Anzeigen holen**). Holt für alle Jobs mit Link, aber ohne gespeicherte Anzeige, den Text über den Link. Bis 25 pro Durchgang in der App, 40 im Menü. Danach steht da, was nicht geklappt hat.
 - Mehr Portale werden direkt erkannt: LinkedIn, Greenhouse (auch `job-boards.eu.greenhouse.io`), Lever und Ashby über deren öffentliche Schnittstellen. Bei anderen Seiten wird die strukturierte Anzeige genutzt; reine Startseiten oder Cookie-Hinweise werden nicht mehr als Anzeige gespeichert.
