@@ -8,7 +8,7 @@
  * (z. B. {fn:"apiSavePosting", key, data:{url, title, text}} – data darf auch JSON-Text sein).
  */
 
-const VERSION = '1.6.5'; // siehe CHANGELOG.md
+const VERSION = '1.6.6'; // siehe CHANGELOG.md
 const APP_PAGE = 'https://lobi1994.github.io/Job-Tracker/';
 const SHEET = 'Bewerbungen';
 const POSTINGS = 'Anzeigen';
@@ -53,8 +53,10 @@ function doPost(e) {
     out = { result: globalThis[fn].apply(null, [body.key].concat(args)) };
     if (out.result === undefined) out.result = null;
     if (out.result && out.result.confirm) out.confirm = out.result.confirm; // für den Kurzbefehl: Rückfrage „ersetzen?“
+    if (out.result && typeof out.result.message === 'string') out.message = out.result.message; // Kurzbefehl liest message direkt
   } catch (err) {
     out = { error: String((err && err.message) || err) };
+    out.message = 'Fehler: ' + out.error;
   }
   return ContentService.createTextOutput(JSON.stringify(out)).setMimeType(ContentService.MimeType.JSON);
 }
