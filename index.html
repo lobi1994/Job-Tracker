@@ -356,10 +356,11 @@ async function openPosting(j) {
 
 /* ---------- Neuer Job ---------- */
 $('bAdd').onclick = () => {
-  openSheet('<h2>Neuer Job</h2><p class="sub">Tipp: Mit dem Kurzbefehl „Job speichern“ geht das direkt aus Safari.</p>' +
+  openSheet('<h2>Neuer Job</h2><p class="sub">Am iPhone geht das auch direkt aus Safari mit dem Kurzbefehl „Job speichern“.</p>' +
     inp('nCompany', 'Firma', '') + inp('nRole', 'Stelle', '') + inp('nLocation', 'Ort / Remote', '') + inp('nUrl', 'Link zur Anzeige', '', 'url') +
     '<label class="fl"><span>Status</span><select id="nStatus">' + statusOpts(statuses[0]) + '</select></label>' +
-    '<label class="fl" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="nFetch" checked style="width:auto"> <span style="margin:0">Anzeige vom Link gleich mitspeichern</span></label>' +
+    '<label class="fl"><span>Text der Stellenanzeige (optional, einfach hineinkopieren)</span><textarea id="nText" style="min-height:140px" placeholder="Aufgaben, Profil, Benefits …"></textarea></label>' +
+    '<label class="fl" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="nFetch" checked style="width:auto"> <span style="margin:0">Ohne Text: Anzeige vom Link abrufen</span></label>' +
     '<div class="acts"><button class="ib pri" id="nSave">Anlegen</button><button class="ib" id="nClose">Abbrechen</button></div>');
   $('nClose').onclick = closeSheet;
   $('nSave').onclick = async () => {
@@ -368,8 +369,9 @@ $('bAdd').onclick = () => {
     $('nSave').disabled = true;
     try {
       let j = await api('apiAdd', job); jobs.push(j); render();
-      if (job.url && $('nFetch').checked) {
-        try { const r = await api('apiSavePosting', { id: j.id, url: job.url }); Object.assign(j, r.job); }
+      const text = $('nText').value.trim();
+      if (text.length >= 50 || (job.url && $('nFetch').checked)) {
+        try { const r = await api('apiSavePosting', text.length >= 50 ? { id: j.id, url: job.url, text: text } : { id: j.id, url: job.url }); Object.assign(j, r.job); }
         catch (e) { toast('Job angelegt. Anzeige: ' + e.message, 6000); render(); closeSheet(); return; }
       }
       render(); closeSheet(); toast('Job angelegt');
