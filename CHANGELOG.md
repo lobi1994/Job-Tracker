@@ -11,6 +11,11 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.10 – 12.11.2026 (nur App)
+- **Updates kommen sofort:** Die App lädt sich beim Öffnen zuerst frisch aus dem Netz und nimmt die gespeicherte Kopie nur noch, wenn du offline bist. Vorher konnte eine ältere Version aus dem Zwischenspeicher wieder auftauchen.
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.6.9 – 12.11.2026 (nur App)
 - Gespeicherte Anzeige: **„📖 Gespeicherte Anzeige lesen“** und **„🗑 Anzeige löschen“** sind jetzt Knöpfe statt Textlinks.
 
