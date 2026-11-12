@@ -15,7 +15,7 @@ Created by **Matthias Lobinger** · [LinkedIn](https://www.linkedin.com/in/matth
 - **Status pro Bewerbung:** Noch nicht beworben → Beworben → Zum Gespräch eingeladen → Persönliches Gespräch → Jobangebot / Abgelehnt
 - **Filter an/aus pro Status**, Suche nach Firma oder Stelle, Sortierung nach Datum, Status oder Bewertung
 - **Zwei Bewertungen:** wie gut mir die Stelle gefällt und wie gut mein CV zur Stelle passt (jeweils 1–5)
-- **Stellenanzeige speichern:** per Link, per eingefügtem Text oder per iOS-Kurzbefehl direkt aus Safari. So bleibt die Anzeige lesbar, auch wenn sie offline geht.
+- **Stellenanzeige speichern:** per Link, per eingefügtem Text oder per iOS-Kurzbefehl direkt aus Safari. So bleibt die Anzeige lesbar, auch wenn sie offline geht. Vor dem Überschreiben einer gespeicherten Anzeige wird nachgefragt; eine falsche Anzeige lässt sich löschen.
 - **Gesprächstermine, Gehaltsangabe, Portal, CV-Datei und Notizen** pro Bewerbung, mit Link zur CV-Datei in Google Drive
 - **„Jetzt bewerben“-Knopf:** öffnet die Anzeige und sichert den Anzeigentext dabei automatisch
 - **Hard- und Soft-Skills** aus der Anzeige, abgeglichen mit dem eigenen Profil (Passung in %)

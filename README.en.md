@@ -15,7 +15,7 @@ Created by **Matthias Lobinger** · [LinkedIn](https://www.linkedin.com/in/matth
 - **Status per application:** not applied → applied → invited to interview → on-site interview → offer / rejected
 - **Status filters you can switch on and off**, search by company or role, sorting by date, status or rating
 - **Two ratings:** how much I like the role and how well my CV fits it (1–5 each)
-- **Save the job posting:** from its link, as pasted text, or with an iOS shortcut straight from Safari, so the posting stays readable after it goes offline
+- **Save the job posting:** from its link, as pasted text, or with an iOS shortcut straight from Safari, so the posting stays readable after it goes offline; it asks before replacing a saved posting, and a wrong posting can be deleted
 - **Interview dates, salary stated, portal, CV file and notes** per application, with a link to the CV file in Google Drive
 - **"Apply now" button:** opens the posting and saves its text automatically
 - **Hard and soft skills** pulled from the posting and matched against your own profile (fit in %)
