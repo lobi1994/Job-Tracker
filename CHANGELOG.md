@@ -11,6 +11,12 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.5.3 – 12.11.2026
+- Gmail-Abgleich erkennt jetzt auch die **LinkedIn-Easy-Apply-Bestätigung** („Ihre Bewerbung wurde an … gesendet“ / „Your application was sent to …“) und setzt den Job automatisch auf „Beworben“.
+
+**Apps Script: Bereitstellen nötig: ja** – `Code.gs` und `Mail.gs` neu kopieren (enthält alles ab 1.3.0)
+**Beschreibung für die Bereitstellung:** `1.5.3 – Bewerben-Knopf, LinkedIn, Bestätigungen automatisch`
+
 ## 1.5.2 – 12.11.2026
 - Neues App-Icon „Karriere-Rakete“ (mit „ML“).
 - Damit das neue Icon erscheint: App vom Home-Bildschirm löschen, Einrichtungs-Link in Safari öffnen (Tabelle → Job-Tracker → App-Link anzeigen) und erneut „Zum Home-Bildschirm“.
