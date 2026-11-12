@@ -1,6 +1,6 @@
 # Änderungsverzeichnis
 
-Versionsnummern: **Haupt.Funktion.Korrektur** (z. B. 1.2.1).
+Versionsnummern: **Haupt.Funktion.Korrektur** (z. B. 1.2.1). Es gibt **eine gemeinsame Nummer** für App und Apps Script: Jede Version bekommt die nächste Nummer, aber nur der Teil, der sich ändert, übernimmt sie. Ändert sich nur die App, bleibt das Skript auf seiner Nummer (und umgekehrt). Ändern sich beide, haben App und Skript wieder dieselbe Nummer – Nummern dazwischen werden dann übersprungen.
 
 **Apps Script: Bereitstellen nötig?** Nur bei „ja“ musst du etwas tun:
 1. Die genannten Dateien aus `google/` in Apps Script neu kopieren und speichern.
@@ -12,10 +12,12 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 ---
 
 ## 1.6.3 – 12.11.2026
+- App und Apps Script wieder auf derselben Nummer (Skript inhaltlich wie 1.6.2).
 - Unter „Unterlagen“ jetzt ein Knopf **„📄 CV öffnen“** statt Textlink (öffnet den zugeschnittenen CV aus Google Drive bzw. sucht die CV-Datei dort).
 - Der Bereich **„CV mit Claude erstellen“** erscheint nur noch bei Jobs mit Status „Noch nicht beworben“.
 
-**Apps Script: Bereitstellen nötig: nein** (für 1.6.2 weiterhin ja)
+**Apps Script: Bereitstellen nötig: ja** – `Code.gs` und `Mail.gs` neu kopieren (enthält alles ab 1.3.0)
+**Beschreibung für die Bereitstellung:** `1.6.3 – Skills, Claude-Bewertung, CV erstellen, Greenhouse-Anzeigen`
 
 ## 1.6.2 – 12.11.2026
 - **Karriereseiten mit eingebettetem Greenhouse** (z. B. LucaNet, Link mit `?gh_jid=…`): Der Kurzbefehl sah dort nur den Hinweis „bitte Cookies akzeptieren“, weil die eigentliche Anzeige in einem eingebetteten Fenster steckt. Das Skript holt die Anzeige jetzt direkt über die Greenhouse-Schnittstelle.
