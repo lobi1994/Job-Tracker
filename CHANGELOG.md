@@ -11,6 +11,11 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.5.1 – 12.11.2026
+- „Created by Matthias Lobinger“ unten in der Liste (mit Link zu LinkedIn), in den Einstellungen, auf der Einrichtungs- und der Kurzbefehl-Seite und in der README.
+
+**Apps Script: Bereitstellen nötig: nein** (in `Code.gs` steht der Name nur als Kommentar; beim nächsten Kopieren automatisch dabei)
+
 ## 1.5.0 – 12.11.2026
 - **Stellenanzeige gegliedert:** Die gespeicherte Anzeige wird in Abschnitte aufgeteilt – Aufgaben, Profil, Wir bieten, Über die Firma, Bewerbung & Kontakt – mit Farben, Aufzählungen, größerer Schrift und Sprung-Knöpfen oben. Erkennt deutsche und englische Überschriften, auch „Ihre Aufgaben: …“ in einer Zeile.
 - Es geht nichts verloren: Der gespeicherte Text bleibt unverändert, die Reihenfolge bleibt wie im Original, Unbekanntes landet unter „Einleitung“ bzw. „Weitere Informationen“. Unten jederzeit „Originaltext anzeigen“.

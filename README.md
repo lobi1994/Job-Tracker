@@ -6,6 +6,8 @@ Eine kleine Web-App, mit der ich meine Bewerbungen verwalte. Die Daten liegen in
 
 ![Job-Tracker mit Beispieldaten](docs/screenshot.png)
 
+Created by **Matthias Lobinger** · [LinkedIn](https://www.linkedin.com/in/matthias-lobinger)
+
 **Ausprobieren ohne Einrichtung:** [Demo mit Beispieldaten](https://lobi1994.github.io/Job-Tracker/#demo)
 
 ## Was die App kann
