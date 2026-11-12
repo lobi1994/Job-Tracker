@@ -8,7 +8,7 @@
  * (z. B. {fn:"apiSavePosting", key, data:{url, title, text}} – data darf auch JSON-Text sein).
  */
 
-const VERSION = '1.6.6'; // siehe CHANGELOG.md
+const VERSION = '1.6.11'; // siehe CHANGELOG.md
 const APP_PAGE = 'https://lobi1994.github.io/Job-Tracker/';
 const SHEET = 'Bewerbungen';
 const POSTINGS = 'Anzeigen';
@@ -376,6 +376,8 @@ function savePosting_(data, linkOnly) {
       r = lastDataRow_(sh, map);
       created = true;
     }
+    // Bestehender Job ohne Link: den Link der gespeicherten Seite übernehmen
+    if (!created && url && map.url && !String(sh.getRange(r, map.url).getValue() || '').trim()) sh.getRange(r, map.url).setValue(url);
     const job0 = rowToJob_(sh.getRange(r, 1, 1, sh.getLastColumn()).getValues()[0], map);
     const name = [job0.company, job0.role].filter(String).join(' – ');
     if (!text) {
