@@ -8,7 +8,7 @@ A small web app I use to manage my job applications. The data lives in my own Go
 
 Created by **Matthias Lobinger** · [LinkedIn](https://www.linkedin.com/in/matthias-lobinger)
 
-**Try it without setup:** [demo with sample data](https://lobi1994.github.io/Job-Tracker/#demo)
+**Try it without setup:** [demo with sample data](https://lobi1994.github.io/Job-Tracker/#demo) · [automatic tour](https://lobi1994.github.io/Job-Tracker/#tour)
 
 ## Features
 
