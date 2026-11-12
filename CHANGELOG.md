@@ -11,6 +11,16 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.0 – 12.11.2026
+- **Hard und Soft Skills:** In der gespeicherten Stellenanzeige erscheint oben „Skills aus der Anzeige“ mit Hard- und Soft-Skills. Grün mit ✓ = steht in deinem Profil, grau = fehlt dort. Dazu **„Passung Hard Skills: x %“**.
+- **Neues Blatt „Profil“** in der Tabelle: deine Skills (aus dem CV vorbefüllt, Soft Skills bitte prüfen). Ergänzen oder löschen jederzeit möglich.
+- **Bewertung durch Claude:** Eine geplante Claude-Aufgabe (alle 2 Stunden, 8–20 Uhr) bewertet Jobs mit gespeicherter Anzeige und trägt „CV passt“ und eine kurze **Fit-Begründung** ein (in der App unter „CV passt“).
+- **„CV mit Claude erstellen“** in der Detailansicht: legt einen Auftrag an. Die geplante Aufgabe baut den zugeschnittenen CV (nur wahre Inhalte, Sprache der Anzeige), legt ihn in Google Drive ab und zeigt in der App „CV öffnen“.
+- Neue Spalten: „Fit-Begründung“, „CV-Auftrag“, „CV-Link“.
+
+**Apps Script: Bereitstellen nötig: ja** – `Code.gs` und `Mail.gs` neu kopieren (enthält alles ab 1.3.0)
+**Beschreibung für die Bereitstellung:** `1.6.0 – Skills, Claude-Bewertung, CV erstellen`
+
 ## 1.5.3 – 12.11.2026
 - Gmail-Abgleich erkennt jetzt auch die **LinkedIn-Easy-Apply-Bestätigung** („Ihre Bewerbung wurde an … gesendet“ / „Your application was sent to …“) und setzt den Job automatisch auf „Beworben“.
 

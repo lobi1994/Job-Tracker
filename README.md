@@ -18,6 +18,8 @@ Created by **Matthias Lobinger** · [LinkedIn](https://www.linkedin.com/in/matth
 - **Stellenanzeige speichern:** per Link, per eingefügtem Text oder per iOS-Kurzbefehl direkt aus Safari. So bleibt die Anzeige lesbar, auch wenn sie offline geht.
 - **Gesprächstermine, Gehaltsangabe, Portal, CV-Datei und Notizen** pro Bewerbung, mit Link zur CV-Datei in Google Drive
 - **„Jetzt bewerben“-Knopf:** öffnet die Anzeige und sichert den Anzeigentext dabei automatisch
+- **Hard- und Soft-Skills** aus der Anzeige, abgeglichen mit dem eigenen Profil (Passung in %)
+- **Claude-Anbindung (optional):** Bewertung „CV passt“ mit Begründung und zugeschnittener CV per Knopfdruck, über eine geplante Claude-Aufgabe
 - **Gmail-Abgleich:** erkennt Absagen, Einladungen und Eingangsbestätigungen in deinen Mails setzt Eingangsbestätigungen automatisch auf „Beworben“ und fragt bei Absagen und Einladungen in der App nach
 - Funktioniert als App auf dem Home-Bildschirm und zeigt beim Start sofort den letzten Stand
 
