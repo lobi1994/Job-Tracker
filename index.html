@@ -175,7 +175,7 @@ a{color:var(--acc)}
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.10', NEED_SCRIPT = '1.6.5'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.12', NEED_SCRIPT = '1.6.12'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Job-Tracker ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
@@ -260,6 +260,7 @@ $('bSettings').onclick = () => {
       (sheetUrl ? btn('xSheet', '📊 Tabelle öffnen', 'Deine Google-Tabelle in Google Sheets') : '') +
       (DEMO ? '' : btn('xShort', '📲 Kurzbefehle einrichten', 'Anleitung für „Job speichern“ und „Job-Link speichern“ mit deinem Schlüssel')) +
       btn('xLog', '📝 Änderungen', 'Was in welcher Version neu ist (CHANGELOG)') +
+      (DEMO ? '' : btn('xFetch', '📥 Fehlende Anzeigen holen', 'Holt für alle Jobs mit Link, aber ohne gespeicherte Anzeige, den Text über den Link (bis 25 pro Durchgang)')) +
       (DEMO ? '' : btn('xMail', '✉️ Mails jetzt prüfen', 'Sucht sofort nach Bestätigungen, Absagen und Einladungen. Läuft sonst automatisch alle 30 Minuten.')) +
       btn('xRe', '🔗 Anders verbinden', 'Neuen App-Link oder Schlüssel eintragen, z. B. nach einem neuen Schlüssel') +
       (DEMO ? '' : btn('xOut', '⏏️ Verbindung trennen', 'Löscht App-Link und Schlüssel auf diesem Gerät. Die Tabelle bleibt unverändert.')) +
@@ -270,6 +271,15 @@ $('bSettings').onclick = () => {
   if ($('xShort')) $('xShort').onclick = () => ext(new URL('kurzbefehl.html', location.href).href.replace(/#.*$/, '') + '#setup=' + encSetup(CFG));
   $('xLog').onclick = () => ext('https://github.com/lobi1994/Job-Tracker/blob/main/CHANGELOG.md');
   $('xRe').onclick = () => { closeSheet(); showSetup(); };
+  if ($('xFetch')) $('xFetch').onclick = async () => {
+    const b = $('xFetch'); b.disabled = true; b.querySelector('b').textContent = 'Hole Anzeigen … (bis zu 3 Minuten)';
+    try {
+      const r = await api('apiFetchMissing');
+      closeSheet(); await load(true);
+      const msg = r.ok.length + ' Anzeige(n) gespeichert' + (r.failed.length ? ' · nicht abrufbar: ' + r.failed.join(', ') + ' (in Safari mit „Job speichern“ sichern)' : '') + (r.left ? ' · noch ' + r.left + ' offen, nochmal tippen' : '');
+      toast(msg, r.failed.length || r.left ? 12000 : 5000);
+    } catch (e) { toast(e.message, 6000); b.disabled = false; b.querySelector('b').textContent = '📥 Fehlende Anzeigen holen'; }
+  };
   if ($('xMail')) $('xMail').onclick = async () => {
     const b = $('xMail'); b.disabled = true; b.querySelector('b').textContent = 'Prüfe Mails …';
     try { const r = await api('apiCheckMail'); closeSheet(); toast(r.added ? r.added + ' neue Rückmeldung(en) gefunden' : 'Keine neuen Rückmeldungen'); loadSuggestions(true); }
