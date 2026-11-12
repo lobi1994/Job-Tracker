@@ -145,7 +145,7 @@ a{color:var(--acc)}
 
 <script>
 'use strict';
-const APP_VERSION = '1.4.0', NEED_SCRIPT = '1.4.0'; // siehe CHANGELOG.md
+const APP_VERSION = '1.4.1', NEED_SCRIPT = '1.4.0'; // siehe CHANGELOG.md
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt'};
 const CK = 'jt-cfg', LK = 'jt-cache', FK = 'jt-filter';
@@ -314,10 +314,22 @@ $('list').onclick = (e) => {
   const c = e.target.closest('.card'); if (c) openDetail(c.dataset.id);
 };
 
+/* Stellenanzeigen auf iPhone/iPad immer in Safari öffnen (nicht in der LinkedIn-App o. Ä.).
+   x-safari-https:// öffnet ab iOS 17 direkt Safari; dort greift „Job speichern“. */
+const IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+function openExt(url) {
+  if (IOS && /^https?:\/\//i.test(url)) { location.href = 'x-safari-' + url; return; }
+  window.open(url, '_blank', 'noopener');
+}
+document.addEventListener('click', (e) => {
+  const a = e.target.closest('a[data-ext]');
+  if (a && IOS) { e.preventDefault(); openExt(a.getAttribute('href')); }
+});
+
 /* Bewerben: Anzeige öffnen und – falls noch nicht gespeichert – im Hintergrund über den Link sichern */
 function applyNow(j) {
   if (!j.url) { toast('Kein Link hinterlegt.'); return; }
-  window.open(j.url, '_blank', 'noopener');
+  openExt(j.url);
   if (j.postingSaved) return;
   api('apiSavePosting', { id: j.id, url: j.url })
     .then((r) => { Object.assign(j, r.job); render(); toast('Anzeige automatisch gespeichert'); })
@@ -370,7 +382,7 @@ function openDetail(id) {
       inp('fCompany', 'Firma', j.company) + inp('fRole', 'Stelle', j.role) + inp('fLocation', 'Ort / Remote', j.location) +
       inp('fUrl', 'Link Anzeige', j.url, 'url') + inp('fCv', 'CV-Datei', j.cv) + '</details>' +
     '<div class="box"><h3>Unterlagen</h3>' +
-      (j.url ? '<p><a href="' + esc(j.url) + '" target="_blank" rel="noopener">Anzeige online öffnen</a></p>' : '<p>Kein Link hinterlegt.</p>') +
+      (j.url ? '<p><a href="' + esc(j.url) + '" target="_blank" rel="noopener" data-ext="1">Anzeige online öffnen' + (IOS ? ' (Safari)' : '') + '</a></p>' : '<p>Kein Link hinterlegt.</p>') +
       (j.cv ? '<p>CV: ' + esc(j.cv) + ' <a href="#" id="aCv">in Drive suchen</a></p>' : '') +
       '<p>' + (j.postingSaved ? 'Anzeige gespeichert am ' + esc(j.postingSaved) + ' · <a href="#" id="aShow">lesen</a>' : '<span class="miss">Anzeige noch nicht gespeichert.</span>') + '</p>' +
       '<div class="acts" style="margin-top:6px">' + (j.url ? '<button class="ib" id="bFetch">Anzeige vom Link speichern</button>' : '') +
@@ -425,7 +437,7 @@ async function openPosting(j) {
     const p = await api('apiGetPosting', j.id);
     openSheet(head('Stellenanzeige', j.company + ' · ' + j.role + (p ? ' · gespeichert ' + fmtDate(p.savedAt) : ''), '') +
       '<div class="ptext">' + esc(p ? p.text : 'Nichts gespeichert.') + '</div>',
-      '<button class="ib" id="tBack">Zurück</button>' + (p && p.url ? '<a class="ib" href="' + esc(p.url) + '" target="_blank" rel="noopener">Original öffnen</a>' : ''));
+      '<button class="ib" id="tBack">Zurück</button>' + (p && p.url ? '<a class="ib" href="' + esc(p.url) + '" target="_blank" rel="noopener" data-ext="1">Original öffnen</a>' : ''));
     $('tBack').onclick = () => openDetail(j.id);
   } catch (e) { toast(e.message, 4000); openDetail(j.id); }
 }

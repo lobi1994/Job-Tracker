@@ -11,6 +11,11 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.4.1 – 12.11.2026
+- Stellenanzeigen öffnen sich auf iPhone/iPad jetzt **immer in Safari** (auch LinkedIn-Links, statt in der LinkedIn-App). So funktioniert dort direkt „Job speichern“. Gilt für „Jetzt bewerben“, „Anzeige online öffnen“ und „Original öffnen“. Voraussetzung: iOS 17 oder neuer.
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.4.0 – 12.11.2026
 - **Schließen / Speichern unten:** große Knöpfe in einer festen Leiste, immer sichtbar beim Scrollen (Detail, Neuer Job, Text einfügen, Stellenanzeige, Mail-Rückmeldung).
 - **„Jetzt bewerben ↗“**: erscheint nur bei „Noch nicht beworben“ (in der Detailansicht und auf der Karte). Öffnet die hinterlegte Anzeige und speichert dabei den Anzeigentext automatisch im Hintergrund, falls noch keiner da ist (klappt bei Personio, Greenhouse, softgarden, JOIN, Lever & Co.).
