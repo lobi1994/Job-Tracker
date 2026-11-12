@@ -7,6 +7,7 @@
  * (z. B. {fn:"apiSavePosting", key, data:{url, title, text}}).
  */
 
+const VERSION = '1.2.1'; // siehe CHANGELOG.md
 const APP_PAGE = 'https://lobi1994.github.io/Job-Tracker/';
 const SHEET = 'Bewerbungen';
 const POSTINGS = 'Anzeigen';
@@ -53,7 +54,7 @@ function doPost(e) {
 }
 
 function doGet() {
-  return ContentService.createTextOutput('Job-Tracker läuft. Die App findest du unter ' + APP_PAGE)
+  return ContentService.createTextOutput('Job-Tracker ' + VERSION + ' läuft. Die App findest du unter ' + APP_PAGE)
     .setMimeType(ContentService.MimeType.TEXT);
 }
 
@@ -135,7 +136,7 @@ function apiList(key) {
   const rows = last < 2 ? [] : sh.getRange(2, 1, last - 1, sh.getLastColumn()).getValues();
   const jobs = rows.filter(function (r) { return String(r[map.company - 1] || r[map.role - 1]).trim(); })
     .map(function (r) { return rowToJob_(r, map); });
-  return { jobs: jobs, statuses: STATUS, sheetUrl: SpreadsheetApp.getActiveSpreadsheet().getUrl() };
+  return { jobs: jobs, statuses: STATUS, sheetUrl: SpreadsheetApp.getActiveSpreadsheet().getUrl(), version: VERSION };
 }
 
 /** Ändert einzelne Felder eines Jobs. Setzt bei „Beworben“ automatisch das Datum, falls leer. */
