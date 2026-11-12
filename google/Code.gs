@@ -8,7 +8,7 @@
  * (z. B. {fn:"apiSavePosting", key, data:{url, title, text}} – data darf auch JSON-Text sein).
  */
 
-const VERSION = '1.6.11'; // siehe CHANGELOG.md
+const VERSION = '1.6.12'; // siehe CHANGELOG.md
 const APP_PAGE = 'https://lobi1994.github.io/Job-Tracker/';
 const SHEET = 'Bewerbungen';
 const POSTINGS = 'Anzeigen';
@@ -309,6 +309,97 @@ function linkedinId_(url) {
   return m ? m[1] : '';
 }
 
+/**
+ * Anzeige über den Link holen – mit Sonderwegen für Portale, deren Seite die Anzeige erst per JavaScript lädt.
+ * Gibt {text, role, company, location, title} zurück; text ist leer, wenn nichts Brauchbares kam.
+ */
+function fetchAny_(url) {
+  url = String(url || '');
+  let info = { text: '' };
+  try {
+    const li = linkedinId_(url);
+    if (li) info = fetchLinkedin_(li);
+    else if (/[?&]gh_jid=\d+/.test(url)) info = fetchGreenhouse_(url);
+    else if (/greenhouse\.io\/[a-z0-9_-]+\/jobs\/\d+/i.test(url)) {
+      const m = url.match(/greenhouse\.io\/([a-z0-9_-]+)\/jobs\/(\d+)/i);
+      const hosts = /\.eu\.greenhouse/i.test(url) ? ['boards-api.eu.greenhouse.io', 'boards-api.greenhouse.io'] : ['boards-api.greenhouse.io', 'boards-api.eu.greenhouse.io'];
+      for (let i = 0; i < hosts.length && !info.text; i++) {
+        const res = UrlFetchApp.fetch('https://' + hosts[i] + '/v1/boards/' + m[1] + '/jobs/' + m[2], { muteHttpExceptions: true });
+        if (res.getResponseCode() === 200) { const j = JSON.parse(res.getContentText()); info = { text: htmlToText_(decode_(String(j.content || ''))), role: j.title || '', location: (j.location && j.location.name) || '' }; }
+      }
+    } else if (/jobs\.(eu\.)?lever\.co\/[^/]+\/[0-9a-f-]{36}/i.test(url)) {
+      const m = url.match(/jobs\.(eu\.)?lever\.co\/([^/]+)\/([0-9a-f-]{36})/i);
+      const res = UrlFetchApp.fetch('https://api.' + (m[1] || '') + 'lever.co/v0/postings/' + m[2] + '/' + m[3], { muteHttpExceptions: true });
+      if (res.getResponseCode() === 200) {
+        const j = JSON.parse(res.getContentText());
+        const parts = [j.descriptionPlain || htmlToText_(j.description || '')];
+        (j.lists || []).forEach(function (l) { parts.push(l.text + '\n' + htmlToText_(l.content || '')); });
+        if (j.additionalPlain) parts.push(j.additionalPlain);
+        info = { text: parts.join('\n\n'), role: j.text || '', location: (j.categories && j.categories.location) || '' };
+      }
+    } else if (/jobs\.ashbyhq\.com\/[^/]+\/[0-9a-f-]{36}/i.test(url)) {
+      const m = url.match(/jobs\.ashbyhq\.com\/([^/]+)\/([0-9a-f-]{36})/i);
+      const res = UrlFetchApp.fetch('https://api.ashbyhq.com/posting-api/job-board/' + m[1], { muteHttpExceptions: true });
+      if (res.getResponseCode() === 200) {
+        const job = (JSON.parse(res.getContentText()).jobs || []).filter(function (x) { return x.id === m[2]; })[0];
+        if (job) info = { text: job.descriptionPlain || htmlToText_(job.descriptionHtml || ''), role: job.title || '', location: job.location || '' };
+      }
+    } else {
+      info = fetchPosting_(url);
+      // Ohne strukturierte Anzeige (JSON-LD) nur längere Seitentexte nehmen – sonst ist es oft nur Cookie-Hinweis oder Startseite
+      if (info && !info.role && String(info.text || '').length < 1500) info.text = '';
+    }
+  } catch (e) { info = { text: '' }; }
+  info = info || { text: '' };
+  info.text = cleanText_(info.text || '');
+  if (info.text.length < 200) info.text = '';
+  return info;
+}
+
+/** Für alle Jobs mit Link, aber ohne gespeicherte Anzeige, die Anzeige holen (höchstens max pro Lauf). */
+function fetchMissing_(max) {
+  const sh = sheet_(), map = colMap_(sh);
+  const last = lastDataRow_(sh, map);
+  if (last < 2 || !map.url) return { ok: [], failed: [], left: 0 };
+  const rows = sh.getRange(2, 1, last - 1, sh.getLastColumn()).getValues();
+  const ps = postingsSheet_();
+  const todo = [];
+  rows.forEach(function (r, i) {
+    const job = rowToJob_(r, map);
+    if (job.url && job.id && !job.postingSaved && !findPosting_(ps, job.id)) todo.push({ row: i + 2, job: job });
+  });
+  const ok = [], failed = [];
+  const started = Date.now();
+  for (let i = 0; i < todo.length && i < max && Date.now() - started < 270000; i++) {
+    const t = todo[i], name = t.job.company + ' – ' + t.job.role;
+    const info = fetchAny_(t.job.url);
+    if (!info.text) { failed.push(name); continue; }
+    withLock_(function () {
+      const now = new Date();
+      ps.appendRow([String(t.job.id), t.job.url, now, info.text.slice(0, MAX_TEXT)]);
+      markPostingChanged_(sh, map, t.row, now);
+    });
+    ok.push(name);
+    if (linkedinId_(t.job.url)) Utilities.sleep(700); // LinkedIn nicht zu schnell hintereinander fragen
+  }
+  return { ok: ok, failed: failed, left: Math.max(0, todo.length - ok.length - failed.length) };
+}
+
+/** App: „Fehlende Anzeigen holen“. */
+function apiFetchMissing(key) {
+  check_(key);
+  return fetchMissing_(25);
+}
+
+/** Menü: Fehlende Anzeigen holen. */
+function jtAnzeigenNachladen() {
+  const r = fetchMissing_(40);
+  SpreadsheetApp.getUi().alert('Anzeigen nachgeladen',
+    'Gespeichert: ' + r.ok.length + (r.ok.length ? '\n' + r.ok.join('\n') : '') +
+    '\n\nNicht abrufbar: ' + r.failed.length + (r.failed.length ? '\n' + r.failed.join('\n') + '\n→ in Safari mit „Job speichern“ oder in der App mit „Text einfügen“ sichern.' : '') +
+    (r.left ? '\n\nNoch offen: ' + r.left + ' – einfach nochmal ausführen.' : ''), SpreadsheetApp.getUi().ButtonSet.OK);
+}
+
 /** Öffentliche LinkedIn-Jobansicht (ohne Login). Kann von LinkedIn blockiert werden. */
 function fetchLinkedin_(id) {
   try {
@@ -349,7 +440,7 @@ function savePosting_(data, linkOnly) {
     if (!url) throw new Error('Kein Text und kein Link übergeben.');
     const li = linkedinId_(url);
     if (li) url = 'https://www.linkedin.com/jobs/view/' + li + '/';
-    info = li ? fetchLinkedin_(li) : fetchPosting_(url);
+    info = fetchAny_(url);
     text = info.text || '';
     if (text.length < 200) {
       text = '';
@@ -629,6 +720,8 @@ function onOpen() {
     .addItem('Einrichten', 'jtEinrichten')
     .addItem('App-Link anzeigen', 'jtAppLink')
     .addItem('Web-App-Link ändern', 'jtLinkAendern')
+    .addSeparator()
+    .addItem('Fehlende Anzeigen holen', 'jtAnzeigenNachladen')
     .addSeparator()
     .addItem('Gmail-Abgleich einrichten', 'jtMailEinrichten')
     .addItem('Mails jetzt prüfen', 'jtMailJetzt')

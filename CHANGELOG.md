@@ -11,6 +11,14 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.12 – 12.11.2026
+- **Fehlende Anzeigen holen:** Neuer Knopf im Zahnrad (und im Tabellen-Menü **Job-Tracker → Fehlende Anzeigen holen**). Holt für alle Jobs mit Link, aber ohne gespeicherte Anzeige, den Text über den Link. Bis 25 pro Durchgang in der App, 40 im Menü. Danach steht da, was nicht geklappt hat.
+- Mehr Portale werden direkt erkannt: LinkedIn, Greenhouse (auch `job-boards.eu.greenhouse.io`), Lever und Ashby über deren öffentliche Schnittstellen. Bei anderen Seiten wird die strukturierte Anzeige genutzt; reine Startseiten oder Cookie-Hinweise werden nicht mehr als Anzeige gespeichert.
+- Gilt auch für „Anzeige vom Link speichern“ und den Kurzbefehl „Job-Link speichern“.
+
+**Apps Script: Bereitstellen nötig: ja** – nur `Code.gs` neu kopieren
+**Beschreibung für die Bereitstellung:** `1.6.12 – Fehlende Anzeigen holen, mehr Portale`
+
 ## 1.6.11 – 12.11.2026 (nur Apps Script)
 - Wird eine Anzeige zu einem bestehenden Job ohne Link gespeichert (z. B. ALTEN), übernimmt der Job jetzt den Link der Anzeige. Ein vorhandener Link wird nie überschrieben.
 
