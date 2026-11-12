@@ -61,7 +61,7 @@ main{padding:12px 16px calc(env(safe-area-inset-bottom) + 90px);max-width:820px;
 .capply{margin-left:auto;border:1px solid var(--s4);color:var(--s4);border-radius:999px;padding:2px 9px;font-size:12px;font-weight:600;background:transparent;cursor:pointer}
 .miss{color:var(--danger)}
 .del{color:var(--danger)}
-.tourcap{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 10px);transform:translateX(-50%);z-index:90;background:rgba(20,32,52,.92);color:#fff;padding:10px 16px;border-radius:14px;font-size:15px;font-weight:600;max-width:92vw;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.25);transition:opacity .3s;pointer-events:none}
+.tourcap{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 22px);transform:translateX(-50%);z-index:90;background:rgba(20,32,52,.92);color:#fff;padding:10px 16px;border-radius:14px;font-size:15px;font-weight:600;max-width:92vw;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.25);transition:opacity .3s;pointer-events:none}
 .tourtap{position:fixed;z-index:95;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:rgba(232,93,4,.35);border:2px solid rgba(232,93,4,.9);pointer-events:none;animation:tourtap .6s ease-out forwards}
 @keyframes tourtap{0%{transform:scale(.4);opacity:1}100%{transform:scale(1.4);opacity:0}}
 @media (min-width:700px){.ov{align-items:center}.sheet{border-radius:18px}}
@@ -859,6 +859,8 @@ async function runTour() {
   const glide = async (el, to, ms) => { const from = el === window ? window.scrollY : el.scrollTop, n = Math.max(1, Math.round(ms / 16));
     for (let i = 1; i <= n; i++) { const y = from + (to - from) * (0.5 - Math.cos(Math.PI * i / n) / 2); if (el === window) window.scrollTo(0, y); else el.scrollTop = y; await wait(16); } };
   window.confirm = () => true; // in der Demo keine Rückfragen
+  if ($('demoBar')) $('demoBar').hidden = true; if ($('bAdd')) $('bAdd').style.display = 'none';
+  const st0 = document.createElement('style'); st0.textContent = '.toast{bottom:calc(env(safe-area-inset-bottom) + 90px)!important}.sfoot{padding-bottom:70px!important}'; document.head.appendChild(st0);
   filter.on = statuses.slice(); filter.q = ''; $('q').value = ''; filter.sort = 'date'; $('sort').value = 'date'; render();
   await wait(1200);
   cap('Job-Tracker: alle Bewerbungen auf einen Blick'); await wait(2600);
@@ -866,7 +868,7 @@ async function runTour() {
   await glide(window, document.body.scrollHeight, 2600); await wait(500); await glide(window, 0, 1600); await wait(600);
   cap('Nach Status filtern');
   await tap('.chip[data-s="Abgelehnt"]'); await tap('.chip[data-s="Nicht bewerben"]'); await tap('.chip[data-s="Beworben"]', 1400);
-  await tap('.chip.meta', 600); await tap('.chip.meta', 1200);
+  await tap('.chip.meta', 1200); // „Alle an“
   cap('Sortieren, z. B. nach „Gefällt mir“');
   $('sort').value = 'like'; $('sort').dispatchEvent(new Event('change')); await wait(1800);
   $('sort').value = 'date'; $('sort').dispatchEvent(new Event('change')); await wait(600);
