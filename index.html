@@ -175,7 +175,7 @@ a{color:var(--acc)}
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.12', NEED_SCRIPT = '1.6.12'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.14', NEED_SCRIPT = '1.6.12'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Job-Tracker ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
@@ -397,6 +397,17 @@ function wireCv(j) {
   if ($('cvAgain')) $('cvAgain').onclick = go;
 }
 
+/* Anzeige speichern; hat der Job schon eine andere, entscheidet die Antwort des Skripts über die Rückfrage
+   (nicht der Stand in der App, der kann veraltet sein). Gibt null zurück, wenn abgebrochen. */
+async function savePostingAsk(data) {
+  let r = await api('apiSavePosting', Object.assign({}, data, { replace: false }));
+  if (r && r.ask) {
+    if (!confirm(r.message || 'Für diesen Job ist schon eine Anzeige gespeichert. Ersetzen?')) return null;
+    r = await api('apiSavePosting', Object.assign({}, data, { replace: true }));
+  }
+  return r;
+}
+
 /* Bewerben: Anzeige öffnen und – falls noch nicht gespeichert – im Hintergrund über den Link sichern */
 function applyNow(j) {
   if (!j.url) { toast('Kein Link hinterlegt.'); return; }
@@ -499,9 +510,8 @@ function openDetail(id) {
     catch (e) { toast('Fehler: ' + e.message, 4000); $('bSave').disabled = false; }
   };
   if ($('bFetch')) $('bFetch').onclick = async () => {
-    if (j.postingSaved && !confirm('Für diesen Job ist schon eine Anzeige gespeichert. Durch die Anzeige vom Link ersetzen?')) return;
     $('bFetch').disabled = true; $('bFetch').textContent = 'Lade Anzeige …';
-    try { const r = await api('apiSavePosting', { id: j.id, url: j.url, replace: true }); Object.assign(j, r.job); render(); openDetail(j.id); toast('Anzeige gespeichert (' + r.chars + ' Zeichen)'); }
+    try { const r = await savePostingAsk({ id: j.id, url: j.url }); if (!r) { $('bFetch').disabled = false; $('bFetch').textContent = 'Anzeige vom Link speichern'; return; } Object.assign(j, r.job); render(); openDetail(j.id); toast(r.message || 'Anzeige gespeichert'); }
     catch (e) { toast(e.message, 6000); $('bFetch').disabled = false; $('bFetch').textContent = 'Anzeige vom Link speichern'; }
   };
   $('bPaste').onclick = () => openPaste(j);
@@ -532,8 +542,7 @@ function openPaste(j) {
   $('pBack').onclick = () => openDetail(j.id);
   $('pSave').onclick = async () => {
     const t = $('pText').value.trim(); if (t.length < 50) { toast('Bitte den ganzen Anzeigentext einfügen.'); return; }
-    if (j.postingSaved && !confirm('Für diesen Job ist schon eine Anzeige gespeichert. Durch den eingefügten Text ersetzen?')) return;
-    try { const r = await api('apiSavePosting', { id: j.id, url: j.url, text: t, replace: true }); Object.assign(j, r.job); render(); openDetail(j.id); toast('Anzeige gespeichert'); }
+    try { const r = await savePostingAsk({ id: j.id, url: j.url, text: t }); if (!r) return; Object.assign(j, r.job); render(); openDetail(j.id); toast(r.message || 'Anzeige gespeichert'); }
     catch (e) { toast(e.message, 5000); }
   };
 }
@@ -784,7 +793,8 @@ function demoApi(fn, args) {
       const j = jobs.find((x) => x.id === (sg || {}).jobId); return res({ job: args[1] && j ? Object.assign({}, j, { status: sg.status }) : null }); }
     if (fn === 'apiGetPosting') return res({ url: '', savedAt: '2026-11-10', text: 'Wir bauen autonome Roboter für die Intralogistik.\n\nDeine Aufgaben\n- Kunden bei technischen Fragen unterstützen (2nd/3rd Level Support)\n- Fehler analysieren und mit der Entwicklung lösen\n- Schulungen für Kunden durchführen\n\nDein Profil\n- Technisches Studium\n- Erfahrung mit Linux, Netzwerktechnik und CAN-Bus\n- Gute Deutsch- und Englischkenntnisse\n- Kundenorientierung, Teamfähigkeit und strukturierte Arbeitsweise\n\nWas wir bieten\n- Hybrides Arbeiten\n- 30 Tage Urlaub' });
     if (fn === 'apiDeletePosting') { const j = jobs.find((x) => x.id === args[0]) || {}; return res(Object.assign({}, j, { postingSaved: '', fitNote: '' })); }
-    if (fn === 'apiSavePosting') { const j = jobs.find((x) => x.id === (args[0] || {}).id) || {}; return res({ chars: 1234, job: Object.assign({}, j, { postingSaved: new Date().toLocaleDateString('de-DE') }) }); }
+    if (fn === 'apiSavePosting') { const j = jobs.find((x) => x.id === (args[0] || {}).id) || {};
+      if (j.postingSaved && (args[0] || {}).replace === false) return res({ ask: true, job: j, chars: 0, message: 'Für ' + j.company + ' ist schon eine Anzeige gespeichert. Durch die neue ersetzen?' }); return res({ chars: 1234, job: Object.assign({}, j, { postingSaved: new Date().toLocaleDateString('de-DE') }) }); }
     rej(new Error('In der Demo nicht verfügbar'));
   }, 150));
 }

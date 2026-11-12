@@ -11,6 +11,12 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.14 – 12.11.2026 (nur App)
+- „Anzeige vom Link speichern“ und „Text einfügen“ fragen jetzt zuverlässig „ersetzen?“, wenn schon eine Anzeige gespeichert ist. Ob eine da ist, entscheidet jetzt die Tabelle und nicht mehr der zwischengespeicherte Stand in der App (der konnte veraltet sein, dann kam keine Frage).
+- Ist der Text gleich, kommt keine Frage, nur „unverändert“.
+
+**Apps Script: Bereitstellen nötig: nein** (braucht Skript ab 1.6.5)
+
 ## 1.6.13 – 12.11.2026 (nur Apps Script)
 - **Sauberere Anzeigen von Karriereseiten** (z. B. Arthrex / SAP SuccessFactors): Statt der ganzen Seite wird nur noch die Anzeige gespeichert, mit Titel, Datum, Ort und Firma oben. Cookie-Hinweise, Sprach- und Regionsauswahl, Suche, Menüs, Login-Links und Fußzeile fallen weg.
 - Seiten ohne erkennbare Anzeige: Es wird der Hauptbereich der Seite genommen, und nur eindeutige Bereiche (Cookie-Banner, Navigation, Kopf- und Fußzeile, Suche, Sprachauswahl, Formulare) werden entfernt. Im Zweifel bleibt Text drin.
