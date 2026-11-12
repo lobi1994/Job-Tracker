@@ -11,6 +11,12 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.5.2 – 12.11.2026
+- Neues App-Icon „Karriere-Rakete“ (mit „ML“).
+- Damit das neue Icon erscheint: App vom Home-Bildschirm löschen, Einrichtungs-Link in Safari öffnen (Tabelle → Job-Tracker → App-Link anzeigen) und erneut „Zum Home-Bildschirm“.
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.5.1 – 12.11.2026
 - „Created by Matthias Lobinger“ unten in der Liste (mit Link zu LinkedIn), in den Einstellungen, auf der Einrichtungs- und der Kurzbefehl-Seite und in der README.
 
