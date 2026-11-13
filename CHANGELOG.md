@@ -11,6 +11,12 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.26 – 13.11.2026 (nur App)
+- **Neues App-Icon: Kompass in Nacht und Mint** (dunkler Hintergrund, mintgrüne Nadel nach rechts oben). Ersetzt das Weg-Logo aus 1.6.25 – oben in der App, auf dem Einrichtungs-Bildschirm und auf dem Home-Bildschirm.
+- Für das neue Home-Bildschirm-Icon: App-Symbol löschen und in Safari neu „Zum Home-Bildschirm“ hinzufügen.
+
+**Apps Script: Bereitstellen nötig: nein** (die Bereitstellung aus 1.6.25 bleibt nötig, falls noch nicht erledigt)
+
 ## 1.6.25 – 13.11.2026 (App und Apps Script)
 - **Neuer Name: Careerway.** Die App, der Startbildschirm-Name, das Menü in der Tabelle („Careerway“ statt „Job-Tracker“), Meldungen und Anleitungen heißen jetzt so. Die Internetadresse der App bleibt gleich (`lobi1994.github.io/Job-Tracker/`), damit bestehende Links und der Kurzbefehl weiter funktionieren.
 - **Neues Logo und App-Icon:** ein Weg mit Zwischenstation, der an einer gelben Zielmarke endet. Es steht oben neben dem Namen, auf dem Einrichtungs-Bildschirm und als Icon auf dem Home-Bildschirm.
