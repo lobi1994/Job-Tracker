@@ -180,7 +180,7 @@ a{color:var(--acc)}
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.18', NEED_SCRIPT = '1.6.12'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.19', NEED_SCRIPT = '1.6.12'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Job-Tracker ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
@@ -308,7 +308,7 @@ $('bSettings').onclick = () => {
   };
   if ($('xMail')) $('xMail').onclick = async () => {
     const b = $('xMail'); b.disabled = true; b.querySelector('b').textContent = 'Prüfe Mails …';
-    try { const r = await api('apiCheckMail'); closeSheet(); toast(r.added ? r.added + ' neue Rückmeldung(en) gefunden' : 'Keine neuen Rückmeldungen'); loadSuggestions(true); }
+    try { const r = await api('apiCheckMail'); closeSheet(); toast(r.added ? r.added + ' neue Rückmeldung(en) gefunden' : 'Mails geprüft – Liste aktualisiert'); shownSug = false; await load(true); }
     catch (e) { toast(e.message, 6000); b.disabled = false; b.querySelector('b').textContent = '✉️ Mails jetzt prüfen'; }
   };
   if ($('xOut')) $('xOut').onclick = () => { if (confirm('Verbindung auf diesem Gerät trennen?')) { ls.del(CK); ls.del(LK); CFG = null; closeSheet(); showSetup(); } };
@@ -321,8 +321,9 @@ function vLess(a, b) {
   for (let i = 0; i < 3; i++) { if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) < (y[i] || 0); }
   return false;
 }
-async function load(spin) {
+async function load(spin, quiet) {
   if (spin) $('bRefresh').classList.add('spin');
+  load._at = Date.now();
   try {
     const r = await api('apiList');
     jobs = r.jobs || []; statuses = r.statuses || STATUS_DEF; sheetUrl = r.sheetUrl || ''; profile = r.profile || []; scriptVersion = DEMO ? APP_VERSION : (r.version || '');
@@ -331,10 +332,21 @@ async function load(spin) {
     render();
     loadSuggestions(!shownSug);
   } catch (e) {
-    if (e.message !== 'Kein Zugriff') toast('Laden fehlgeschlagen: ' + e.message, 8000);
+    if (e.message !== 'Kein Zugriff' && !quiet) toast('Laden fehlgeschlagen: ' + e.message, 8000);
   } finally { $('bRefresh').classList.remove('spin'); }
 }
 $('bRefresh').onclick = () => load(true);
+
+/* Automatisch aktualisieren: beim Zurückkehren in die App (nach mind. 1 Minute) und alle 3 Minuten,
+   solange die App offen ist und gerade kein Fenster (Job, Anzeige …) offen ist. So erscheinen Änderungen
+   von Claude (Bewertungen, fertige CVs) und vom Gmail-Abgleich ohne Tippen auf „Neu laden“. */
+function autoRefresh(minAge) {
+  if (DEMO || !CFG || document.hidden || $('ov').classList.contains('show')) return;
+  if (Date.now() - (load._at || 0) < minAge) return;
+  load(false, true);
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) autoRefresh(60000); });
+setInterval(() => autoRefresh(170000), 180000);
 
 function renderChips() {
   const c = {}; jobs.forEach((j) => { c[j.status] = (c[j.status] || 0) + 1; });

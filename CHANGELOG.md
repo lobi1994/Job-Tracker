@@ -11,6 +11,12 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.19 – 13.11.2026 (nur App)
+- **Nach „Mails jetzt prüfen“ lädt die Liste automatisch neu** – automatisch erkannte Bewerbungsbestätigungen sind sofort sichtbar, neue Rückmeldungen werden direkt angezeigt.
+- **Automatisches Aktualisieren:** Kommst du nach mindestens 1 Minute in die App zurück, oder ist sie offen, lädt sie alle 3 Minuten still neu. So erscheinen Änderungen von Claude (Bewertungen, fertige CVs) und vom Gmail-Abgleich ohne „Neu laden“. Ist gerade ein Job oder eine Anzeige geöffnet, wird nicht neu geladen, damit nichts dazwischenfunkt.
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.6.18 – 13.11.2026 (nur App)
 - **Klarere Symbole in der Liste:** 📋 hinter der Stelle = Stellenanzeige gespeichert. 📄 hinter der CV-Bewertung = zugeschnittener CV vorhanden.
 - **Filter „CV 4+“ und „CV 3+“** in der Chip-Leiste: zeigt nur Jobs mit entsprechender Claude-Bewertung (nochmal tippen = aus). Wird mit den anderen Filtern gespeichert.
