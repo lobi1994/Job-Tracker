@@ -31,6 +31,7 @@ header{position:sticky;top:0;z-index:5;background:var(--bg);padding:calc(env(saf
 .chips::-webkit-scrollbar{display:none}
 .chip{flex:none;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:5px 11px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;opacity:.5;white-space:nowrap}
 .chip.on{opacity:1;border-color:var(--c);box-shadow:inset 0 0 0 1px var(--c)}
+.chipsep{flex:none;width:1px;align-self:stretch;margin:4px 4px;background:var(--line)}
 .chip i{width:9px;height:9px;border-radius:50%;background:var(--c);display:inline-block}
 .chip b{font-weight:600}
 .chip.meta{opacity:1;--c:var(--mute)}
@@ -192,7 +193,7 @@ a{color:var(--acc)}
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.23', NEED_SCRIPT = '1.6.12'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.24', NEED_SCRIPT = '1.6.12'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Job-Tracker ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
@@ -364,9 +365,11 @@ function renderChips() {
   const c = {}; jobs.forEach((j) => { c[j.status] = (c[j.status] || 0) + 1; });
   const allOn = statuses.every((s) => filter.on.includes(s));
   const fc = (n) => jobs.filter((j) => (j.fit || 0) >= n).length;
-  $('chips').innerHTML = '<button class="chip meta" data-all="1">' + (allOn ? 'Alle aus' : 'Alle an') + '</button>' +
-    [4, 3].map((n) => '<button class="chip fitchip' + (filter.fitMin === n ? ' on' : '') + '" data-fit="' + n + '" style="--c:var(--acc)">CV ' + n + '+ <b>' + fc(n) + '</b></button>').join('') +
-    statuses.map((s) => '<button class="chip' + (filter.on.includes(s) ? ' on' : '') + '" data-s="' + esc(s) + '" style="--c:' + col(s) + '"><i></i>' + esc(SHORT[s] || s) + ' <b>' + (c[s] || 0) + '</b></button>').join('');
+  // Reihenfolge: zuerst die Status (Offen, Beworben, Gespräch, Vor Ort …), dann „Alle aus/an“ und die CV-Filter rechts
+  $('chips').innerHTML = statuses.map((s) => '<button class="chip' + (filter.on.includes(s) ? ' on' : '') + '" data-s="' + esc(s) + '" style="--c:' + col(s) + '"><i></i>' + esc(SHORT[s] || s) + ' <b>' + (c[s] || 0) + '</b></button>').join('') +
+    '<span class="chipsep" aria-hidden="true"></span>' +
+    '<button class="chip meta" data-all="1">' + (allOn ? 'Alle aus' : 'Alle an') + '</button>' +
+    [4, 3].map((n) => '<button class="chip fitchip' + (filter.fitMin === n ? ' on' : '') + '" data-fit="' + n + '" style="--c:var(--acc)">CV ' + n + '+ <b>' + fc(n) + '</b></button>').join('');
 }
 $('chips').onclick = (e) => {
   const b = e.target.closest('.chip'); if (!b) return;

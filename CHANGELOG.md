@@ -11,6 +11,11 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.24 – 13.11.2026 (nur App)
+- **Filterleiste neu sortiert:** Die Status-Filter (Offen, Beworben, Gespräch, Vor Ort …) stehen jetzt vorne und sind sofort sichtbar. „Alle aus/an“ und die CV-Filter „CV 4+“ und „CV 3+“ folgen rechts dahinter, durch einen feinen Strich getrennt.
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.6.23 – 13.11.2026 (App und Apps Script)
 - **Gespeicherte Anzeigen werden einheitlich aufbereitet** (App und Skript nutzen dieselbe Regel):
   - HTML wird zu Text, Sonderzeichen wie `&uuml;` werden zu „ü“.
