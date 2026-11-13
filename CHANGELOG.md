@@ -11,6 +11,13 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.18 – 13.11.2026 (nur App)
+- **Klarere Symbole in der Liste:** 📋 hinter der Stelle = Stellenanzeige gespeichert. 📄 hinter der CV-Bewertung = zugeschnittener CV vorhanden.
+- **Filter „CV 4+“ und „CV 3+“** in der Chip-Leiste: zeigt nur Jobs mit entsprechender Claude-Bewertung (nochmal tippen = aus). Wird mit den anderen Filtern gespeichert.
+- **Sortierung nach Bewerbungsdatum:** „Beworben: neueste“ und neu „Beworben: älteste“ (Jobs ohne Datum stehen am Ende) – praktisch zum Nachfassen.
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.6.17 – 12.11.2026 (nur App)
 - **Automatischer Rundgang für Demo-Videos:** `lobi1994.github.io/Job-Tracker/#tour` spielt die App mit Beispieldaten selbst ab (ca. 50 Sekunden): Liste, Filter, Sortierung, Job öffnen, Bewertung, Claudes Einschätzung, gespeicherte Anzeige mit Skills, CV anfordern, Status ändern, Gmail-Rückmeldung. Kurze Texte unten erklären jeden Schritt. Keine echten Bewerbungen, nichts wird gespeichert.
 - Demo hat jetzt 10 Beispiel-Jobs (inkl. „Nicht bewerben“).
