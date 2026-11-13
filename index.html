@@ -9,8 +9,8 @@
 <meta name="apple-mobile-web-app-title" content="Careerway">
 <title>Careerway</title>
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icons/icon-180.png?v=3">
-<link rel="icon" href="icons/icon-32.png?v=3">
+<link rel="apple-touch-icon" href="icons/icon-180.png?v=4">
+<link rel="icon" href="icons/icon-32.png?v=4">
 <style>
 :root{--bg:#f4f6f9;--card:#fff;--ink:#1f2328;--mute:#68707a;--line:#e1e5ea;--navy:#1f3a5f;--acc:#2563eb;--danger:#b42318;
 --s0:#9aa1a9;--s1:#3b82f6;--s2:#d4a017;--s3:#e8792b;--s4:#2e9e5b;--s5:#c2413b;--s6:#5b6470;--rad:14px}
@@ -154,7 +154,7 @@ a{color:var(--acc)}
 <div id="demoBar" class="demo" hidden>Demo mit Beispieldaten – Änderungen werden nicht gespeichert.</div>
 <header id="hdr" hidden>
   <div class="top">
-    <h1><img class="logo" src="icons/logo.svg?v=3" alt="" width="28" height="28">Careerway<small id="cnt"></small></h1>
+    <h1><img class="logo" src="icons/logo.svg?v=4" alt="" width="28" height="28">Careerway<small id="cnt"></small></h1>
     <button class="ib" id="bRefresh" title="Aktualisieren" aria-label="Aktualisieren"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/></svg></button>
     <button class="ib" id="bSettings" title="Einstellungen" aria-label="Einstellungen"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
   </div>
@@ -176,7 +176,7 @@ a{color:var(--acc)}
 <button class="fab" id="bAdd" hidden aria-label="Neuer Job">+</button>
 
 <div class="setup" id="setup" hidden>
-  <img src="icons/logo.svg?v=3" alt="" width="96" height="96" style="display:block;margin:0 auto 12px"><h1 style="color:var(--navy)">Careerway</h1>
+  <img src="icons/logo.svg?v=4" alt="" width="96" height="96" style="display:block;margin:0 auto 12px"><h1 style="color:var(--navy)">Careerway</h1>
   <p>Verbinde die App mit deiner Google-Tabelle. Den Einrichtungs-Link bekommst du in der Tabelle über <b>Careerway → App-Link anzeigen</b>.</p>
   <div class="box">
     <label class="fl"><span>Einrichtungs-Link</span><input id="sLink" placeholder="https://…#setup=…" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
@@ -194,7 +194,7 @@ a{color:var(--acc)}
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.25', NEED_SCRIPT = '1.6.12'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.26', NEED_SCRIPT = '1.6.12'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Careerway ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
