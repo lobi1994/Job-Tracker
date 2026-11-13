@@ -102,6 +102,8 @@ main{padding:12px 16px calc(env(safe-area-inset-bottom) + 90px);max-width:820px;
 .setb{height:auto!important;min-height:52px;flex-direction:column;align-items:flex-start!important;text-align:left;padding:10px 14px!important;gap:2px!important;width:100%}
 .setb b{font-size:16px}
 .setb span{font-size:13px;color:var(--mute);font-weight:400}
+.langsw{display:flex;align-items:center;gap:8px;margin:10px 0 4px;flex-wrap:wrap}.langsw span{font-size:13px;color:var(--mute);flex:1 1 100%}.langsw .ib{flex:1;justify-content:center}
+.trnote{font-size:12.5px;line-height:1.4;padding:8px 10px;border-radius:10px;margin:6px 0 10px;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.45)}
 .qa{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:8px;margin:10px 0 4px}
 .qbtn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:72px;padding:8px 4px;border:1px solid var(--line);border-radius:14px;background:var(--bg);color:var(--ink);font:inherit;font-size:13px;font-weight:600;line-height:1.2;text-align:center;cursor:pointer}
 .qbtn svg{width:24px;height:24px;stroke:var(--acc);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -202,11 +204,150 @@ a{color:var(--acc)}
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.28', NEED_SCRIPT = '1.6.12'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.29', NEED_SCRIPT = '1.6.12'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Careerway ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
 const CK = 'jt-cfg', LK = 'jt-cache', FK = 'jt-filter';
+
+/* ---------- Sprache Deutsch / Englisch ----------
+   Die App ist auf Deutsch geschrieben. Im englischen Modus übersetzt diese Schicht alle sichtbaren Texte
+   (Textknoten, Platzhalter, Titel, Meldungen). Eigene Daten (Firma, Stelle, Notizen) bleiben unverändert.
+   Werte, die in die Tabelle geschrieben werden (z. B. Status), bleiben immer deutsch. */
+const LANG_KEY = 'jt-lang';
+let LANG = (() => { try { return localStorage.getItem(LANG_KEY) || 'de'; } catch (e) { return 'de'; } })();
+const EN = {
+  // Status und Kurzformen
+  'Noch nicht beworben': 'Not applied yet', 'Beworben': 'Applied', 'Zum Gespräch eingeladen': 'Invited to interview',
+  'Persönliches Gespräch': 'On-site interview', 'Jobangebot': 'Job offer', 'Abgelehnt': 'Rejected', 'Nicht bewerben': "Won't apply",
+  'Offen': 'Open', 'Gespräch': 'Interview', 'Vor Ort': 'On-site', 'Angebot': 'Offer',
+  'Alle aus': 'All off', 'Alle an': 'All on',
+  // Kopf, Suche, Sortierung
+  'Aktualisieren': 'Refresh', 'Einstellungen': 'Settings', 'Firma oder Stelle suchen': 'Search company or role', 'Sortierung': 'Sort',
+  'Beworben: neueste': 'Applied: newest', 'Beworben: älteste': 'Applied: oldest', 'Lebenslauf passt': 'Résumé fit', 'Gefällt mir': 'Interest',
+  'Status': 'Status', 'Firma A–Z': 'Company A–Z', 'Neuer Job': 'New job', 'Nach Status filtern': 'Filter by status',
+  'Demo mit Beispieldaten – Änderungen werden nicht gespeichert.': 'Demo with sample data – changes are not saved.',
+  'Keine Jobs für diesen Filter.': 'No jobs for this filter.', 'Noch keine Jobs. Tipp auf +.': 'No jobs yet. Tap +.',
+  'Bewerben ↗': 'Apply ↗', 'Jetzt bewerben ↗': 'Apply now ↗',
+  // Einrichtung
+  'Verbinde die App mit deiner Google-Tabelle. Den Einrichtungs-Link bekommst du in der Tabelle über': 'Connect the app to your Google Sheet. You get the setup link in the sheet via',
+  'Careerway → App-Link anzeigen': 'Careerway → Show app link', 'Einrichtungs-Link': 'Setup link', 'oder einzeln:': 'or separately:',
+  'App-Link (endet auf /exec)': 'App link (ends with /exec)', 'Schlüssel': 'Key', 'Verbinden': 'Connect', 'Demo ansehen': 'View demo', 'Abbrechen': 'Cancel',
+  // Einstellungen
+  'Demo-Modus': 'Demo mode', 'Verbunden mit deiner Google-Tabelle': 'Connected to your Google Sheet', 'wird geprüft …': 'checking …', 'bitte aktualisieren': 'please update',
+  '📊 Tabelle öffnen': '📊 Open sheet', 'Deine Google-Tabelle in Google Sheets': 'Your Google Sheet',
+  '📲 Kurzbefehle einrichten': '📲 Set up shortcuts', 'Anleitung für „Job speichern“ und „Job-Link speichern“ mit deinem Schlüssel': 'Guide for the “Job speichern” and “Job-Link speichern” shortcuts with your key',
+  '📝 Änderungen': '📝 Changelog', 'Was in welcher Version neu ist (CHANGELOG)': 'What is new in each version (CHANGELOG)',
+  '📥 Fehlende Stellenausschreibungen holen': '📥 Fetch missing job postings',
+  'Holt für alle Jobs mit Link, aber ohne gespeicherte Stellenausschreibung, den Text über den Link (bis 25 pro Durchgang)': 'Fetches the text for all jobs that have a link but no saved job posting (up to 25 per run)',
+  '✉️ Mails jetzt prüfen': '✉️ Check emails now', 'Sucht sofort nach Bestätigungen, Absagen und Einladungen. Läuft sonst automatisch alle 30 Minuten.': 'Looks for confirmations, rejections and invitations right away. Otherwise runs every 30 minutes.',
+  '🔗 Anders verbinden': '🔗 Connect differently', 'Neuen App-Link oder Schlüssel eintragen, z. B. nach einem neuen Schlüssel': 'Enter a new app link or key, e.g. after creating a new key',
+  '⏏️ Verbindung trennen': '⏏️ Disconnect', 'Löscht App-Link und Schlüssel auf diesem Gerät. Die Tabelle bleibt unverändert.': 'Removes the app link and key from this device. The sheet stays unchanged.',
+  'Verbindung auf diesem Gerät trennen?': 'Disconnect on this device?', 'Schließen': 'Close', 'Sprache': 'Language',
+  // Job-Ansicht
+  'Stellen­ausschreibung': 'Job posting', 'Stellenausschreibung': 'Job posting', 'Lebenslauf': 'Résumé',
+  'Stellenausschreibung noch nicht gespeichert – unten unter „Mehr“ speichern.': 'Job posting not saved yet – save it below under “More”.',
+  'Beworben am': 'Applied on', 'Gespräche': 'Interviews', '＋ Gespräch hinzufügen': '＋ Add interview', 'Gespräch entfernen': 'Remove interview',
+  'Art …': 'Type …', 'Telefon': 'Phone', 'Video': 'Video', 'Persönlich (vor Ort)': 'In person (on-site)', 'Assessment Center': 'Assessment center', 'Sonstiges': 'Other',
+  'Notiz (z. B. 2. Gespräch mit Teamlead)': 'Note (e.g. 2nd interview with team lead)',
+  'Bewertung': 'Rating', 'Lebenslauf passt (Einschätzung)': 'Résumé fit (estimate)', 'Details': 'Details',
+  'Gehalt angegeben': 'Salary stated', 'Weg / Portal': 'Channel / portal', 'Notizen': 'Notes',
+  'Mehr: Stellenausschreibung verwalten, Firma und Stelle ändern': 'More: manage job posting, edit company and role',
+  'Stellenausschreibung noch nicht gespeichert.': 'Job posting not saved yet.', 'Vom Link speichern': 'Save from link', 'Text einfügen': 'Paste text', '🗑 Löschen': '🗑 Delete',
+  'Firma': 'Company', 'Stelle': 'Role', 'Ort / Remote': 'Location / remote', 'Link zur Stellenausschreibung': 'Link to job posting', 'Lebenslauf-Datei': 'Résumé file',
+  'Speichern': 'Save', 'Gespeichert': 'Saved', 'Zurück': 'Back', 'Anlegen': 'Create', 'Kein Link hinterlegt.': 'No link saved.',
+  'Zugeschnittener Lebenslauf': 'Tailored résumé', 'Zugeschnittener Lebenslauf ist fertig': 'Tailored résumé is ready', 'Oben über „Lebenslauf“ öffnen.': 'Open it with “Résumé” at the top.',
+  'Neu erstellen lassen': 'Create again', 'Lebenslauf mit Claude erstellen': 'Create résumé with Claude', 'Nochmal versuchen': 'Try again',
+  'Claude baut einen Lebenslauf passend zu dieser Stelle (nur wahre Inhalte, Sprache der Stellenausschreibung).': 'Claude builds a résumé tailored to this job (only true content, in the language of the job posting).',
+  'Lebenslauf angefordert': 'Résumé requested', 'Datei nicht in Google Drive gefunden.': 'File not found in Google Drive.',
+  'Für diesen Job ist noch keine Stellenausschreibung gespeichert. Claude nutzt dann nur Titel und Link. Trotzdem anfordern?': 'No job posting is saved for this job yet. Claude will only use the title and link. Request anyway?',
+  'Für diesen Job ist schon eine Stellenausschreibung gespeichert. Ersetzen?': 'A job posting is already saved for this job. Replace it?',
+  'Lade Stellenausschreibung …': 'Loading job posting …', 'Stellenausschreibung gespeichert': 'Job posting saved', 'Stellenausschreibung gelöscht': 'Job posting deleted',
+  'Stellenausschreibung automatisch gespeichert': 'Job posting saved automatically',
+  'Stellenausschreibung konnte nicht automatisch geholt werden – in Safari: Teilen → „Job speichern“.': 'Could not fetch the job posting automatically – in Safari: Share → “Job speichern”.',
+  // Stellenausschreibung lesen / einfügen
+  'Text der Stellenausschreibung einfügen': 'Paste job posting text', 'Text der Stellenausschreibung': 'Job posting text',
+  'Bitte den ganzen Text der Stellenausschreibung einfügen.': 'Please paste the full job posting text.',
+  'Originaltext anzeigen': 'Show original text', 'Gegliederte Ansicht': 'Structured view', 'Original öffnen': 'Open original', 'Nichts gespeichert.': 'Nothing saved.', 'Lade …': 'Loading …',
+  'Skills': 'Skills', 'Hard Skills': 'Hard skills', 'Soft Skills': 'Soft skills', 'Skills aus der Stellenausschreibung': 'Skills from the job posting',
+  '✓ = steht in deinem Profil (Tabelle, Blatt „Profil“). Grau = fehlt dort – ggf. ergänzen, wenn du es kannst.': '✓ = in your profile (sheet “Profil”). Grey = missing there – add it if you have it.',
+  'Aufgaben': 'Tasks', 'Profil': 'Profile', 'Benefits': 'Benefits', 'Über die Firma': 'About the company', 'Bewerbung & Kontakt': 'Application & contact', 'Weitere Informationen': 'More information',
+  'Analytisches Denken': 'Analytical thinking', 'Strukturiertes Arbeiten': 'Structured working', 'Interkulturelle Kompetenz': 'Intercultural competence', 'Agile Methoden': 'Agile methods',
+  'Technischer Support': 'Technical support', 'Technischer Vertrieb / Pre-Sales': 'Technical sales / pre-sales', 'Schulungen / Trainings': 'Training',
+  // Neuer Job
+  'Text der Stellenausschreibung (optional, einfach hineinkopieren)': 'Job posting text (optional, just paste it)', 'Aufgaben, Profil, Benefits …': 'Tasks, profile, benefits …',
+  'Ohne Text: Stellenausschreibung vom Link abrufen': 'Without text: fetch job posting from link', 'Bitte Firma oder Stelle angeben.': 'Please enter a company or role.', 'Job angelegt': 'Job created',
+  'oder in Safari / LinkedIn: Teilen → Job speichern': 'or in Safari / LinkedIn: Share → Job speichern',
+  // Mail-Vorschläge
+  'Rückmeldung per Mail': 'Email feedback', 'Später': 'Later', 'Nein': 'No', 'Ja': 'Yes', 'Mail in Gmail öffnen': 'Open email in Gmail', 'Job öffnen': 'Open job', 'Status geändert': 'Status changed',
+  'als „Abgelehnt“ markieren': 'mark as “Rejected”', 'als „Beworben“ markieren': 'mark as “Applied”',
+  'auf „Zum Gespräch eingeladen“ setzen': 'set to “Invited to interview”', 'auf „Persönliches Gespräch“ setzen': 'set to “On-site interview”',
+  'Absage': 'Rejection', 'Einladung': 'Invitation', 'Eingangsbestätigung': 'Confirmation',
+  // Fehler
+  'Keine Internetverbindung.': 'No internet connection.', 'In der Demo nicht verfügbar': 'Not available in the demo', 'Kein Zugriff': 'No access',
+  'Der Schlüssel passt nicht (mehr). Bitte deinen aktuellen Einrichtungs-Link öffnen.': 'The key does not match (anymore). Please open your current setup link.',
+  'Link oder Schlüssel stimmen nicht. Der App-Link beginnt mit https://script.google.com/ und endet auf /exec.': 'Link or key is wrong. The app link starts with https://script.google.com/ and ends with /exec.',
+  // Übersetzung
+  'Maschinell übersetzt': 'Machine-translated'
+};
+// Texte mit Zahlen oder Namen
+const EN_PAT = [
+  [/^(\d+) von (\d+)$/, '$1 of $2'],
+  [/^Stellenausschreibung gespeichert am (.+)$/, 'Job posting saved on $1'],
+  [/^Lebenslauf: (.+)$/, 'Résumé: $1'],
+  [/^App (\S+) · Apps Script (.*)$/, 'App $1 · Apps Script $2'],
+  [/^ · gespeichert (.+)$/, ' · saved $1'],
+  [/^✉️ (\d+) neue Rückmeldung(?:en)? per Mail – ansehen$/, (m, n) => '✉️ ' + n + ' new email update' + (n === '1' ? '' : 's') + ' – view'],
+  [/^(\d+) neue Rückmeldung\(en\) gefunden$/, '$1 new email update(s) found'],
+  [/^Passung Hard Skills: (\d+) %$/, 'Hard-skill fit: $1 %'],
+  [/^\((\d+) von (\d+) bringst du laut Profil mit\)$/, '(you have $1 of $2 according to your profile)'],
+  [/^Gespeicherte Stellenausschreibung für (.+) wirklich löschen\? Die Claude-Bewertung wird dabei auch zurückgesetzt\.$/, 'Really delete the saved job posting for $1? The Claude rating will be reset too.'],
+  [/^Für (.+) ist schon eine Stellenausschreibung gespeichert\. Durch die neue ersetzen\?$/, 'A job posting is already saved for $1. Replace it with the new one?'],
+  [/^Für (.+) ist schon eine Anzeige gespeichert \((.+)\)\. Durch die neue ersetzen\?$/, 'A job posting is already saved for $1 ($2). Replace it with the new one?'],
+  [/^(\d+) Stellenausschreibung\(n\) gespeichert/, '$1 job posting(s) saved'],
+  [/^Lebenslauf angefordert (.+)$/, 'Résumé requested $1'],
+  [/^angefordert (.+)$/, 'requested $1'],
+  [/^Fehler: (.+)$/, (m, x) => 'Error: ' + trText(x)],
+  [/^Laden fehlgeschlagen: (.+)$/, (m, x) => 'Loading failed: ' + trText(x)],
+  [/^Mails geprüft – Liste aktualisiert$/, 'Emails checked – list updated'],
+  [/^Claude: /, 'Claude: ']
+];
+function trText(s) {
+  if (LANG !== 'en' || !s) return s;
+  const t = s.trim(); if (!t) return s;
+  let out = Object.prototype.hasOwnProperty.call(EN, t) ? EN[t] : null;
+  if (out === null) for (const [re, rep] of EN_PAT) { if (re.test(t)) { out = t.replace(re, rep); break; } }
+  if (out === null) return s;
+  return s.replace(t, out);
+}
+const TR_SKIP = 'script,style,textarea,.notr';
+function trNode(root) {
+  if (LANG !== 'en' || !root) return;
+  if (root.nodeType === 3) { if (!root.parentElement || !root.parentElement.closest(TR_SKIP)) { const v = trText(root.nodeValue); if (v !== root.nodeValue) root.nodeValue = v; } return; }
+  if (root.nodeType !== 1 || root.closest(TR_SKIP)) return;
+  const els = [root].concat(Array.from(root.querySelectorAll('[placeholder],[title],[aria-label]')));
+  els.forEach((el) => ['placeholder', 'title', 'aria-label'].forEach((a) => { if (el.hasAttribute && el.hasAttribute(a) && !el.closest(TR_SKIP)) { const v = trText(el.getAttribute(a)); if (v !== el.getAttribute(a)) el.setAttribute(a, v); } }));
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.parentElement && n.parentElement.closest(TR_SKIP) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT) });
+  const nodes = []; while (w.nextNode()) nodes.push(w.currentNode);
+  nodes.forEach((n) => { const v = trText(n.nodeValue); if (v !== n.nodeValue) n.nodeValue = v; });
+}
+let trBusy = false;
+const trObs = new MutationObserver((muts) => {
+  if (trBusy || LANG !== 'en') return; trBusy = true;
+  try { muts.forEach((m) => { if (m.type === 'characterData') trNode(m.target); else m.addedNodes.forEach(trNode); }); }
+  finally { trObs.takeRecords(); trBusy = false; }
+});
+function startTr() {
+  document.documentElement.lang = LANG;
+  if (LANG !== 'en') return;
+  trNode(document.body);
+  trObs.observe(document.body, { childList: true, subtree: true, characterData: true });
+  const c0 = window.confirm.bind(window), a0 = window.alert.bind(window);
+  window.confirm = (m) => c0(trText(String(m)));
+  window.alert = (m) => a0(trText(String(m)));
+}
+function setLang(l) { try { localStorage.setItem(LANG_KEY, l); } catch (e) { /* egal */ } location.reload(); }
+
 let CFG = null, DEMO = false, jobs = [], statuses = STATUS_DEF.slice(), sheetUrl = '', scriptVersion = '', profile = [];
 let filter = { on: STATUS_DEF.slice(), q: '', sort: 'date', fitMin: 0 };
 const $ = (id) => document.getElementById(id);
@@ -262,7 +403,7 @@ async function apiOnce(fn, args) {
 }
 
 function toast(t, ms) {
-  const el = $('toast'); el.textContent = t; el.classList.add('show');
+  const el = $('toast'); el.textContent = trText(String(t)); el.classList.add('show');
   clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.remove('show'), ms || 2600);
 }
 
@@ -304,6 +445,7 @@ $('bSettings').onclick = () => {
   const btn = (id, label, hint) => '<button class="ib setb" id="' + id + '"><b>' + label + '</b>' + (hint ? '<span>' + hint + '</span>' : '') + '</button>';
   openSheet('<h2>Einstellungen</h2><p class="sub">' + (DEMO ? 'Demo-Modus' : 'Verbunden mit deiner Google-Tabelle') + '</p>' +
     '<p class="sub">App ' + APP_VERSION + ' · Apps Script ' + sv + '</p>' +
+    '<div class="langsw notr"><span>Sprache / Language</span><button class="ib' + (LANG === 'de' ? ' pri' : '') + '" data-lang="de">Deutsch</button><button class="ib' + (LANG === 'en' ? ' pri' : '') + '" data-lang="en">English</button></div>' +
     '<div class="setlist">' +
       (sheetUrl ? btn('xSheet', '📊 Tabelle öffnen', 'Deine Google-Tabelle in Google Sheets') : '') +
       (DEMO ? '' : btn('xShort', '📲 Kurzbefehle einrichten', 'Anleitung für „Job speichern“ und „Job-Link speichern“ mit deinem Schlüssel')) +
@@ -314,6 +456,7 @@ $('bSettings').onclick = () => {
       (DEMO ? '' : btn('xOut', '⏏️ Verbindung trennen', 'Löscht App-Link und Schlüssel auf diesem Gerät. Die Tabelle bleibt unverändert.')) +
     '</div><p class="sub" style="margin-top:12px">Created by Matthias Lobinger</p>',
     '<button class="ib" id="xClose">Schließen</button>');
+  document.querySelectorAll('.langsw [data-lang]').forEach((b) => { b.onclick = () => { if (b.dataset.lang !== LANG) setLang(b.dataset.lang); }; });
   const ext = (u) => { if (IOS) openExt(u); else window.open(u, '_blank', 'noopener'); };
   if ($('xSheet')) $('xSheet').onclick = () => ext(sheetUrl);
   if ($('xShort')) $('xShort').onclick = () => ext(new URL('kurzbefehl.html', location.href).href.replace(/#.*$/, '') + '#setup=' + encSetup(CFG));
@@ -414,8 +557,8 @@ function render() {
   $('cnt').textContent = v.length + ' von ' + jobs.length;
   $('list').innerHTML = v.length ? v.map((j) =>
     '<div class="card" data-id="' + esc(j.id) + '" style="--c:' + col(j.status) + '">' +
-      '<div class="r1"><span class="co">' + esc(j.company || '–') + '</span><span class="dt">' + esc(fmtDate(j.appliedOn)) + '</span></div>' +
-      '<div class="ro">' + esc(j.role) + (j.postingSaved ? ' <span class="mk" title="Stellenausschreibung gespeichert">📋</span>' : '') + '</div>' +
+      '<div class="r1"><span class="co notr">' + esc(j.company || '–') + '</span><span class="dt">' + esc(fmtDate(j.appliedOn)) + '</span></div>' +
+      '<div class="ro"><span class="notr">' + esc(j.role) + '</span>' + (j.postingSaved ? ' <span class="mk" title="Stellenausschreibung gespeichert">📋</span>' : '') + '</div>' +
       '<div class="r3"><span class="pill" style="--c:' + col(j.status) + '">' + esc(SHORT[j.status] || j.status) + '</span>' +
         (j.location ? '<span>' + esc(j.location) + '</span>' : '') +
         (j.interview ? '<span>📅 ' + esc(ivShort(j.interview)) + '</span>' : '') +
@@ -509,7 +652,7 @@ $('ov').onclick = (e) => { if (e.target === $('ov')) closeSheet(); };
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
 
 function head(title, sub, btns) {
-  return '<div class="shead"><div class="tt"><h2>' + esc(title) + '</h2>' + (sub ? '<p class="sub">' + esc(sub) + '</p>' : '') + '</div>' + btns + '</div>';
+  return '<div class="shead"><div class="tt"><h2>' + esc(trText(title)) + '</h2>' + (sub ? '<p class="sub notr">' + esc(sub) + '</p>' : '') + '</div>' + btns + '</div>';
 }
 function starRow(id, val, cls) {
   return '<div class="stars ' + (cls || '') + '" id="' + id + '" data-v="' + (val || '') + '">' +
@@ -524,7 +667,7 @@ function wireStars(id) {
     el.querySelectorAll('button').forEach((x) => x.classList.toggle('on', Number(x.dataset.n) <= v));
   };
 }
-const statusOpts = (cur) => statuses.map((s) => '<option' + (s === cur ? ' selected' : '') + '>' + esc(s) + '</option>').join('');
+const statusOpts = (cur) => statuses.map((s) => '<option value="' + esc(s) + '"' + (s === cur ? ' selected' : '') + '>' + esc(s) + '</option>').join('');
 // Gespräche: eine Zeile je Gespräch in „Gespräch am“: „TT.MM.JJJJ HH:MM · Art · Notiz“
 const IV_TYPES = ['Telefon', 'Video', 'Persönlich (vor Ort)', 'Assessment Center', 'Sonstiges'];
 function parseIv(txt) {
@@ -556,7 +699,7 @@ function ivShort(txt) {
   }).join(' | ');
 }
 function ivRow(e) {
-  const opts = ['<option value="">Art …</option>'].concat(IV_TYPES.map((t) => '<option' + (t === e.type ? ' selected' : '') + '>' + t + '</option>')).join('');
+  const opts = ['<option value="">Art …</option>'].concat(IV_TYPES.map((t) => '<option value="' + t + '"' + (t === e.type ? ' selected' : '') + '>' + t + '</option>')).join('');
   return '<div class="ivr"><input type="datetime-local" class="ivd" value="' + esc(e.dt) + '"><select class="ivt">' + opts + '</select>' +
     '<button type="button" class="ivx" title="Gespräch entfernen">✕</button>' +
     '<input type="text" class="ivn" placeholder="Notiz (z. B. 2. Gespräch mit Teamlead)" value="' + esc(e.note) + '"></div>';
@@ -600,7 +743,7 @@ function openDetail(id) {
     '<div class="sec">Bewertung</div>' +
     '<div class="fl"><span>Gefällt mir</span>' + starRow('fLike', j.like) + '</div>' +
     '<div class="fl"><span>Lebenslauf passt (Einschätzung)</span>' + starRow('fFit', j.fit, 'fit') + '</div>' +
-    (j.fitNote ? '<p class="fitnote">Claude: ' + esc(j.fitNote) + '</p>' : '') +
+    (j.fitNote ? '<p class="fitnote">Claude: <span class="notr">' + esc(j.fitNote) + '</span></p>' : '') +
     (j.status === statuses[0] ? '<div class="cvbox" id="cvBox">' + cvBoxHtml(j) + '</div>' : '') +
     '<div class="sec">Details</div>' +
     '<div class="row2 stack">' + inp('fSalary', 'Gehalt angegeben', j.salary) + inp('fChannel', 'Weg / Portal', j.channel) + '</div>' +
@@ -682,15 +825,26 @@ function openPaste(j) {
 
 /* Gespeicherte Stellenausschreibung: sofort aus dem Gerät zeigen (falls schon einmal geladen), parallel frisch aus der Tabelle holen.
    Klappt das Laden nicht, bleibt die Kopie aus dem Gerät stehen. */
+/* Englische Fassung aus dem Gerätespeicher, wenn sie zur gespeicherten Ausschreibung passt. */
+function enPosting(id, p) {
+  const c = ls.get('jt-post-en-' + id);
+  return c && c.sig === p.savedAt + '|' + p.text.length ? c : null;
+}
+
 async function openPosting(j) {
   const key = 'jt-post-' + j.id;
   const cached = ls.get(key);
   let shown = null;
-  const show = (p) => {
-    shown = p;
+  const show = (p0) => {
+    shown = p0;
+    // Englisch: übersetzten Text zeigen (falls vorhanden), mit Hinweis oben
+    const en = LANG === 'en' && p0 && p0.text ? enPosting(j.id, p0) : null;
+    const p = p0 && en && en.text ? Object.assign({}, p0, { text: en.text }) : p0;
+    const note = !p0 || LANG !== 'en' ? '' : (en && en.translated ? '<div class="trnote notr">🌐 Machine-translated from German with Google Translate. The translation may contain errors – check important details in the original (“Show original text” shows the translated full text, “Open original” the source page).</div>'
+      : en ? '' : '<div class="trnote notr" id="trWait">🌐 Translating to English …</div>');
     const f = p ? formatPosting(p.text) : null;
     openSheet(head('Stellenausschreibung', j.company + ' · ' + j.role + (p ? ' · gespeichert ' + fmtDate(p.savedAt) : ''), '') +
-      (f ? f.nav + '<div id="pFmt">' + skillsHtml(extractSkills(htmlText(p.text), profile)) + f.html + '</div><div id="pRaw" class="ptext" hidden>' + esc(htmlText(p.text)) + '</div>' +
+      note + (f ? f.nav + '<div id="pFmt">' + skillsHtml(extractSkills(htmlText(p.text), profile)) + f.html + '</div><div id="pRaw" class="ptext" hidden>' + esc(htmlText(p.text)) + '</div>' +
         '<button class="toggle" id="pToggle">Originaltext anzeigen</button>' : '<p>Nichts gespeichert.</p>'),
       '<button class="ib" id="tBack">Zurück</button>' + (p && p.url ? '<a class="ib" href="' + esc(p.url) + '" target="_blank" rel="noopener" data-ext="1">Original öffnen</a>' : ''));
     $('tBack').onclick = () => openDetail(j.id);
@@ -703,11 +857,24 @@ async function openPosting(j) {
   };
   if (cached && cached.text) show(cached);
   else openSheet('<h2>Stellenausschreibung</h2><p class="sub">' + esc(j.company) + ' · ' + esc(j.role) + '</p><p class="sub">Lade …</p>');
+  const translate = async (p) => {
+    if (LANG !== 'en' || !p || !p.text || enPosting(j.id, p)) return;
+    try {
+      const r = await api('apiTranslatePosting', j.id);
+      if (r) ls.set('jt-post-en-' + j.id, { sig: p.savedAt + '|' + p.text.length, text: r.text, translated: !!r.translated });
+    } catch (e) {
+      ls.set('jt-post-en-' + j.id, { sig: p.savedAt + '|' + p.text.length, text: '', translated: false, err: e.message });
+      toast(/Unbekannte Funktion/.test(e.message) ? 'Translation needs Apps Script 1.6.29 – please deploy the new version.' : 'Translation failed: ' + e.message, 6000);
+    }
+    if ($('tBack') && shown === p) show(p);
+  };
+  if (cached && cached.text) translate(cached);
   try {
     const p = await api('apiGetPosting', j.id);
     if (p) ls.set(key, p); else ls.del(key);
     const stillHere = shown ? !!$('tBack') : /Lade …/.test($('sheet').textContent); // nicht in ein anderes Fenster hineinspringen
     if (stillHere && (!shown || !p || p.text !== shown.text || p.savedAt !== shown.savedAt)) show(p);
+    if (stillHere) translate(p);
     else if (!stillHere && !shown) { /* Fenster wurde inzwischen gewechselt */ }
   } catch (e) {
     if (!shown && /Lade …/.test($('sheet').textContent)) { toast(e.message, 4000); openDetail(j.id); }
@@ -920,7 +1087,7 @@ function openSuggestion(i) {
     '<div class="sug" style="--c:' + col(s.status) + '"><b>' + esc(s.company) + '</b> · ' + esc(s.role) +
       '<div class="meta">' + esc(s.art) + ' · ' + esc(fmtDate(s.date)) + ' · ' + esc(s.from) + '</div>' +
       '<div><b>' + esc(s.subject) + '</b></div>' + (s.excerpt ? '<blockquote>' + esc(s.excerpt) + '</blockquote>' : '') + '</div>' +
-    '<p>Soll ich die Bewerbung <b>' + verb + '</b>?</p>' +
+    (LANG === 'en' ? '<p>Should I <b>' + trText(verb) + '</b> this application?</p>' : '<p>Soll ich die Bewerbung <b>' + verb + '</b>?</p>') +
     (s.link ? '<p><a href="' + esc(s.link) + '" target="_blank" rel="noopener">Mail in Gmail öffnen</a></p>' : ''),
     '<button class="ib" id="gLater">Später</button><button class="ib" id="gNo">Nein</button><button class="ib pri" id="gYes">Ja</button>');
   const done = async (accept) => {
@@ -992,6 +1159,7 @@ function demoApi(fn, args) {
     if (fn === 'apiRequestCv') { const j = jobs.find((x) => x.id === args[0]); return res(Object.assign({}, j, { cvRequest: 'angefordert ' + new Date().toLocaleString('de-DE').slice(0, 17), cvLink: '' })); }
     if (fn === 'apiResolveSuggestion') { const sg = demoSug.find((x) => x.vid === args[0]); demoSug = demoSug.filter((x) => x.vid !== args[0]);
       const j = jobs.find((x) => x.id === (sg || {}).jobId); return res({ job: args[1] && j ? Object.assign({}, j, { status: sg.status }) : null }); }
+    if (fn === 'apiTranslatePosting') return res({ id: args[0], translated: true, text: 'We build autonomous robots for intralogistics.\n\nYour tasks\n- Support customers with technical questions (2nd/3rd level support)\n- Analyse errors and solve them together with development\n- Run training sessions for customers\n\nYour profile\n- Technical degree\n- Experience with Linux, networking and CAN bus\n- Good German and English skills\n- Customer focus, teamwork and a structured way of working\n\nWhat we offer\n- Hybrid working\n- 30 days of vacation' });
     if (fn === 'apiGetPosting') return res({ url: '', savedAt: '2026-11-10', text: 'Wir bauen autonome Roboter für die Intralogistik.\n\nDeine Aufgaben\n- Kunden bei technischen Fragen unterstützen (2nd/3rd Level Support)\n- Fehler analysieren und mit der Entwicklung lösen\n- Schulungen für Kunden durchführen\n\nDein Profil\n- Technisches Studium\n- Erfahrung mit Linux, Netzwerktechnik und CAN-Bus\n- Gute Deutsch- und Englischkenntnisse\n- Kundenorientierung, Teamfähigkeit und strukturierte Arbeitsweise\n\nWas wir bieten\n- Hybrides Arbeiten\n- 30 Tage Urlaub' });
     if (fn === 'apiDeletePosting') { const j = jobs.find((x) => x.id === args[0]) || {}; return res(Object.assign({}, j, { postingSaved: '', fitNote: '' })); }
     if (fn === 'apiSavePosting') { const j = jobs.find((x) => x.id === (args[0] || {}).id) || {};
@@ -1051,6 +1219,7 @@ async function runTour() {
 
 /* ---------- Start ---------- */
 (function start() {
+  startTr();
   const f = ls.get(FK); if (f && Array.isArray(f.on)) { filter.on = f.on; filter.sort = f.sort || 'date'; filter.fitMin = f.fitMin || 0; }
   $('sort').value = filter.sort;
   const fromHash = parseSetup(location.hash);

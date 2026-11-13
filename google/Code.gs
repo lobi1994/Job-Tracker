@@ -8,7 +8,7 @@
  * (z. B. {fn:"apiSavePosting", key, data:{url, title, text}} – data darf auch JSON-Text sein).
  */
 
-const VERSION = '1.6.25'; // siehe CHANGELOG.md
+const VERSION = '1.6.29'; // siehe CHANGELOG.md
 const APP_PAGE = 'https://lobi1994.github.io/Job-Tracker/';
 const SHEET = 'Bewerbungen';
 const POSTINGS = 'Anzeigen';
@@ -667,6 +667,49 @@ function apiGetPosting(key, id) {
   if (!r) return null;
   const v = ps.getRange(r, 1, 1, 4).getValues()[0];
   return { id: String(v[0]), url: String(v[1]), savedAt: iso_(v[2]), text: normalizePosting_(v[3]) };
+}
+
+/* ------------------------------------------------------------------ */
+/* Übersetzung der Stellenausschreibung ins Englische (seit 1.6.29)     */
+/* Google Übersetzer über LanguageApp; Ergebnis wird in „Anzeigen“ H/I   */
+/* zwischengespeichert, damit jede Ausschreibung nur einmal übersetzt wird. */
+/* ------------------------------------------------------------------ */
+function looksEnglish_(t) {
+  const w = String(t).toLowerCase().match(/[a-zäöüß]+/g) || [];
+  const DE = { und: 1, der: 1, die: 1, das: 1, mit: 1, für: 1, sie: 1, wir: 1, ist: 1, eine: 1, ein: 1, bei: 1, oder: 1, auf: 1, zu: 1, im: 1, von: 1, dich: 1, dein: 1, deine: 1, ihre: 1 };
+  const EN = { the: 1, and: 1, with: 1, for: 1, you: 1, we: 1, is: 1, are: 1, a: 1, of: 1, to: 1, in: 1, your: 1, our: 1, will: 1, on: 1 };
+  let de = 0, en = 0;
+  w.forEach(function (x) { if (DE[x]) de++; if (EN[x]) en++; });
+  return en > de * 1.5;
+}
+
+function translateLong_(text) {
+  // LanguageApp verarbeitet nur begrenzte Längen: in Absätzen bis ca. 4500 Zeichen übersetzen
+  const parts = String(text).split(/\n{2,}/);
+  const chunks = []; let cur = '';
+  parts.forEach(function (p) {
+    if ((cur + '\n\n' + p).length > 4500 && cur) { chunks.push(cur); cur = p; } else cur = cur ? cur + '\n\n' + p : p;
+  });
+  if (cur) chunks.push(cur);
+  return chunks.map(function (c) { return LanguageApp.translate(c, 'de', 'en'); }).join('\n\n');
+}
+
+function apiTranslatePosting(key, id) {
+  check_(key);
+  const ps = postingsSheet_();
+  const r = findPosting_(ps, id);
+  if (!r) return null;
+  if (ps.getMaxColumns() < 9) ps.insertColumnsAfter(ps.getMaxColumns(), 9 - ps.getMaxColumns());
+  if (!ps.getRange(1, 8).getValue()) ps.getRange(1, 8, 1, 2).setValues([['Übersetzung (Englisch)', 'Übersetzt von']]).setFontWeight('bold');
+  const v = ps.getRange(r, 1, 1, 9).getValues()[0];
+  const text = normalizePosting_(v[3]);
+  const sig = iso_(v[2]) + '|' + text.length;
+  if (!text) return { id: String(id), text: '', translated: false };
+  if (looksEnglish_(text)) return { id: String(id), text: text, translated: false };
+  if (String(v[8]) === sig && v[7]) return { id: String(id), text: String(v[7]), translated: true };
+  const en = translateLong_(text);
+  ps.getRange(r, 8, 1, 2).setValues([[en, sig]]);
+  return { id: String(id), text: en, translated: true };
 }
 
 /** Link zur CV-Datei in Google Drive (sucht nach dem Dateinamen). */
