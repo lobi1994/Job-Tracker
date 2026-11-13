@@ -1,8 +1,8 @@
-/* Job-Tracker – starts the app from the device cache.
+/* Careerway – starts the app from the device cache.
  * App page: loaded fresh from the network first (no browser cache), device copy only when offline or slow.
  * Fonts: cached once. Calls to Google (your list) are never cached here. */
-var CACHE = 'jt-shell-v40';
-var SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-32.png'];
+var CACHE = 'jt-shell-v41';
+var SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-32.png', 'icons/logo.svg'];
 
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(SHELL); }).then(function () { return self.skipWaiting(); }));

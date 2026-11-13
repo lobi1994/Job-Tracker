@@ -1,5 +1,5 @@
 /*
- * Job-Tracker – Skript für den iOS-Kurzbefehl „Job speichern“
+ * Careerway – Skript für den iOS-Kurzbefehl „Job speichern“
  * Aktion: „JavaScript auf Webseite ausführen“ (Safari-Teilen-Menü).
  * Liest Titel, Firma, Ort und Text der geöffneten Stellenanzeige und gibt sie als Wörterbuch zurück.
  * Funktioniert auch auf Seiten, die nur im Browser lesbar sind (LinkedIn, Workday).

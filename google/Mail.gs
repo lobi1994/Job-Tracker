@@ -1,5 +1,5 @@
 /**
- * Job-Tracker – Gmail-Abgleich
+ * Careerway – Gmail-Abgleich
  *
  * Durchsucht neue Mails nach Rückmeldungen zu deinen Bewerbungen (Absage, Einladung,
  * Eingangsbestätigung) und legt Vorschläge im Blatt „Vorschläge“ an.
@@ -263,17 +263,17 @@ function jtMailEinrichten() {
   ScriptApp.getProjectTriggers().forEach(function (t) { if (t.getHandlerFunction() === 'jtMailPruefen') ScriptApp.deleteTrigger(t); });
   ScriptApp.newTrigger('jtMailPruefen').timeBased().everyMinutes(30).create();
   const n = jtMailPruefen();
-  SpreadsheetApp.getUi().alert('Job-Tracker', 'Gmail-Abgleich ist eingerichtet und läuft alle 30 Minuten.\n\n' +
+  SpreadsheetApp.getUi().alert('Careerway', 'Gmail-Abgleich ist eingerichtet und läuft alle 30 Minuten.\n\n' +
     n + ' Vorschlag/Vorschläge aus den letzten ' + FIRST_RUN_DAYS + ' Tagen gefunden. Sie erscheinen beim nächsten Öffnen der App.',
     SpreadsheetApp.getUi().ButtonSet.OK);
 }
 
 function jtMailJetzt() {
   const n = jtMailPruefen();
-  SpreadsheetApp.getUi().alert('Job-Tracker', n + ' neue(r) Vorschlag/Vorschläge.', SpreadsheetApp.getUi().ButtonSet.OK);
+  SpreadsheetApp.getUi().alert('Careerway', n + ' neue(r) Vorschlag/Vorschläge.', SpreadsheetApp.getUi().ButtonSet.OK);
 }
 
 function jtMailAus() {
   ScriptApp.getProjectTriggers().forEach(function (t) { if (t.getHandlerFunction() === 'jtMailPruefen') ScriptApp.deleteTrigger(t); });
-  SpreadsheetApp.getUi().alert('Job-Tracker', 'Gmail-Abgleich ist ausgeschaltet.', SpreadsheetApp.getUi().ButtonSet.OK);
+  SpreadsheetApp.getUi().alert('Careerway', 'Gmail-Abgleich ist ausgeschaltet.', SpreadsheetApp.getUi().ButtonSet.OK);
 }

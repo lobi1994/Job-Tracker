@@ -1,10 +1,10 @@
-# Job-Tracker
+# Careerway
 
 [Deutsch](README.md) | **English**
 
 A small web app I use to manage my job applications. The data lives in my own Google Sheet; the app runs on iPhone, iPad and desktop. The interface is in German.
 
-![Job-Tracker with sample data](docs/screenshot.png)
+![Careerway with sample data](docs/screenshot.png)
 
 Created by **Matthias Lobinger** · [LinkedIn](https://www.linkedin.com/in/matthias-lobinger)
 

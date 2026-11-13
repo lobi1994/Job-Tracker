@@ -11,6 +11,15 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.25 – 13.11.2026 (App und Apps Script)
+- **Neuer Name: Careerway.** Die App, der Startbildschirm-Name, das Menü in der Tabelle („Careerway“ statt „Job-Tracker“), Meldungen und Anleitungen heißen jetzt so. Die Internetadresse der App bleibt gleich (`lobi1994.github.io/Job-Tracker/`), damit bestehende Links und der Kurzbefehl weiter funktionieren.
+- **Neues Logo und App-Icon:** ein Weg mit Zwischenstation, der an einer gelben Zielmarke endet. Es steht oben neben dem Namen, auf dem Einrichtungs-Bildschirm und als Icon auf dem Home-Bildschirm.
+- Damit das neue Icon auf dem Home-Bildschirm erscheint: App-Symbol löschen und die Seite in Safari neu über Teilen → „Zum Home-Bildschirm“ hinzufügen (iOS übernimmt neue Icons sonst nicht).
+
+**Apps Script: Bereitstellen nötig: ja** (`google/Code.gs` und `google/Mail.gs`; enthält auch die Änderungen aus 1.6.23)
+
+Beschreibung für die Bereitstellung: `1.6.25 – Careerway: neuer Name, Anzeigen einheitlich aufbereiten, Menü „Gespeicherte Anzeigen aufräumen“`
+
 ## 1.6.24 – 13.11.2026 (nur App)
 - **Filterleiste neu sortiert:** Die Status-Filter (Offen, Beworben, Gespräch, Vor Ort …) stehen jetzt vorne und sind sofort sichtbar. „Alle aus/an“ und die CV-Filter „CV 4+“ und „CV 3+“ folgen rechts dahinter, durch einen feinen Strich getrennt.
 
