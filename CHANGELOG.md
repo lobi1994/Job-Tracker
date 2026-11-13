@@ -11,6 +11,11 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.21 – 13.11.2026 (nur App)
+- **„Beworben am“ füllt sich automatisch:** Stellst du im Job den Status von „Noch nicht beworben“ auf „Beworben“ (oder einen späteren Status), trägt die App das heutige Datum ein, sofern noch keins drinsteht. Das Datum bleibt änderbar. Bei „Nicht bewerben“ passiert nichts.
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.6.20 – 13.11.2026 (nur App)
 - **„Unterlagen“ im Job neu sortiert und zentriert:** oben „📖 Gespeicherte Anzeige lesen“ und „📄 CV öffnen“ nebeneinander, darunter Speicherdatum und CV-Dateiname, dann „🌐 Bewerben ↗“ (öffnet die Anzeige online). Unten unter „Anzeige verwalten“: „Vom Link speichern“, „Text einfügen“ und „🗑 Löschen“ als gleich breite Knöpfe.
 
