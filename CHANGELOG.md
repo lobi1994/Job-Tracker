@@ -11,6 +11,14 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.31 – 13.11.2026 (nur App)
+- **Gliederung englischer Stellenausschreibungen verbessert:** Erkannt werden jetzt auch Überschriften wie „Main Responsibilities“, „… Related Duties“, „Prerequisites“, „Essential / Desirable“, „You should apply if“, „Your day-to-day“, „What you'll be working on“, „Attractive work conditions“, „What's in it for you“ und „The interview process“ – auch mit Emoji oder „#“ davor, Leerzeichen vor dem Doppelpunkt oder typografischem Apostroph.
+- Deutsch zusätzlich: „Diese Herausforderungen erwarten Sie“, „Damit begeistern Sie uns“, „Das zeichnet dich aus“, „Was du mitbringst“.
+- Ganze Sätze (mehr als 7 Wörter oder mit Punkt am Ende) werden nicht mehr fälschlich als Überschrift erkannt.
+- Kommt ein Abschnitt doppelt vor (z. B. zweimal „Aufgaben“), zeigt die Sprungleiste oben den Originaltitel statt zweimal denselben Namen.
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.6.30 – 13.11.2026 (nur App)
 - Englischer Modus: Abschnitte der Stellenausschreibung (z. B. „Introduction“, „We offer“) und die erkannten Skills (z. B. „Networking“, „Customer focus“) werden ebenfalls englisch angezeigt; kürzerer Übersetzungs-Hinweis.
 

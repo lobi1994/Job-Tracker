@@ -204,7 +204,7 @@ a{color:var(--acc)}
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.30', NEED_SCRIPT = '1.6.12'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.31', NEED_SCRIPT = '1.6.12'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Careerway ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
@@ -963,15 +963,16 @@ function skillsHtml(sk) {
    Nur Darstellung: Der gespeicherte Text bleibt unverändert. Jede Zeile landet in genau einem Abschnitt,
    die Reihenfolge bleibt wie im Original – es geht nichts verloren. */
 const PSEC = [
-  { key: 'tasks', name: 'Aufgaben', c: 'var(--s1)', re: /^(ihre|deine|eure|unsere)?\s*(aufgaben|tätigkeiten|tätigkeitsbereich|aufgabengebiet|verantwortung(en|sbereich)?)|^(was (sie|du) (bei uns )?(erwartet|machen|bewegen)|das erwartet (sie|dich)|dein job|ihr job|your (tasks|responsibilities|role|impact|mission)|responsibilities|key responsibilities|what you('ll| will) do|(about )?the role|in this role|key responsibilities|tasks)\b/i },
-  { key: 'profile', name: 'Profil', c: 'var(--s2)', re: /^(ihr|dein|euer)\s*profil|^(profil|anforderungen|qualifikation(en)?|voraussetzungen|das bringst du mit|das bringen sie mit|was (sie|du) mitbring(en|st)|was wir (von dir |von ihnen )?erwarten|wen wir suchen|your profile|requirements|qualifications?( and experience)?|experience and qualifications|what you bring|who you are|about you|what we('re| are) looking for|skills|must[- ]have|nice[- ]to[- ]have)\b/i },
-  { key: 'offer', name: 'Wir bieten', c: 'var(--s4)', re: /^(was )?wir bieten|^(ihre|deine) (vorteile|benefits)|^(benefits|vorteile|unser angebot|das bieten wir|darauf (kannst du|können sie) dich|warum (wir|zu uns)|why (join|us)|what we offer|we offer|perks|our offer)\b/i },
+  { key: 'tasks', name: 'Aufgaben', c: 'var(--s1)', re: /^((ihre|deine|eure|unsere|die|deine wichtigsten|ihre wichtigsten)\s*)?(haupt)?(aufgaben|tätigkeiten|tätigkeitsbereich|aufgabengebiet|verantwortung(en|sbereich)?|mission)\b|^(was (sie|du) (bei uns )?(erwartet|machen|bewegen|tun wirst)|was dich erwartet|das erwartet (sie|dich)|dein job|ihr job|deine rolle|ihre rolle|((your|main|key|core|primary|job|the|role)\s*)*(tasks|responsibilities|duties|mission|impact|role)|.{0,40}\b(responsibilities|duties)|what you('ll| will) (do|be doing|be working on)|your day[- ]to[- ]day|(diese )?herausforderungen erwarten (sie|dich)|was (sie|dich) erwartet|(about )?the (role|job|position)|in this role|the opportunity|job description)\b/i },
+  { key: 'profile', name: 'Profil', c: 'var(--s2)', re: /^(ihr|dein|euer)\s*profil|^(profil|anforderungen|qualifikation(en)?|voraussetzungen|das bringst du mit|das bringen sie mit|was (sie|du) mitbring(en|st)|was du mitbringst|das zeichnet (dich|sie) aus|was wir (von dir |von ihnen )?erwarten|wen wir suchen|((your|the|candidate|desired|ideal|required|key)\s*)*(profile|requirements|qualifications?|prerequisites|skills|background|experience)( and (experience|skills|qualifications))?|experience and qualifications|what you bring|what you('ll| will) bring|who you are|about you|the ideal candidate|you should apply if|essential|desirable|damit begeistern (sie|du) uns|what we('re| are) looking for|who we('re| are) looking for|must[- ]have|nice[- ]to[- ]have)\b/i },
+  { key: 'offer', name: 'Wir bieten', c: 'var(--s4)', re: /^(was )?wir bieten|^(ihre|deine|unsere) (vorteile|benefits)|^(benefits|vorteile|unser angebot|das bieten wir|was wir (dir|ihnen) bieten|darauf (kannst du|können sie) dich|warum (wir|zu uns)|why (join|us|work)|what we offer|we offer|what('s| is) in it for you|perks|our offer|((attractive|our|great|your)\s*)*(work(ing)? conditions|compensation( and benefits)?|benefits?))\b/i },
   { key: 'company', name: 'Über die Firma', c: 'var(--s3)', re: /^(über uns|wer wir sind|das unternehmen|unternehmen|about us|about the company|who we are|our company|company|über (die|das) )/i },
-  { key: 'contact', name: 'Bewerbung & Kontakt', c: 'var(--navy)', re: /^(interesse geweckt|kontakt|ansprechpartner|bewerbung|so bewirbst du dich|jetzt bewerben|haben wir dein interesse|klingt (gut|spannend)|contact|how to apply|apply now|interested)/i }
+  { key: 'contact', name: 'Bewerbung & Kontakt', c: 'var(--navy)', re: /^(interesse geweckt|kontakt|ansprechpartner|bewerbung|so bewirbst du dich|jetzt bewerben|haben wir dein interesse|klingt (gut|spannend)|contact|how to apply|apply now|interested|next steps|hiring process|our hiring process|the interview process|interview process)/i }
 ];
 function headingOf(line) {
-  const t = line.replace(/^[#*\s]+|[*\s]+$/g, '').replace(/[:：]$/, '').trim();
+  const t = line.replace(/^[^\p{L}\p{N}]+/u, '').replace(/[*\s]+$/g, '').replace(/[:：]$/, '').replace(/[\s:]*\(.*\)$/, '').replace(/[’‘]/g, "'").trim();
   if (!t || t.length > 70 || /^[-•·]/.test(line.trim())) return null;
+  if (t.split(/\s+/).length > 7 || /[.,;]$/.test(t)) return null; // ganze Sätze sind keine Überschriften
   for (const s of PSEC) if (s.re.test(t)) return { sec: s, title: t };
   return null;
 }
@@ -1075,7 +1076,7 @@ function formatPosting(text) {
     const sub = s.sec && s.title.toLowerCase() !== s.sec.name.toLowerCase() ? '<span style="font-weight:400;color:var(--mute);font-size:13px"> · ' + esc(s.title) + '</span>' : '';
     return '<section class="psec" id="' + id + '" style="--pc:' + (s.sec ? s.sec.c : 'var(--mute)') + '"><h3>' + esc(name) + sub + '</h3>' + blocks(s.lines) + '</section>';
   }).join('');
-  const nav = secs.length > 1 ? '<div class="pnav"><button data-to="psecSkills">Skills</button>' + secs.map((s) => '<button data-to="' + s.id + '">' + esc(s.sec ? s.sec.name : s.title) + '</button>').join('') + '</div>' : '';
+  const nav = secs.length > 1 ? '<div class="pnav"><button data-to="psecSkills">Skills</button>' + secs.map((s, i) => { const nm = s.sec ? s.sec.name : s.title; const dup = secs.some((o, k) => k !== i && (o.sec ? o.sec.name : o.title) === nm); return '<button data-to="' + s.id + '">' + esc(dup ? s.title : nm) + '</button>'; }).join('') + '</div>' : '';
   return { html: html, nav: nav };
 }
 
