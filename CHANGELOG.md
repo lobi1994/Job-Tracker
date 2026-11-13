@@ -11,6 +11,11 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.28 – 13.11.2026 (nur App)
+- Gespräche: Das Notizfeld ist jetzt so breit wie die ganze Zeile.
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.6.27 – 13.11.2026 (nur App)
 - **Job-Ansicht neu geordnet:** Direkt unter Firma und Stelle stehen drei große Knöpfe mit neuen Symbolen: **Stellenausschreibung** (Dokument), **Lebenslauf** (Ausweis-Symbol) und **Bewerben ↗** (Papierflieger; bei offenen Jobs grün hervorgehoben). Der frühere Kasten „Unterlagen“ unten entfällt.
 - Selten Genutztes steht eingeklappt ganz unten unter **„Mehr“**: Stellenausschreibung vom Link speichern, Text einfügen, löschen sowie Firma, Stelle, Ort, Link und Lebenslauf-Datei ändern.
