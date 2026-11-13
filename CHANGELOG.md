@@ -11,6 +11,14 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.29 – 13.11.2026 (App und Apps Script)
+- **Sprache Deutsch / Englisch:** In den Einstellungen gibt es oben den Umschalter „Sprache / Language“. Im englischen Modus sind alle Knöpfe, Überschriften, Hinweise und Meldungen englisch (z. B. „Job posting“, „Résumé“, „Apply ↗“). Deine eigenen Einträge (Firma, Stelle, Notizen) und die Werte in der Tabelle (z. B. Status) bleiben unverändert.
+- **Stellenausschreibungen auf Englisch:** Im englischen Modus wird eine deutsche Stellenausschreibung beim Öffnen automatisch mit Google Übersetzer übersetzt. Oben steht ein Hinweis, dass es eine maschinelle Übersetzung ist und Fehler enthalten kann. Die Übersetzung wird in der Tabelle (Blatt „Anzeigen“, Spalten H und I) und auf dem Gerät gespeichert, damit jede Ausschreibung nur einmal übersetzt wird. Englische Ausschreibungen bleiben, wie sie sind. Im deutschen Modus ändert sich nichts.
+
+**Apps Script: Bereitstellen nötig: ja** (`google/Code.gs`; enthält auch 1.6.23 und 1.6.25). Beim ersten Ausführen fragt Google evtl. nach einer zusätzlichen Berechtigung für den Übersetzer – bestätigen.
+
+Beschreibung für die Bereitstellung: `1.6.29 – Careerway: Englisch-Übersetzung der Stellenausschreibungen, Anzeigen aufräumen`
+
 ## 1.6.28 – 13.11.2026 (nur App)
 - Gespräche: Das Notizfeld ist jetzt so breit wie die ganze Zeile.
 
