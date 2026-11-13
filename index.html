@@ -204,7 +204,7 @@ a{color:var(--acc)}
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.29', NEED_SCRIPT = '1.6.12'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.30', NEED_SCRIPT = '1.6.12'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Careerway ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
@@ -278,6 +278,18 @@ const EN = {
   'Text der Stellenausschreibung (optional, einfach hineinkopieren)': 'Job posting text (optional, just paste it)', 'Aufgaben, Profil, Benefits …': 'Tasks, profile, benefits …',
   'Ohne Text: Stellenausschreibung vom Link abrufen': 'Without text: fetch job posting from link', 'Bitte Firma oder Stelle angeben.': 'Please enter a company or role.', 'Job angelegt': 'Job created',
   'oder in Safari / LinkedIn: Teilen → Job speichern': 'or in Safari / LinkedIn: Share → Job speichern',
+  // Abschnitte und Skills der Stellenausschreibung
+  'Einleitung': 'Introduction', 'Wir bieten': 'We offer', 'Über uns': 'About us', 'Kontakt': 'Contact', 'Sonstiges zur Stelle': 'Other details',
+  'Mobilfunk (LTE/5G)': 'Mobile networks (LTE/5G)', 'Telematik': 'Telematics', 'Fahrzeugvernetzung': 'Vehicle connectivity', 'Fahrzeugelektronik': 'Vehicle electronics',
+  'Elektronik': 'Electronics', 'Hochvolt': 'High voltage', 'Netzwerktechnik': 'Networking', 'Trace-Analyse': 'Trace analysis', 'Systemintegration': 'System integration',
+  'Inbetriebnahme': 'Commissioning', 'Projektmanagement': 'Project management', 'Testmanagement': 'Test management', 'Testfallerstellung': 'Test case design',
+  'Testautomatisierung': 'Test automation', 'Anforderungsmanagement': 'Requirements management', 'Fehleranalyse': 'Fault analysis', 'Qualitätsmanagement': 'Quality management',
+  'Qualitätsaudits': 'Quality audits', 'Lieferantenmanagement': 'Supplier management', 'V-Modell / ASPICE': 'V-model / ASPICE', 'Medizintechnik': 'Medical technology',
+  'Präsentationen': 'Presentations', 'CRM (z. B. Salesforce)': 'CRM (e.g. Salesforce)', 'Führerschein': "Driver's licence", 'Deutsch': 'German', 'Englisch': 'English',
+  'Hochschulabschluss': 'University degree', 'Kommunikation': 'Communication', 'Kundenorientierung': 'Customer focus', 'Teamarbeit': 'Teamwork', 'Selbstständigkeit': 'Independence',
+  'Eigeninitiative': 'Initiative', 'Lösungsorientierung': 'Solution focus', 'Flexibilität': 'Flexibility', 'Belastbarkeit': 'Resilience', 'Zuverlässigkeit': 'Reliability',
+  'Lernbereitschaft': 'Willingness to learn', 'Reisebereitschaft': 'Willingness to travel', 'Durchsetzungsvermögen': 'Assertiveness', 'Überzeugungskraft': 'Persuasiveness',
+  'Führungskompetenz': 'Leadership',
   // Mail-Vorschläge
   'Rückmeldung per Mail': 'Email feedback', 'Später': 'Later', 'Nein': 'No', 'Ja': 'Yes', 'Mail in Gmail öffnen': 'Open email in Gmail', 'Job öffnen': 'Open job', 'Status geändert': 'Status changed',
   'als „Abgelehnt“ markieren': 'mark as “Rejected”', 'als „Beworben“ markieren': 'mark as “Applied”',
@@ -840,10 +852,10 @@ async function openPosting(j) {
     // Englisch: übersetzten Text zeigen (falls vorhanden), mit Hinweis oben
     const en = LANG === 'en' && p0 && p0.text ? enPosting(j.id, p0) : null;
     const p = p0 && en && en.text ? Object.assign({}, p0, { text: en.text }) : p0;
-    const note = !p0 || LANG !== 'en' ? '' : (en && en.translated ? '<div class="trnote notr">🌐 Machine-translated from German with Google Translate. The translation may contain errors – check important details in the original (“Show original text” shows the translated full text, “Open original” the source page).</div>'
+    const note = !p0 || LANG !== 'en' ? '' : (en && en.translated ? '<div class="trnote notr">🌐 Machine-translated from German (Google Translate). The translation may contain errors – please check important details in the original job posting (“Open original”).</div>'
       : en ? '' : '<div class="trnote notr" id="trWait">🌐 Translating to English …</div>');
     const f = p ? formatPosting(p.text) : null;
-    openSheet(head('Stellenausschreibung', j.company + ' · ' + j.role + (p ? ' · gespeichert ' + fmtDate(p.savedAt) : ''), '') +
+    openSheet(head('Stellenausschreibung', j.company + ' · ' + j.role + (p ? (LANG === 'en' ? ' · saved ' : ' · gespeichert ') + fmtDate(p.savedAt) : ''), '') +
       note + (f ? f.nav + '<div id="pFmt">' + skillsHtml(extractSkills(htmlText(p.text), profile)) + f.html + '</div><div id="pRaw" class="ptext" hidden>' + esc(htmlText(p.text)) + '</div>' +
         '<button class="toggle" id="pToggle">Originaltext anzeigen</button>' : '<p>Nichts gespeichert.</p>'),
       '<button class="ib" id="tBack">Zurück</button>' + (p && p.url ? '<a class="ib" href="' + esc(p.url) + '" target="_blank" rel="noopener" data-ext="1">Original öffnen</a>' : ''));
