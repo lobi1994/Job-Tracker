@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#1e1b4b">
+<meta name="theme-color" content="#0b0f17">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Careerway">
@@ -158,6 +158,79 @@ a{color:var(--acc)}
 .credit a{color:inherit}
 .demo{background:#fff7d6;color:#5b4a00;font-size:12.5px;padding:6px 16px;text-align:center}
 @media (prefers-color-scheme:dark){.demo{background:#3a3210;color:#f3e3a0}}
+
+/* ===== Stil B: Nacht & Mint (seit 1.6.32) ===== */
+:root,:root[data-x]{--bg:#0b0f17;--card:#111827;--field:#0d1320;--ink:#e5e7eb;--mute:#8b95a5;--line:#1f2937;--line2:#2b3545;--navy:#34d399;--acc:#34d399;--onacc:#06231a;--danger:#f87171;
+--s0:#6b7280;--s1:#60a5fa;--s2:#fbbf24;--s3:#fb923c;--s4:#34d399;--s5:#f87171;--s6:#6b7280;--rad:12px;color-scheme:dark}
+html,body{background:var(--bg);color:var(--ink);font:15px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Segoe UI",Roboto,sans-serif;font-feature-settings:"tnum" 1;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
+header{background:rgba(11,15,23,.86);-webkit-backdrop-filter:saturate(160%) blur(14px);backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+.top h1{color:var(--ink);font-size:20px;font-weight:650;letter-spacing:-.02em}
+.top h1 .logo{width:26px;height:26px;border-radius:7px}
+.ib{background:transparent;border:1px solid var(--line2);border-radius:10px;color:var(--ink);transition:background .15s,border-color .15s}
+.ib:hover{background:#151d2b}
+.ib.pri{background:var(--acc);border-color:var(--acc);color:var(--onacc);font-weight:600}
+.ib svg,svg.i{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.chip{background:transparent;border:1px solid var(--line2);color:var(--mute);opacity:1;font-size:12.5px;padding:5px 11px}
+.chip.on{border-color:color-mix(in srgb,var(--c) 70%,transparent);box-shadow:none;color:var(--ink);background:color-mix(in srgb,var(--c) 10%,transparent)}
+.chip b{font-weight:600;color:var(--mute)}.chip.on b{color:var(--ink)}
+.chip i{width:7px;height:7px}
+.chip.meta{color:var(--mute)}
+.bar input,.bar select{background:var(--field);border:1px solid var(--line2);color:var(--ink);border-radius:10px}
+.bar input::placeholder{color:#5b6576}
+.card{background:var(--card);border:1px solid var(--line);border-left:1px solid var(--line);border-radius:var(--rad);padding:12px 14px;margin-bottom:8px;transition:border-color .15s,background .15s}
+.card:hover{border-color:var(--line2);background:#131b2a}
+.card .co{font-weight:600;letter-spacing:-.01em}
+.card .ro{color:#aab3c0;font-size:14px}
+.card .dt{color:#6b7587}
+.card .r3{gap:6px 14px;font-size:12.5px;color:var(--mute)}
+.pill{background:transparent;padding:0;color:var(--ink);font-weight:500;font-size:12.5px;display:inline-flex;align-items:center;gap:6px}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c)}
+.rt,.iv,.mk{display:inline-flex;align-items:center;gap:4px}
+.rt svg,.iv svg,.mk svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.rt.like{color:#d6b25e}.rt.fit{color:var(--acc)}
+.mk{color:#6b7587;opacity:1;vertical-align:-2px}
+.capply{border-color:color-mix(in srgb,var(--acc) 60%,transparent);color:var(--acc);font-weight:600}
+.fab{background:var(--acc);color:var(--onacc);box-shadow:0 8px 24px rgba(52,211,153,.25),0 2px 6px rgba(0,0,0,.4);font-weight:300}
+.ov{background:rgba(3,6,12,.6);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.ov.show .sheet{animation:sheetIn .22s cubic-bezier(.2,.8,.2,1)}
+@keyframes sheetIn{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+.sheet{background:var(--card);border:1px solid var(--line2);border-bottom:0}
+@media (min-width:700px){.sheet{border-bottom:1px solid var(--line2)}}
+.sheet h2,.shead h2{font-weight:650;letter-spacing:-.015em}
+.sfoot{background:var(--card);border-top:1px solid var(--line)}
+.sfoot .ib{border-radius:12px}
+.fl>span,.ivl>span{color:var(--mute);font-weight:500}
+.fl input,.fl select,.fl textarea,.ivr input,.ivr select,.ivr .ivx{background:var(--field);border:1px solid var(--line2);color:var(--ink)}
+.fl input:focus,.fl select:focus,.fl textarea:focus,.ivr input:focus,.ivr select:focus,.bar input:focus,.bar select:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px rgba(52,211,153,.18)}
+.ivadd{border-color:var(--line2);color:var(--mute)}
+.sec{color:#6b7587;font-weight:600;letter-spacing:.08em;font-size:11px}
+.stars button{background:var(--field);border:1px solid var(--line2);color:var(--mute)}
+.stars button.on{--c2:#d6b25e;color:#1a1305}
+.stars.fit button.on{--c2:var(--acc);color:var(--onacc)}
+.qbtn{background:var(--field);border:1px solid var(--line2);font-weight:500}
+.qbtn svg{stroke:var(--acc)}
+.qbtn.go{background:var(--acc);border-color:var(--acc);color:var(--onacc)}.qbtn.go svg{stroke:var(--onacc)}
+.more,.box{background:var(--field);border:1px solid var(--line2)}
+.setb{flex-direction:row!important;align-items:center!important;gap:12px!important;background:var(--field)!important}
+.setb .si{display:flex;width:34px;height:34px;border-radius:9px;align-items:center;justify-content:center;background:rgba(52,211,153,.1);color:var(--acc);flex:none;font-style:normal}
+.setb .st{display:flex;flex-direction:column;gap:2px;min-width:0}
+.setb b{font-size:15px;font-weight:600}
+.del{color:var(--danger)}
+.del svg{width:16px;height:16px}
+.psec{background:var(--field);border:1px solid var(--line);border-left:3px solid var(--pc,var(--mute))}
+.pnav button,.sk{background:transparent;border-color:var(--line2)}
+.sk.have{border-color:color-mix(in srgb,var(--acc) 55%,transparent);background:rgba(52,211,153,.08)}
+.cvbox{border-color:color-mix(in srgb,var(--acc) 55%,transparent)}
+.toggle,a{color:var(--acc)}
+.toast{background:#1b2433;border:1px solid var(--line2);color:var(--ink);box-shadow:0 8px 24px rgba(0,0,0,.45)}
+.mailbar{border:1px solid color-mix(in srgb,var(--s2) 45%,transparent);background:rgba(251,191,36,.08);color:var(--ink);display:none;padding-left:34px;position:relative}
+.mailbar.show{display:block}
+.mailbar::before{content:"";position:absolute;left:11px;top:50%;width:15px;height:15px;transform:translateY(-50%);background:var(--s2);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='14' rx='2'/%3E%3Cpath d='m3 7 9 6 9-6'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='14' rx='2'/%3E%3Cpath d='m3 7 9 6 9-6'/%3E%3C/svg%3E") center/contain no-repeat}
+.demo{background:rgba(251,191,36,.08);color:#e9cf86;border-bottom:1px solid var(--line)}
+.trnote{background:rgba(52,211,153,.07);border-color:rgba(52,211,153,.35)}
+.setup .box{background:var(--card)}
+.credit{color:#5b6576}
+::selection{background:rgba(52,211,153,.3)}
 </style>
 </head>
 <body>
@@ -204,7 +277,7 @@ a{color:var(--acc)}
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.31', NEED_SCRIPT = '1.6.12'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.32', NEED_SCRIPT = '1.6.12'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Careerway ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
@@ -228,21 +301,21 @@ const EN = {
   'Status': 'Status', 'Firma A–Z': 'Company A–Z', 'Neuer Job': 'New job', 'Nach Status filtern': 'Filter by status',
   'Demo mit Beispieldaten – Änderungen werden nicht gespeichert.': 'Demo with sample data – changes are not saved.',
   'Keine Jobs für diesen Filter.': 'No jobs for this filter.', 'Noch keine Jobs. Tipp auf +.': 'No jobs yet. Tap +.',
-  'Bewerben ↗': 'Apply ↗', 'Jetzt bewerben ↗': 'Apply now ↗',
+  'Bewerben ↗': 'Apply ↗', 'Bewerben →': 'Apply →', 'Jetzt bewerben ↗': 'Apply now ↗',
   // Einrichtung
   'Verbinde die App mit deiner Google-Tabelle. Den Einrichtungs-Link bekommst du in der Tabelle über': 'Connect the app to your Google Sheet. You get the setup link in the sheet via',
   'Careerway → App-Link anzeigen': 'Careerway → Show app link', 'Einrichtungs-Link': 'Setup link', 'oder einzeln:': 'or separately:',
   'App-Link (endet auf /exec)': 'App link (ends with /exec)', 'Schlüssel': 'Key', 'Verbinden': 'Connect', 'Demo ansehen': 'View demo', 'Abbrechen': 'Cancel',
   // Einstellungen
   'Demo-Modus': 'Demo mode', 'Verbunden mit deiner Google-Tabelle': 'Connected to your Google Sheet', 'wird geprüft …': 'checking …', 'bitte aktualisieren': 'please update',
-  '📊 Tabelle öffnen': '📊 Open sheet', 'Deine Google-Tabelle in Google Sheets': 'Your Google Sheet',
-  '📲 Kurzbefehle einrichten': '📲 Set up shortcuts', 'Anleitung für „Job speichern“ und „Job-Link speichern“ mit deinem Schlüssel': 'Guide for the “Job speichern” and “Job-Link speichern” shortcuts with your key',
-  '📝 Änderungen': '📝 Changelog', 'Was in welcher Version neu ist (CHANGELOG)': 'What is new in each version (CHANGELOG)',
-  '📥 Fehlende Stellenausschreibungen holen': '📥 Fetch missing job postings',
+  'Tabelle öffnen': 'Open sheet', 'Deine Google-Tabelle in Google Sheets': 'Your Google Sheet',
+  'Kurzbefehle einrichten': 'Set up shortcuts', 'Anleitung für „Job speichern“ und „Job-Link speichern“ mit deinem Schlüssel': 'Guide for the “Job speichern” and “Job-Link speichern” shortcuts with your key',
+  'Änderungen': 'Changelog', 'Was in welcher Version neu ist (CHANGELOG)': 'What is new in each version (CHANGELOG)',
+  'Fehlende Stellenausschreibungen holen': 'Fetch missing job postings',
   'Holt für alle Jobs mit Link, aber ohne gespeicherte Stellenausschreibung, den Text über den Link (bis 25 pro Durchgang)': 'Fetches the text for all jobs that have a link but no saved job posting (up to 25 per run)',
-  '✉️ Mails jetzt prüfen': '✉️ Check emails now', 'Sucht sofort nach Bestätigungen, Absagen und Einladungen. Läuft sonst automatisch alle 30 Minuten.': 'Looks for confirmations, rejections and invitations right away. Otherwise runs every 30 minutes.',
-  '🔗 Anders verbinden': '🔗 Connect differently', 'Neuen App-Link oder Schlüssel eintragen, z. B. nach einem neuen Schlüssel': 'Enter a new app link or key, e.g. after creating a new key',
-  '⏏️ Verbindung trennen': '⏏️ Disconnect', 'Löscht App-Link und Schlüssel auf diesem Gerät. Die Tabelle bleibt unverändert.': 'Removes the app link and key from this device. The sheet stays unchanged.',
+  'Mails jetzt prüfen': 'Check emails now', 'Sucht sofort nach Bestätigungen, Absagen und Einladungen. Läuft sonst automatisch alle 30 Minuten.': 'Looks for confirmations, rejections and invitations right away. Otherwise runs every 30 minutes.',
+  'Anders verbinden': 'Connect differently', 'Neuen App-Link oder Schlüssel eintragen, z. B. nach einem neuen Schlüssel': 'Enter a new app link or key, e.g. after creating a new key',
+  'Verbindung trennen': 'Disconnect', 'Löscht App-Link und Schlüssel auf diesem Gerät. Die Tabelle bleibt unverändert.': 'Removes the app link and key from this device. The sheet stays unchanged.',
   'Verbindung auf diesem Gerät trennen?': 'Disconnect on this device?', 'Schließen': 'Close', 'Sprache': 'Language',
   // Job-Ansicht
   'Stellen­ausschreibung': 'Job posting', 'Stellenausschreibung': 'Job posting', 'Lebenslauf': 'Résumé',
@@ -253,7 +326,7 @@ const EN = {
   'Bewertung': 'Rating', 'Lebenslauf passt (Einschätzung)': 'Résumé fit (estimate)', 'Details': 'Details',
   'Gehalt angegeben': 'Salary stated', 'Weg / Portal': 'Channel / portal', 'Notizen': 'Notes',
   'Mehr: Stellenausschreibung verwalten, Firma und Stelle ändern': 'More: manage job posting, edit company and role',
-  'Stellenausschreibung noch nicht gespeichert.': 'Job posting not saved yet.', 'Vom Link speichern': 'Save from link', 'Text einfügen': 'Paste text', '🗑 Löschen': '🗑 Delete',
+  'Stellenausschreibung noch nicht gespeichert.': 'Job posting not saved yet.', 'Vom Link speichern': 'Save from link', 'Text einfügen': 'Paste text', 'Löschen': 'Delete',
   'Firma': 'Company', 'Stelle': 'Role', 'Ort / Remote': 'Location / remote', 'Link zur Stellenausschreibung': 'Link to job posting', 'Lebenslauf-Datei': 'Résumé file',
   'Speichern': 'Save', 'Gespeichert': 'Saved', 'Zurück': 'Back', 'Anlegen': 'Create', 'Kein Link hinterlegt.': 'No link saved.',
   'Zugeschnittener Lebenslauf': 'Tailored résumé', 'Zugeschnittener Lebenslauf ist fertig': 'Tailored résumé is ready', 'Oben über „Lebenslauf“ öffnen.': 'Open it with “Résumé” at the top.',
@@ -309,7 +382,7 @@ const EN_PAT = [
   [/^Lebenslauf: (.+)$/, 'Résumé: $1'],
   [/^App (\S+) · Apps Script (.*)$/, 'App $1 · Apps Script $2'],
   [/^ · gespeichert (.+)$/, ' · saved $1'],
-  [/^✉️ (\d+) neue Rückmeldung(?:en)? per Mail – ansehen$/, (m, n) => '✉️ ' + n + ' new email update' + (n === '1' ? '' : 's') + ' – view'],
+  [/^(\d+) neue Rückmeldung(?:en)? per Mail – ansehen$/, (m, n) => n + ' new email update' + (n === '1' ? '' : 's') + ' – view'],
   [/^(\d+) neue Rückmeldung\(en\) gefunden$/, '$1 new email update(s) found'],
   [/^Passung Hard Skills: (\d+) %$/, 'Hard-skill fit: $1 %'],
   [/^\((\d+) von (\d+) bringst du laut Profil mit\)$/, '(you have $1 of $2 according to your profile)'],
@@ -454,18 +527,18 @@ $('sDemo').onclick = () => { DEMO = true; showApp(); load(true); };
 $('sCancel').onclick = () => { showApp(); };
 $('bSettings').onclick = () => {
   const sv = scriptVersion ? esc(scriptVersion) + (!DEMO && vLess(scriptVersion, NEED_SCRIPT) ? ' – <b style="color:var(--danger)">bitte aktualisieren</b>' : '') : 'wird geprüft …';
-  const btn = (id, label, hint) => '<button class="ib setb" id="' + id + '"><b>' + label + '</b>' + (hint ? '<span>' + hint + '</span>' : '') + '</button>';
+  const btn = (id, label, hint, ic) => '<button class="ib setb" id="' + id + '">' + (ic ? '<i class="si">' + ic + '</i>' : '') + '<span class="st"><b>' + label + '</b>' + (hint ? '<span>' + hint + '</span>' : '') + '</span></button>';
   openSheet('<h2>Einstellungen</h2><p class="sub">' + (DEMO ? 'Demo-Modus' : 'Verbunden mit deiner Google-Tabelle') + '</p>' +
     '<p class="sub">App ' + APP_VERSION + ' · Apps Script ' + sv + '</p>' +
     '<div class="langsw notr"><span>Sprache / Language</span><button class="ib' + (LANG === 'de' ? ' pri' : '') + '" data-lang="de">Deutsch</button><button class="ib' + (LANG === 'en' ? ' pri' : '') + '" data-lang="en">English</button></div>' +
     '<div class="setlist">' +
-      (sheetUrl ? btn('xSheet', '📊 Tabelle öffnen', 'Deine Google-Tabelle in Google Sheets') : '') +
-      (DEMO ? '' : btn('xShort', '📲 Kurzbefehle einrichten', 'Anleitung für „Job speichern“ und „Job-Link speichern“ mit deinem Schlüssel')) +
-      btn('xLog', '📝 Änderungen', 'Was in welcher Version neu ist (CHANGELOG)') +
-      (DEMO ? '' : btn('xFetch', '📥 Fehlende Stellenausschreibungen holen', 'Holt für alle Jobs mit Link, aber ohne gespeicherte Stellenausschreibung, den Text über den Link (bis 25 pro Durchgang)')) +
-      (DEMO ? '' : btn('xMail', '✉️ Mails jetzt prüfen', 'Sucht sofort nach Bestätigungen, Absagen und Einladungen. Läuft sonst automatisch alle 30 Minuten.')) +
-      btn('xRe', '🔗 Anders verbinden', 'Neuen App-Link oder Schlüssel eintragen, z. B. nach einem neuen Schlüssel') +
-      (DEMO ? '' : btn('xOut', '⏏️ Verbindung trennen', 'Löscht App-Link und Schlüssel auf diesem Gerät. Die Tabelle bleibt unverändert.')) +
+      (sheetUrl ? btn('xSheet', 'Tabelle öffnen', 'Deine Google-Tabelle in Google Sheets', IC.sheet) : '') +
+      (DEMO ? '' : btn('xShort', 'Kurzbefehle einrichten', 'Anleitung für „Job speichern“ und „Job-Link speichern“ mit deinem Schlüssel', IC.phone)) +
+      btn('xLog', 'Änderungen', 'Was in welcher Version neu ist (CHANGELOG)', IC.log) +
+      (DEMO ? '' : btn('xFetch', 'Fehlende Stellenausschreibungen holen', 'Holt für alle Jobs mit Link, aber ohne gespeicherte Stellenausschreibung, den Text über den Link (bis 25 pro Durchgang)', IC.down)) +
+      (DEMO ? '' : btn('xMail', 'Mails jetzt prüfen', 'Sucht sofort nach Bestätigungen, Absagen und Einladungen. Läuft sonst automatisch alle 30 Minuten.', IC.mail)) +
+      btn('xRe', 'Anders verbinden', 'Neuen App-Link oder Schlüssel eintragen, z. B. nach einem neuen Schlüssel', IC.link) +
+      (DEMO ? '' : btn('xOut', 'Verbindung trennen', 'Löscht App-Link und Schlüssel auf diesem Gerät. Die Tabelle bleibt unverändert.', IC.out)) +
     '</div><p class="sub" style="margin-top:12px">Created by Matthias Lobinger</p>',
     '<button class="ib" id="xClose">Schließen</button>');
   document.querySelectorAll('.langsw [data-lang]').forEach((b) => { b.onclick = () => { if (b.dataset.lang !== LANG) setLang(b.dataset.lang); }; });
@@ -481,12 +554,12 @@ $('bSettings').onclick = () => {
       closeSheet(); await load(true);
       const msg = r.ok.length + ' Stellenausschreibung(n) gespeichert' + (r.failed.length ? ' · nicht abrufbar: ' + r.failed.join(', ') + ' (in Safari mit „Job speichern“ sichern)' : '') + (r.left ? ' · noch ' + r.left + ' offen, nochmal tippen' : '');
       toast(msg, r.failed.length || r.left ? 12000 : 5000);
-    } catch (e) { toast(e.message, 6000); b.disabled = false; b.querySelector('b').textContent = '📥 Fehlende Stellenausschreibungen holen'; }
+    } catch (e) { toast(e.message, 6000); b.disabled = false; b.querySelector('b').textContent = 'Fehlende Stellenausschreibungen holen'; }
   };
   if ($('xMail')) $('xMail').onclick = async () => {
     const b = $('xMail'); b.disabled = true; b.querySelector('b').textContent = 'Prüfe Mails …';
     try { const r = await api('apiCheckMail'); closeSheet(); toast(r.added ? r.added + ' neue Rückmeldung(en) gefunden' : 'Mails geprüft – Liste aktualisiert'); shownSug = false; await load(true); }
-    catch (e) { toast(e.message, 6000); b.disabled = false; b.querySelector('b').textContent = '✉️ Mails jetzt prüfen'; }
+    catch (e) { toast(e.message, 6000); b.disabled = false; b.querySelector('b').textContent = 'Mails jetzt prüfen'; }
   };
   if ($('xOut')) $('xOut').onclick = () => { if (confirm('Verbindung auf diesem Gerät trennen?')) { ls.del(CK); ls.del(LK); CFG = null; closeSheet(); showSetup(); } };
   $('xClose').onclick = closeSheet;
@@ -570,13 +643,13 @@ function render() {
   $('list').innerHTML = v.length ? v.map((j) =>
     '<div class="card" data-id="' + esc(j.id) + '" style="--c:' + col(j.status) + '">' +
       '<div class="r1"><span class="co notr">' + esc(j.company || '–') + '</span><span class="dt">' + esc(fmtDate(j.appliedOn)) + '</span></div>' +
-      '<div class="ro"><span class="notr">' + esc(j.role) + '</span>' + (j.postingSaved ? ' <span class="mk" title="Stellenausschreibung gespeichert">📋</span>' : '') + '</div>' +
+      '<div class="ro"><span class="notr">' + esc(j.role) + '</span>' + (j.postingSaved ? ' <span class="mk" title="Stellenausschreibung gespeichert">' + IC.doc + '</span>' : '') + '</div>' +
       '<div class="r3"><span class="pill" style="--c:' + col(j.status) + '">' + esc(SHORT[j.status] || j.status) + '</span>' +
         (j.location ? '<span>' + esc(j.location) + '</span>' : '') +
-        (j.interview ? '<span>📅 ' + esc(ivShort(j.interview)) + '</span>' : '') +
-        (j.like ? '<span class="dots" title="Gefällt mir">♥ ' + dots(j.like, 5) + '</span>' : '') +
-        (j.fit || j.cvLink || j.cv ? '<span class="dots fit" title="CV passt">CV ' + (j.fit ? dots(j.fit, 5) : '') + ((j.cvLink || j.cv) ? ' <span class="mk" title="Zugeschnittener CV vorhanden">📄</span>' : '') + '</span>' : '') +
-        (j.status === statuses[0] && j.url ? '<button class="capply" data-apply="' + esc(j.id) + '">Bewerben ↗</button>' : '') +
+        (j.interview ? '<span class="iv">' + IC.cal + esc(ivShort(j.interview)) + '</span>' : '') +
+        (j.like ? '<span class="rt like" title="Gefällt mir">' + IC.heart + j.like + '/5</span>' : '') +
+        (j.fit || j.cvLink || j.cv ? '<span class="rt fit" title="Lebenslauf passt">CV ' + (j.fit ? j.fit + '/5' : '') + ((j.cvLink || j.cv) ? ' <span class="mk" title="Zugeschnittener Lebenslauf vorhanden">' + IC.cv + '</span>' : '') + '</span>' : '') +
+        (j.status === statuses[0] && j.url ? '<button class="capply" data-apply="' + esc(j.id) + '">Bewerben →</button>' : '') +
       '</div></div>').join('')
     : '<div class="empty">' + (jobs.length ? 'Keine Jobs für diesen Filter.' : 'Noch keine Jobs. Tipp auf +.') + '</div>';
   $('list').insertAdjacentHTML('beforeend', CREDIT);
@@ -706,7 +779,7 @@ function ivShort(txt) {
   return parseIv(txt).map((e) => {
     const m = e.dt.match(/^\d{4}-(\d{2})-(\d{2})T(\d{2}:\d{2})/);
     const d = m ? m[2] + '.' + m[1] + '.' + (m[3] !== '00:00' ? ' ' + m[3] : '') : '';
-    const t = { 'Telefon': '📞', 'Video': '🎥', 'Persönlich (vor Ort)': '🤝', 'Assessment Center': '🏢' }[e.type] || '';
+    const t = '';
     return (t + ' ' + d + (d ? '' : e.note)).trim();
   }).join(' | ');
 }
@@ -732,6 +805,21 @@ function readIv() {
 }
 function inp(id, label, val, type) { return '<label class="fl"><span>' + label + '</span><input id="' + id + '" type="' + (type || 'text') + '" value="' + esc(val) + '"></label>'; }
 
+const SI = (d) => '<svg class="i" viewBox="0 0 24 24" aria-hidden="true">' + d + '</svg>';
+const IC = {
+  sheet: SI('<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/>'),
+  phone: SI('<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>'),
+  log: SI('<path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/>'),
+  down: SI('<path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/>'),
+  mail: SI('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>'),
+  link: SI('<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>'),
+  out: SI('<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5M15 12H3"/>'),
+  trash: SI('<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>'),
+  doc: SI('<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/>'),
+  cal: SI('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'),
+  heart: SI('<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>'),
+  cv: SI('<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M6 16c.6-1.6 1.7-2.4 3-2.4s2.4.8 3 2.4M14.5 9h4M14.5 12.5h4"/>')
+};
 const ICO = {
   doc: '<svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6M9 9h2"/></svg>',
   cv: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2.2"/><path d="M5.8 16c.6-1.8 1.8-2.7 3.2-2.7s2.6.9 3.2 2.7"/><path d="M14.5 9h4M14.5 12.5h4"/></svg>',
@@ -767,7 +855,7 @@ function openDetail(id) {
       '<div class="ugrid small">' +
         (j.url ? '<button class="ib" id="bFetch">Vom Link speichern</button>' : '') +
         '<button class="ib" id="bPaste">Text einfügen</button>' +
-        (j.postingSaved ? '<button class="ib del" id="aDel">🗑 Löschen</button>' : '') +
+        (j.postingSaved ? '<button class="ib del" id="aDel">' + IC.trash + 'Löschen</button>' : '') +
       '</div>' +
       inp('fCompany', 'Firma', j.company) + inp('fRole', 'Stelle', j.role) + inp('fLocation', 'Ort / Remote', j.location) +
       inp('fUrl', 'Link zur Stellenausschreibung', j.url, 'url') + inp('fCv', 'Lebenslauf-Datei', j.cv) +
@@ -1087,7 +1175,7 @@ async function loadSuggestions(autoOpen) {
   catch (e) { suggestions = []; }  // Gmail-Abgleich nicht eingerichtet oder alte Skriptversion: still ignorieren
   const bar = $('mailbar');
   bar.classList.toggle('show', suggestions.length > 0);
-  bar.textContent = '✉️ ' + suggestions.length + (suggestions.length === 1 ? ' neue Rückmeldung per Mail' : ' neue Rückmeldungen per Mail') + ' – ansehen';
+  bar.textContent = suggestions.length + (suggestions.length === 1 ? ' neue Rückmeldung per Mail' : ' neue Rückmeldungen per Mail') + ' – ansehen';
   if (autoOpen && suggestions.length && !$('ov').classList.contains('show')) { shownSug = true; openSuggestion(0); }
 }
 $('mailbar').onclick = () => openSuggestion(0);
@@ -1118,7 +1206,7 @@ function openSuggestion(i) {
 }
 function loadBar() {
   const bar = $('mailbar'); bar.classList.toggle('show', suggestions.length > 0);
-  bar.textContent = '✉️ ' + suggestions.length + (suggestions.length === 1 ? ' neue Rückmeldung per Mail' : ' neue Rückmeldungen per Mail') + ' – ansehen';
+  bar.textContent = suggestions.length + (suggestions.length === 1 ? ' neue Rückmeldung per Mail' : ' neue Rückmeldungen per Mail') + ' – ansehen';
 }
 
 /* ---------- Neuer Job ---------- */
