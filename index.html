@@ -113,6 +113,11 @@ main{padding:12px 16px calc(env(safe-area-inset-bottom) + 90px);max-width:820px;
 .psec.skills{--pc:var(--acc)}
 .fitline{margin:2px 0 8px}
 .cvrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0}
+.ugrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:8px 0}
+.ugrid .ib{height:44px;justify-content:center;text-align:center;font-weight:600;padding:0 10px;width:100%}
+.ugrid.small .ib{height:38px;font-weight:500;font-size:14px}
+.ucenter{text-align:center;margin:6px 0;word-break:break-all}
+.ulabel{margin:14px 0 0;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--mute);text-align:center}
 .cvrow .ib{flex:1 1 140px}
 .cvrow .ib{height:42px;padding:0 16px;font-weight:600}
 .cvrow .sub{font-size:12.5px;word-break:break-all}
@@ -180,7 +185,7 @@ a{color:var(--acc)}
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.19', NEED_SCRIPT = '1.6.12'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.20', NEED_SCRIPT = '1.6.12'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Job-Tracker ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
@@ -523,14 +528,17 @@ function openDetail(id) {
       inp('fCompany', 'Firma', j.company) + inp('fRole', 'Stelle', j.role) + inp('fLocation', 'Ort / Remote', j.location) +
       inp('fUrl', 'Link Anzeige', j.url, 'url') + inp('fCv', 'CV-Datei', j.cv) + '</details>' +
     '<div class="box"><h3>Unterlagen</h3>' +
-      ((j.url || j.cvLink || j.cv) ? '<div class="cvrow">' +
-        (j.url ? '<button class="ib" id="aUrl">🌐 Anzeige online öffnen</button>' : '') +
-        (j.cvLink || j.cv ? '<button class="ib pri" id="aCv">📄 CV öffnen</button>' : '') + '</div>' +
-        (j.cv ? '<p class="sub">' + esc(j.cv) + '</p>' : '') : '') +
-      (j.url ? '' : '<p>Kein Link hinterlegt.</p>') +
-      (j.postingSaved ? '<p class="sub">Anzeige gespeichert am ' + esc(j.postingSaved) + '</p><div class="cvrow"><button class="ib pri" id="aShow">📖 Gespeicherte Anzeige lesen</button><button class="ib del" id="aDel">🗑 Anzeige löschen</button></div>' : '<p><span class="miss">Anzeige noch nicht gespeichert.</span></p>') +
-      '<div class="acts" style="margin-top:6px">' + (j.url ? '<button class="ib" id="bFetch">Anzeige vom Link speichern</button>' : '') +
-      '<button class="ib" id="bPaste">Text einfügen</button></div></div>',
+      ((j.postingSaved || j.cvLink || j.cv) ? '<div class="ugrid">' +
+        (j.postingSaved ? '<button class="ib pri" id="aShow">📖 Gespeicherte Anzeige lesen</button>' : '') +
+        (j.cvLink || j.cv ? '<button class="ib pri" id="aCv">📄 CV öffnen</button>' : '') + '</div>' : '') +
+      '<p class="sub ucenter">' + (j.postingSaved ? 'Anzeige gespeichert am ' + esc(j.postingSaved) : '<span class="miss">Anzeige noch nicht gespeichert.</span>') +
+        (j.cv ? '<br>CV: ' + esc(j.cv) : '') + '</p>' +
+      (j.url ? '<div class="ugrid"><button class="ib" id="aUrl">🌐 Bewerben ↗</button></div>' : '<p class="sub ucenter">Kein Link hinterlegt.</p>') +
+      '<p class="ulabel">Anzeige verwalten</p><div class="ugrid small">' +
+        (j.url ? '<button class="ib" id="bFetch">Vom Link speichern</button>' : '') +
+        '<button class="ib" id="bPaste">Text einfügen</button>' +
+        (j.postingSaved ? '<button class="ib del" id="aDel">🗑 Löschen</button>' : '') +
+      '</div></div>',
     '<button class="ib" id="bClose">Schließen</button><button class="ib pri" id="bSave">Speichern</button>');
   if ($('bApply')) $('bApply').onclick = () => applyNow(j);
   wireCv(j);
@@ -552,8 +560,8 @@ function openDetail(id) {
   };
   if ($('bFetch')) $('bFetch').onclick = async () => {
     $('bFetch').disabled = true; $('bFetch').textContent = 'Lade Anzeige …';
-    try { const r = await savePostingAsk({ id: j.id, url: j.url }); if (!r) { $('bFetch').disabled = false; $('bFetch').textContent = 'Anzeige vom Link speichern'; return; } Object.assign(j, r.job); render(); openDetail(j.id); toast(r.message || 'Anzeige gespeichert'); }
-    catch (e) { toast(e.message, 6000); $('bFetch').disabled = false; $('bFetch').textContent = 'Anzeige vom Link speichern'; }
+    try { const r = await savePostingAsk({ id: j.id, url: j.url }); if (!r) { $('bFetch').disabled = false; $('bFetch').textContent = 'Vom Link speichern'; return; } Object.assign(j, r.job); render(); openDetail(j.id); toast(r.message || 'Anzeige gespeichert'); }
+    catch (e) { toast(e.message, 6000); $('bFetch').disabled = false; $('bFetch').textContent = 'Vom Link speichern'; }
   };
   $('bPaste').onclick = () => openPaste(j);
   if ($('aDel')) $('aDel').onclick = async (e) => {
