@@ -186,7 +186,7 @@ a{color:var(--acc)}
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.20', NEED_SCRIPT = '1.6.12'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.21', NEED_SCRIPT = '1.6.12'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Job-Tracker ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
@@ -545,6 +545,13 @@ function openDetail(id) {
   wireCv(j);
   wireStars('fLike'); wireStars('fFit');
   $('bClose').onclick = closeSheet;
+  // Status von „Noch nicht beworben“ auf einen Bewerbungs-Status → „Beworben am“ mit heute vorbelegen (bleibt änderbar)
+  $('fStatus').onchange = () => {
+    const s = $('fStatus').value, fa = $('fApplied');
+    if (s !== STATUS_DEF[0] && s !== 'Nicht bewerben' && !fa.value) {
+      const d = new Date(); fa.value = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+  };
   $('bSave').onclick = async () => {
     const ch = {
       status: $('fStatus').value, appliedOn: $('fApplied').value, interview: $('fInterview').value.trim(),
