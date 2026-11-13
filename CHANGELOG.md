@@ -11,6 +11,14 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.32 – 13.11.2026 (nur App)
+- **Neues Design „Nacht & Mint“** passend zum Kompass-Icon: fast schwarzer Hintergrund, feine Linien, Mint als einzige Akzentfarbe. Aufbau und Funktionen bleiben gleich.
+- **Linien-Icons statt Emojis** in den Einstellungen, auf den Karten (Stellenausschreibung gespeichert, Lebenslauf vorhanden, Gesprächstermin) und beim Löschen.
+- **Karten ruhiger:** Status als farbiger Punkt mit Text statt bunter Rand; Bewertungen als Zahl („♥ 4/5“, „CV 4/5“) statt Punkten.
+- Filter als dezente Umrandungen, Eingabefelder mit Mint-Fokus, Kopfleiste leicht durchscheinend, Fenster gleiten sanft auf.
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.6.31 – 13.11.2026 (nur App)
 - **Gliederung englischer Stellenausschreibungen verbessert:** Erkannt werden jetzt auch Überschriften wie „Main Responsibilities“, „… Related Duties“, „Prerequisites“, „Essential / Desirable“, „You should apply if“, „Your day-to-day“, „What you'll be working on“, „Attractive work conditions“, „What's in it for you“ und „The interview process“ – auch mit Emoji oder „#“ davor, Leerzeichen vor dem Doppelpunkt oder typografischem Apostroph.
 - Deutsch zusätzlich: „Diese Herausforderungen erwarten Sie“, „Damit begeistern Sie uns“, „Das zeichnet dich aus“, „Was du mitbringst“.
