@@ -11,6 +11,13 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.22 – 13.11.2026 (nur App)
+- **Mehrere Gespräche pro Job:** Statt eines einzelnen Felds „Gespräch am“ gibt es jetzt den Bereich „Gespräche“. Mit „＋ Gespräch hinzufügen“ legst du beliebig viele Termine an, jeweils mit Datum/Uhrzeit, Art (Telefon, Video, Persönlich (vor Ort), Assessment Center, Sonstiges) und optionaler Notiz. ✕ entfernt einen Termin. Beim Speichern werden die Termine nach Datum sortiert.
+- In der Liste zeigt die Karte alle Termine kurz an, z. B. „📅 📞 12.11. 16:30 | 🤝 19.11. 09:00“.
+- In der Tabelle steht weiterhin alles in der Spalte „Gespräch am“, ein Termin pro Zeile („TT.MM.JJJJ HH:MM · Art · Notiz“). Bisherige Einträge werden automatisch übernommen.
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.6.21 – 13.11.2026 (nur App)
 - **„Beworben am“ füllt sich automatisch:** Stellst du im Job den Status von „Noch nicht beworben“ auf „Beworben“ (oder einen späteren Status), trägt die App das heutige Datum ein, sofern noch keins drinsteht. Das Datum bleibt änderbar. Bei „Nicht bewerben“ passiert nichts.
 
