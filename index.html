@@ -211,7 +211,7 @@ header{background:rgba(11,15,23,.86);-webkit-backdrop-filter:saturate(160%) blur
 .qbtn svg{stroke:var(--acc)}
 .qbtn.go{background:var(--acc);border-color:var(--acc);color:var(--onacc)}.qbtn.go svg{stroke:var(--onacc)}
 .more,.box{background:var(--field);border:1px solid var(--line2)}
-.setb{flex-direction:row!important;align-items:center!important;gap:12px!important;background:var(--field)!important}
+.setb{flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:12px!important;background:var(--field)!important}
 .setb .si{display:flex;width:34px;height:34px;border-radius:9px;align-items:center;justify-content:center;background:rgba(52,211,153,.1);color:var(--acc);flex:none;font-style:normal}
 .setb .st{display:flex;flex-direction:column;gap:2px;min-width:0}
 .setb b{font-size:15px;font-weight:600}
@@ -277,7 +277,7 @@ header{background:rgba(11,15,23,.86);-webkit-backdrop-filter:saturate(160%) blur
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.32', NEED_SCRIPT = '1.6.12'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.33', NEED_SCRIPT = '1.6.12'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Careerway ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};

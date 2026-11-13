@@ -11,6 +11,11 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.33 – 13.11.2026 (nur App)
+- Einstellungen: Icons und Texte der Menüpunkte stehen jetzt bündig links.
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.6.32 – 13.11.2026 (nur App)
 - **Neues Design „Nacht & Mint“** passend zum Kompass-Icon: fast schwarzer Hintergrund, feine Linien, Mint als einzige Akzentfarbe. Aufbau und Funktionen bleiben gleich.
 - **Linien-Icons statt Emojis** in den Einstellungen, auf den Karten (Stellenausschreibung gespeichert, Lebenslauf vorhanden, Gesprächstermin) und beim Löschen.
