@@ -11,6 +11,11 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.30 – 13.11.2026 (nur App)
+- Englischer Modus: Abschnitte der Stellenausschreibung (z. B. „Introduction“, „We offer“) und die erkannten Skills (z. B. „Networking“, „Customer focus“) werden ebenfalls englisch angezeigt; kürzerer Übersetzungs-Hinweis.
+
+**Apps Script: Bereitstellen nötig: nein** (für die Übersetzung selbst ist die Bereitstellung aus 1.6.29 nötig)
+
 ## 1.6.29 – 13.11.2026 (App und Apps Script)
 - **Sprache Deutsch / Englisch:** In den Einstellungen gibt es oben den Umschalter „Sprache / Language“. Im englischen Modus sind alle Knöpfe, Überschriften, Hinweise und Meldungen englisch (z. B. „Job posting“, „Résumé“, „Apply ↗“). Deine eigenen Einträge (Firma, Stelle, Notizen) und die Werte in der Tabelle (z. B. Status) bleiben unverändert.
 - **Stellenausschreibungen auf Englisch:** Im englischen Modus wird eine deutsche Stellenausschreibung beim Öffnen automatisch mit Google Übersetzer übersetzt. Oben steht ein Hinweis, dass es eine maschinelle Übersetzung ist und Fehler enthalten kann. Die Übersetzung wird in der Tabelle (Blatt „Anzeigen“, Spalten H und I) und auf dem Gerät gespeichert, damit jede Ausschreibung nur einmal übersetzt wird. Englische Ausschreibungen bleiben, wie sie sind. Im deutschen Modus ändert sich nichts.
