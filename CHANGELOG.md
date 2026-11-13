@@ -11,6 +11,11 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.20 – 13.11.2026 (nur App)
+- **„Unterlagen“ im Job neu sortiert und zentriert:** oben „📖 Gespeicherte Anzeige lesen“ und „📄 CV öffnen“ nebeneinander, darunter Speicherdatum und CV-Dateiname, dann „🌐 Bewerben ↗“ (öffnet die Anzeige online). Unten unter „Anzeige verwalten“: „Vom Link speichern“, „Text einfügen“ und „🗑 Löschen“ als gleich breite Knöpfe.
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.6.19 – 13.11.2026 (nur App)
 - **Nach „Mails jetzt prüfen“ lädt die Liste automatisch neu** – automatisch erkannte Bewerbungsbestätigungen sind sofort sichtbar, neue Rückmeldungen werden direkt angezeigt.
 - **Automatisches Aktualisieren:** Kommst du nach mindestens 1 Minute in die App zurück, oder ist sie offen, lädt sie alle 3 Minuten still neu. So erscheinen Änderungen von Claude (Bewertungen, fertige CVs) und vom Gmail-Abgleich ohne „Neu laden“. Ist gerade ein Job oder eine Anzeige geöffnet, wird nicht neu geladen, damit nichts dazwischenfunkt.
