@@ -192,7 +192,7 @@ a{color:var(--acc)}
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.22', NEED_SCRIPT = '1.6.12'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.23', NEED_SCRIPT = '1.6.12'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Job-Tracker ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
@@ -776,15 +776,64 @@ function headingOf(line) {
   for (const s of PSEC) if (s.re.test(t)) return { sec: s, title: t };
   return null;
 }
-function htmlText(t) {
-  // Ältere Einträge enthalten teils HTML (z. B. von LinkedIn) – nur für die Anzeige in Text umwandeln
-  for (let i = 0; i < 2 && /<\/?(p|br|li|ul|strong|div|span|b|em)\b[^>]*>/i.test(t); i++) {
-    const d = document.createElement('div');
-    d.innerHTML = t.replace(/<br\s*\/?>/gi, '\n').replace(/<\/(p|div|li|h[1-6]|ul|ol)>/gi, '$&\n').replace(/<li[^>]*>/gi, '$&- ').replace(/<(strong|b)>([^<]{2,70})<\/\1>/gi, '\n$2\n');
-    t = (d.textContent || '').replace(/[ \t\u00a0]+/g, ' ').replace(/ *\n */g, '\n').replace(/\n{3,}/g, '\n\n').trim();
-  }
-  return t;
+// Anzeigentext vereinheitlichen – gleiche Logik wie normalizePosting_ in google/Code.gs
+const ENT = { nbsp: ' ', amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", auml: 'ä', ouml: 'ö', uuml: 'ü', Auml: 'Ä', Ouml: 'Ö', Uuml: 'Ü',
+  szlig: 'ß', ndash: '–', mdash: '—', bdquo: '„', ldquo: '“', rdquo: '”', lsquo: '‘', rsquo: '’', sbquo: '‚', hellip: '…', euro: '€',
+  bull: '•', middot: '·', eacute: 'é', egrave: 'è', agrave: 'à', copy: '©', reg: '®', trade: '™', shy: '', zwnj: '', zwj: '', laquo: '«', raquo: '»' };
+function decodeAll(s) {
+  return String(s)
+    .replace(/&([a-zA-Z]+);/g, (m, n) => (n in ENT ? ENT[n] : m))
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16)));
 }
+function htmlToTextN(h) {
+  return String(h).replace(/\r/g, '')
+    .replace(/<(script|style|noscript|svg|head)[\s\S]*?<\/\1>/gi, ' ')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/(p|div|li|h[1-6]|tr|section|ul|ol)>/gi, '\n')
+    .replace(/<(h[1-6]|p|div|ul|ol|section)[^>]*>/gi, '\n')
+    .replace(/<li[^>]*>/gi, '\n- ')
+    .replace(/<[^>]+>/g, '');
+}
+const HEADINGS = ['Ihre Aufgaben', 'Deine Aufgaben', 'Aufgaben', 'Ihr Profil', 'Dein Profil', 'Profil', 'Was wir bieten', 'Wir bieten', 'Das bieten wir', 'Unser Angebot',
+  'Diese Herausforderungen erwarten Sie', 'Damit begeistern Sie uns', 'Das bringst du mit', 'Das bringen Sie mit', 'Benefits', 'Über uns', 'Wer wir sind',
+  'Responsibilities', 'Requirements', 'Qualifications', 'What you will do', 'What you bring', 'What we offer', 'Nice to have', 'About us', 'About the role',
+  'Your tasks', 'Your profile', 'Your mission', 'Key responsibilities'];
+const JUNK = /^(language|view profile|search by keyword|show more options|clear|apply now ?»?|apply|apply here|back to jobs|bewerben|jetzt bewerben|submit application|select\.\.\.|indicates a required field|\*|,|;|impressum|imprint.*|renew or change your cookie consent|create alert|.*opens in a new tab\.?|select how often.*)$/i;
+const FORM_START = /^(apply for this job|apply for this position|bewerbungsformular|first name ?\*?|vorname ?\*)$/i;
+
+function normalizePosting(t) {
+  t = String(t || '').replace(/\r/g, '');
+  if (/<\/?(p|br|li|ul|ol|strong|div|span|b|em|h[1-6])\b[^>]*>/i.test(t) || /&lt;\/?(p|br|li|ul|strong)/i.test(t)) t = htmlToTextN(decodeAll(t));
+  t = decodeAll(t);
+  t = t.replace(/[‎‏​­﻿]/g, '').replace(/ /g, ' ').replace(/\s*\$\$\s*/g, '\n');
+  // Fließtext ohne Zeilenumbrüche: an typischen Überschriften und Satzgrenzen trennen
+  const nl = (t.match(/\n/g) || []).length;
+  if (t.length > 1200 && nl < t.length / 800) {
+    HEADINGS.forEach((h) => { t = t.replace(new RegExp('\\s*(' + h.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')(\\s*:)[ \\t]*\\n?', 'g'), '\n\n$1$2\n'); });
+    t = t.replace(/([.!?])(?=[A-ZÄÖÜ][a-zäöüß])/g, '$1\n');
+  }
+  let lines = t.split('\n').map((l) => l.replace(/[ \t]+/g, ' ').trim()).map((l) => l.replace(/^[•·▪●◦]\s*(?=[^•·▪●◦\s])/, '- ').replace(/^\*\s+(?=\S)/, '- '));
+  // Bewerbungsformular am Ende abschneiden
+  const cut = lines.findIndex((l, i) => i > lines.length * 0.4 && FORM_START.test(l));
+  if (cut > 0) lines = lines.slice(0, cut);
+  lines = lines.filter((l) => !JUNK.test(l));
+  // Cookie-Hinweise entfernen, wenn genug echter Text bleibt
+  const body = lines.join('\n');
+  if (body.length > 1200) lines = lines.filter((l) => !(l.length < 300 && /cookie/i.test(l)));
+  // leere Überschriften am Ende entfernen
+  const isHead = (l) => l && l.length <= 60 && !/[.!]$/.test(l) && (/:$/.test(l) || /\?$/.test(l) || l === l.toUpperCase());
+  while (lines.length) {
+    const nonEmpty = lines.filter(Boolean); const last = nonEmpty[nonEmpty.length - 1];
+    if (last && isHead(last) && !/^- /.test(last)) { const i = lines.lastIndexOf(last); lines = lines.slice(0, i); } else break;
+  }
+  let out = lines.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+  for (let k = 0; k < 3; k++) out = out.replace(/(\n- [^\n]*)\n\n(?=- )/g, '$1\n');
+  return out;
+}
+
+function htmlText(t) { return normalizePosting(t); }
+
 function formatPosting(text) {
   text = htmlText(String(text || ''));
   const lines = text.replace(/\r/g, '').split('\n');

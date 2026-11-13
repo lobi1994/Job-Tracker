@@ -8,7 +8,7 @@
  * (z. B. {fn:"apiSavePosting", key, data:{url, title, text}} – data darf auch JSON-Text sein).
  */
 
-const VERSION = '1.6.15'; // siehe CHANGELOG.md
+const VERSION = '1.6.23'; // siehe CHANGELOG.md
 const APP_PAGE = 'https://lobi1994.github.io/Job-Tracker/';
 const SHEET = 'Bewerbungen';
 const POSTINGS = 'Anzeigen';
@@ -270,12 +270,69 @@ function parseShareText_(t) {
 }
 
 /** Text säubern: HTML (auch doppelt kodiert, z. B. aus LinkedIn) in lesbaren Text umwandeln. */
-function cleanText_(t) {
-  t = String(t || '').trim();
-  for (let i = 0; i < 2 && /<\/?(p|br|li|ul|strong|div|span|b|em)\b[^>]*>|&lt;\/?(p|br|li|ul|strong)/i.test(t); i++) {
-    t = htmlToText_(decode_(t));
+/* ------------------------------------------------------------------ */
+/* Anzeigentext vereinheitlichen (seit 1.6.23)                          */
+/* HTML → Text, alle Sonderzeichen (&uuml; …) dekodiert, Aufzählungen als „- “,   */
+/* Navigation, Cookie-Hinweise und Bewerbungsformulare entfernt,         */
+/* Fließtext ohne Umbrüche an Überschriften getrennt, leere Überschriften am Ende weg. */
+/* ------------------------------------------------------------------ */
+const ENT_ = { nbsp: ' ', amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", auml: 'ä', ouml: 'ö', uuml: 'ü', Auml: 'Ä', Ouml: 'Ö', Uuml: 'Ü',
+  szlig: 'ß', ndash: '–', mdash: '—', bdquo: '„', ldquo: '“', rdquo: '”', lsquo: '‘', rsquo: '’', sbquo: '‚', hellip: '…', euro: '€',
+  bull: '•', middot: '·', eacute: 'é', egrave: 'è', agrave: 'à', copy: '©', reg: '®', trade: '™', shy: '', zwnj: '', zwj: '', laquo: '«', raquo: '»' };
+function decodeAll_(s) {
+  return String(s)
+    .replace(/&([a-zA-Z]+);/g, (m, n) => (n in ENT_ ? ENT_[n] : m))
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16)));
+}
+function htmlToTextN_(h) {
+  return String(h).replace(/\r/g, '')
+    .replace(/<(script|style|noscript|svg|head)[\s\S]*?<\/\1>/gi, ' ')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/(p|div|li|h[1-6]|tr|section|ul|ol)>/gi, '\n')
+    .replace(/<(h[1-6]|p|div|ul|ol|section)[^>]*>/gi, '\n')
+    .replace(/<li[^>]*>/gi, '\n- ')
+    .replace(/<[^>]+>/g, '');
+}
+const HEADINGS_ = ['Ihre Aufgaben', 'Deine Aufgaben', 'Aufgaben', 'Ihr Profil', 'Dein Profil', 'Profil', 'Was wir bieten', 'Wir bieten', 'Das bieten wir', 'Unser Angebot',
+  'Diese Herausforderungen erwarten Sie', 'Damit begeistern Sie uns', 'Das bringst du mit', 'Das bringen Sie mit', 'Benefits', 'Über uns', 'Wer wir sind',
+  'Responsibilities', 'Requirements', 'Qualifications', 'What you will do', 'What you bring', 'What we offer', 'Nice to have', 'About us', 'About the role',
+  'Your tasks', 'Your profile', 'Your mission', 'Key responsibilities'];
+const JUNK_ = /^(language|view profile|search by keyword|show more options|clear|apply now ?»?|apply|apply here|back to jobs|bewerben|jetzt bewerben|submit application|select\.\.\.|indicates a required field|\*|,|;|impressum|imprint.*|renew or change your cookie consent|create alert|.*opens in a new tab\.?|select how often.*)$/i;
+const FORM_START_ = /^(apply for this job|apply for this position|bewerbungsformular|first name ?\*?|vorname ?\*)$/i;
+
+function normalizePosting_(t) {
+  t = String(t || '').replace(/\r/g, '');
+  if (/<\/?(p|br|li|ul|ol|strong|div|span|b|em|h[1-6])\b[^>]*>/i.test(t) || /&lt;\/?(p|br|li|ul|strong)/i.test(t)) t = htmlToTextN_(decodeAll_(t));
+  t = decodeAll_(t);
+  t = t.replace(/[‎‏​­﻿]/g, '').replace(/ /g, ' ').replace(/\s*\$\$\s*/g, '\n');
+  // Fließtext ohne Zeilenumbrüche: an typischen Überschriften und Satzgrenzen trennen
+  const nl = (t.match(/\n/g) || []).length;
+  if (t.length > 1200 && nl < t.length / 800) {
+    HEADINGS_.forEach((h) => { t = t.replace(new RegExp('\\s*(' + h.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')(\\s*:)[ \\t]*\\n?', 'g'), '\n\n$1$2\n'); });
+    t = t.replace(/([.!?])(?=[A-ZÄÖÜ][a-zäöüß])/g, '$1\n');
   }
-  return t;
+  let lines = t.split('\n').map((l) => l.replace(/[ \t]+/g, ' ').trim()).map((l) => l.replace(/^[•·▪●◦]\s*(?=[^•·▪●◦\s])/, '- ').replace(/^\*\s+(?=\S)/, '- '));
+  // Bewerbungsformular am Ende abschneiden
+  const cut = lines.findIndex((l, i) => i > lines.length * 0.4 && FORM_START_.test(l));
+  if (cut > 0) lines = lines.slice(0, cut);
+  lines = lines.filter((l) => !JUNK_.test(l));
+  // Cookie-Hinweise entfernen, wenn genug echter Text bleibt
+  const body = lines.join('\n');
+  if (body.length > 1200) lines = lines.filter((l) => !(l.length < 300 && /cookie/i.test(l)));
+  // leere Überschriften am Ende entfernen
+  const isHead = (l) => l && l.length <= 60 && !/[.!]$/.test(l) && (/:$/.test(l) || /\?$/.test(l) || l === l.toUpperCase());
+  while (lines.length) {
+    const nonEmpty = lines.filter(Boolean); const last = nonEmpty[nonEmpty.length - 1];
+    if (last && isHead(last) && !/^- /.test(last)) { const i = lines.lastIndexOf(last); lines = lines.slice(0, i); } else break;
+  }
+  let out = lines.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+  for (let k = 0; k < 3; k++) out = out.replace(/(\n- [^\n]*)\n\n(?=- )/g, '$1\n');
+  return out;
+}
+
+function cleanText_(t) {
+  return normalizePosting_(t);
 }
 
 /** Greenhouse-Anzeige über die öffentliche Schnittstelle (Board-Name wird aus der Karriereseite gelesen). */
@@ -293,7 +350,8 @@ function fetchGreenhouse_(url) {
     const host = (String(url).match(/https?:\/\/(?:www\.)?([a-z0-9-]+)\./i) || [])[1];
     if (host && tries.indexOf(host) < 0) tries.push(host);
     for (let i = 0; i < tries.length; i++) {
-      const res = UrlFetchApp.fetch('https://boards-api.greenhouse.io/v1/boards/' + tries[i] + '/jobs/' + id, { muteHttpExceptions: true });
+      let res = UrlFetchApp.fetch('https://boards-api.greenhouse.io/v1/boards/' + tries[i] + '/jobs/' + id, { muteHttpExceptions: true });
+      if (res.getResponseCode() !== 200) res = UrlFetchApp.fetch('https://boards-api.eu.greenhouse.io/v1/boards/' + tries[i] + '/jobs/' + id, { muteHttpExceptions: true });
       if (res.getResponseCode() !== 200) continue;
       const j = JSON.parse(res.getContentText());
       return { text: htmlToText_(decode_(String(j.content || ''))), role: j.title || '', location: (j.location && j.location.name) || '', company: '', title: '' };
@@ -432,6 +490,19 @@ function jtAnzeigenNachladen() {
     'Gespeichert: ' + r.ok.length + (r.ok.length ? '\n' + r.ok.join('\n') : '') +
     '\n\nNicht abrufbar: ' + r.failed.length + (r.failed.length ? '\n' + r.failed.join('\n') + '\n→ in Safari mit „Job speichern“ oder in der App mit „Text einfügen“ sichern.' : '') +
     (r.left ? '\n\nNoch offen: ' + r.left + ' – einfach nochmal ausführen.' : ''), SpreadsheetApp.getUi().ButtonSet.OK);
+}
+
+/** Menü: alle gespeicherten Anzeigen einheitlich aufbereiten (Text bleibt inhaltlich gleich). */
+function jtAnzeigenAufraeumen() {
+  const ps = postingsSheet_();
+  const last = ps.getLastRow();
+  if (last < 2) return;
+  const rg = ps.getRange(2, 4, last - 1, 1);
+  const vals = rg.getValues();
+  let n = 0;
+  const out = vals.map(function (r) { const t = normalizePosting_(r[0]); if (t !== String(r[0])) n++; return [t]; });
+  rg.setValues(out);
+  SpreadsheetApp.getUi().alert('Anzeigen aufgeräumt', n + ' von ' + vals.length + ' Anzeigen wurden vereinheitlicht.', SpreadsheetApp.getUi().ButtonSet.OK);
 }
 
 /** Öffentliche LinkedIn-Jobansicht (ohne Login). Kann von LinkedIn blockiert werden. */
@@ -595,7 +666,7 @@ function apiGetPosting(key, id) {
   const r = findPosting_(ps, id);
   if (!r) return null;
   const v = ps.getRange(r, 1, 1, 4).getValues()[0];
-  return { id: String(v[0]), url: String(v[1]), savedAt: iso_(v[2]), text: String(v[3]) };
+  return { id: String(v[0]), url: String(v[1]), savedAt: iso_(v[2]), text: normalizePosting_(v[3]) };
 }
 
 /** Link zur CV-Datei in Google Drive (sucht nach dem Dateinamen). */
@@ -823,6 +894,7 @@ function onOpen() {
     .addItem('Web-App-Link ändern', 'jtLinkAendern')
     .addSeparator()
     .addItem('Fehlende Anzeigen holen', 'jtAnzeigenNachladen')
+    .addItem('Gespeicherte Anzeigen aufräumen', 'jtAnzeigenAufraeumen')
     .addSeparator()
     .addItem('Gmail-Abgleich einrichten', 'jtMailEinrichten')
     .addItem('Mails jetzt prüfen', 'jtMailJetzt')
