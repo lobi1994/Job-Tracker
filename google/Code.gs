@@ -1,5 +1,5 @@
 /**
- * Job-Tracker – Google Apps Script für das Tabellenblatt „Bewerbungen“.
+ * Careerway – Google Apps Script für das Tabellenblatt „Bewerbungen“.
  * Created by Matthias Lobinger
  *
  * Die App (GitHub Pages) und der iOS-Kurzbefehl schicken jede Anfrage als
@@ -8,7 +8,7 @@
  * (z. B. {fn:"apiSavePosting", key, data:{url, title, text}} – data darf auch JSON-Text sein).
  */
 
-const VERSION = '1.6.23'; // siehe CHANGELOG.md
+const VERSION = '1.6.25'; // siehe CHANGELOG.md
 const APP_PAGE = 'https://lobi1994.github.io/Job-Tracker/';
 const SHEET = 'Bewerbungen';
 const POSTINGS = 'Anzeigen';
@@ -68,7 +68,7 @@ function doGet(e) {
     try { msg = confirmReplace_(String(token)); } catch (err) { msg = 'Fehler: ' + ((err && err.message) || err); }
     return ContentService.createTextOutput(msg).setMimeType(ContentService.MimeType.TEXT);
   }
-  return ContentService.createTextOutput('Job-Tracker ' + VERSION + ' läuft. Die App findest du unter ' + APP_PAGE)
+  return ContentService.createTextOutput('Careerway ' + VERSION + ' läuft. Die App findest du unter ' + APP_PAGE)
     .setMimeType(ContentService.MimeType.TEXT);
 }
 
@@ -78,7 +78,7 @@ function doGet(e) {
 
 function sheet_() {
   const sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET);
-  if (!sh) throw new Error('Blatt „' + SHEET + '“ fehlt. Bitte im Menü „Job-Tracker → Einrichten“ ausführen.');
+  if (!sh) throw new Error('Blatt „' + SHEET + '“ fehlt. Bitte im Menü „Careerway → Einrichten“ ausführen.');
   return sh;
 }
 
@@ -87,7 +87,7 @@ function colMap_(sh) {
   const head = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
   const map = {};
   head.forEach(function (h, i) { const f = COLS[String(h).trim()]; if (f) map[f] = i + 1; });
-  if (!map.id) throw new Error('Spalte „ID“ fehlt. Bitte „Job-Tracker → Einrichten“ ausführen.');
+  if (!map.id) throw new Error('Spalte „ID“ fehlt. Bitte „Careerway → Einrichten“ ausführen.');
   return map;
 }
 
@@ -171,7 +171,7 @@ function apiRequestCv(key, id) {
   return withLock_(function () {
     const sh = sheet_();
     const map = colMap_(sh);
-    if (!map.cvRequest) throw new Error('Spalte „CV-Auftrag“ fehlt. Bitte „Job-Tracker → Einrichten“ ausführen.');
+    if (!map.cvRequest) throw new Error('Spalte „CV-Auftrag“ fehlt. Bitte „Careerway → Einrichten“ ausführen.');
     const r = findRow_(sh, map, id);
     if (!r) throw new Error('Job nicht gefunden.');
     sh.getRange(r, map.cvRequest).setValue('angefordert ' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'dd.MM.yyyy HH:mm'));
@@ -888,7 +888,7 @@ function decode_(s) {
 /* ------------------------------------------------------------------ */
 
 function onOpen() {
-  SpreadsheetApp.getUi().createMenu('Job-Tracker')
+  SpreadsheetApp.getUi().createMenu('Careerway')
     .addItem('Einrichten', 'jtEinrichten')
     .addItem('App-Link anzeigen', 'jtAppLink')
     .addItem('Web-App-Link ändern', 'jtLinkAendern')
@@ -935,9 +935,9 @@ function jtEinrichten() {
   }
   const props = PropertiesService.getScriptProperties();
   if (!schluessel_()) props.setProperty('appKey', zufallsSchluessel_());
-  SpreadsheetApp.getUi().alert('Job-Tracker',
+  SpreadsheetApp.getUi().alert('Careerway',
     'Fertig eingerichtet.\n\nNächster Schritt (nur einmal):\nErweiterungen → Apps Script → Bereitstellen → Neue Bereitstellung → Typ „Web-App“\n' +
-    '• Ausführen als: Ich\n• Zugriff: Jeder\n→ Bereitstellen.\n\nDanach hier im Menü „Job-Tracker → App-Link anzeigen“ wählen.',
+    '• Ausführen als: Ich\n• Zugriff: Jeder\n→ Bereitstellen.\n\nDanach hier im Menü „Careerway → App-Link anzeigen“ wählen.',
     SpreadsheetApp.getUi().ButtonSet.OK);
 }
 
@@ -964,7 +964,7 @@ function jtAppLinkEintragen() {
   if (r.getSelectedButton() !== ui.Button.OK) return false;
   const url = r.getResponseText().trim().replace(/\?.*$/, '');
   if (!/^https:\/\/script\.google\.com\/.+\/exec$/.test(url)) {
-    ui.alert('Job-Tracker', 'Das ist kein Web-App-Link. Er beginnt mit https://script.google.com/ und endet auf /exec.', ui.ButtonSet.OK);
+    ui.alert('Careerway', 'Das ist kein Web-App-Link. Er beginnt mit https://script.google.com/ und endet auf /exec.', ui.ButtonSet.OK);
     return false;
   }
   PropertiesService.getScriptProperties().setProperty('appUrl', url);
@@ -976,7 +976,7 @@ function jtAppLink() {
   if (!appUrl_() && schluessel_() && !jtAppLinkEintragen()) return;
   const url = appUrl_(), k = schluessel_();
   if (!url || !k) {
-    ui.alert('Job-Tracker', 'Noch keine Web-App bereitgestellt oder kein Schlüssel vorhanden.\nBitte zuerst „Einrichten“ ausführen und die Web-App bereitstellen.', ui.ButtonSet.OK);
+    ui.alert('Careerway', 'Noch keine Web-App bereitgestellt oder kein Schlüssel vorhanden.\nBitte zuerst „Einrichten“ ausführen und die Web-App bereitstellen.', ui.ButtonSet.OK);
     return;
   }
   const page = APP_PAGE + '#setup=' + Utilities.base64EncodeWebSafe(JSON.stringify({ u: url, k: k }), Utilities.Charset.UTF_8).replace(/=+$/, '');
@@ -991,7 +991,7 @@ function jtAppLink() {
     '<p>Schlüssel:<br><input readonly style="width:100%" value="' + esc(k) + '" onclick="this.select()"></p>' +
     '<p style="color:#a33">Link und Schlüssel nicht weitergeben – damit kann jeder deine Bewerbungen lesen und ändern.</p></div>'
   ).setWidth(520).setHeight(470);
-  ui.showModalDialog(html, 'Job-Tracker – App-Link');
+  ui.showModalDialog(html, 'Careerway – App-Link');
 }
 
 function jtNeuerSchluessel() {

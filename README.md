@@ -1,10 +1,10 @@
-# Job-Tracker
+# Careerway
 
 **Deutsch** | [English](README.en.md)
 
 Eine kleine Web-App, mit der ich meine Bewerbungen verwalte. Die Daten liegen in einer eigenen Google-Tabelle, die App läuft auf iPhone, iPad und am Rechner.
 
-![Job-Tracker mit Beispieldaten](docs/screenshot.png)
+![Careerway mit Beispieldaten](docs/screenshot.png)
 
 Created by **Matthias Lobinger** · [LinkedIn](https://www.linkedin.com/in/matthias-lobinger)
 
