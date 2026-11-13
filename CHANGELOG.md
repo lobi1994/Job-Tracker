@@ -11,6 +11,13 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.27 – 13.11.2026 (nur App)
+- **Job-Ansicht neu geordnet:** Direkt unter Firma und Stelle stehen drei große Knöpfe mit neuen Symbolen: **Stellenausschreibung** (Dokument), **Lebenslauf** (Ausweis-Symbol) und **Bewerben ↗** (Papierflieger; bei offenen Jobs grün hervorgehoben). Der frühere Kasten „Unterlagen“ unten entfällt.
+- Selten Genutztes steht eingeklappt ganz unten unter **„Mehr“**: Stellenausschreibung vom Link speichern, Text einfügen, löschen sowie Firma, Stelle, Ort, Link und Lebenslauf-Datei ändern.
+- **Begriffe:** „Anzeige“ heißt in der App jetzt überall „Stellenausschreibung“, „CV“ in der Job-Ansicht „Lebenslauf“ (z. B. „Lebenslauf passt“, „Lebenslauf mit Claude erstellen“). Die kurzen Filter „CV 4+ / CV 3+“ bleiben.
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.6.26 – 13.11.2026 (nur App)
 - **Neues App-Icon: Kompass in Nacht und Mint** (dunkler Hintergrund, mintgrüne Nadel nach rechts oben). Ersetzt das Weg-Logo aus 1.6.25 – oben in der App, auf dem Einrichtungs-Bildschirm und auf dem Home-Bildschirm.
 - Für das neue Home-Bildschirm-Icon: App-Symbol löschen und in Safari neu „Zum Home-Bildschirm“ hinzufügen.

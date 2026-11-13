@@ -1,7 +1,7 @@
 /* Careerway – starts the app from the device cache.
  * App page: loaded fresh from the network first (no browser cache), device copy only when offline or slow.
  * Fonts: cached once. Calls to Google (your list) are never cached here. */
-var CACHE = 'jt-shell-v42';
+var CACHE = 'jt-shell-v43';
 var SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-32.png', 'icons/logo.svg'];
 
 self.addEventListener('install', function (e) {
