@@ -11,6 +11,21 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.23 – 13.11.2026 (App und Apps Script)
+- **Gespeicherte Anzeigen werden einheitlich aufbereitet** (App und Skript nutzen dieselbe Regel):
+  - HTML wird zu Text, Sonderzeichen wie `&uuml;` werden zu „ü“.
+  - Aufzählungen erscheinen einheitlich als „- “.
+  - Navigation, Cookie-Hinweise, „Apply now“, Fußzeilen und angehängte Bewerbungsformulare werden entfernt.
+  - Fließtext ohne Zeilenumbrüche wird an Überschriften wie „Ihre Aufgaben:“ oder „Requirements:“ getrennt.
+  - Leere Überschriften am Ende fallen weg.
+- Das gilt beim Speichern neuer Anzeigen und beim Öffnen bereits gespeicherter Anzeigen.
+- Neuer Menüpunkt **Job-Tracker → Gespeicherte Anzeigen aufräumen**: bereitet alle vorhandenen Anzeigen im Blatt „Anzeigen“ einmal neu auf.
+- Greenhouse-Anzeigen, die über eine Firmen-Karriereseite eingebettet sind, werden jetzt auch über den EU-Server von Greenhouse gesucht.
+
+**Apps Script: Bereitstellen nötig: ja** (`google/Code.gs`)
+
+Beschreibung für die Bereitstellung: `1.6.23 – Anzeigen einheitlich aufbereiten, Menü „Gespeicherte Anzeigen aufräumen“, Greenhouse EU`
+
 ## 1.6.22 – 13.11.2026 (nur App)
 - **Mehrere Gespräche pro Job:** Statt eines einzelnen Felds „Gespräch am“ gibt es jetzt den Bereich „Gespräche“. Mit „＋ Gespräch hinzufügen“ legst du beliebig viele Termine an, jeweils mit Datum/Uhrzeit, Art (Telefon, Video, Persönlich (vor Ort), Assessment Center, Sonstiges) und optionaler Notiz. ✕ entfernt einen Termin. Beim Speichern werden die Termine nach Datum sortiert.
 - In der Liste zeigt die Karte alle Termine kurz an, z. B. „📅 📞 12.11. 16:30 | 🤝 19.11. 09:00“.
