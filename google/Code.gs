@@ -8,7 +8,7 @@
  * (z. B. {fn:"apiSavePosting", key, data:{url, title, text}} – data darf auch JSON-Text sein).
  */
 
-const VERSION = '1.6.29'; // siehe CHANGELOG.md
+const VERSION = '1.6.34'; // siehe CHANGELOG.md
 const APP_PAGE = 'https://lobi1994.github.io/Job-Tracker/';
 const SHEET = 'Bewerbungen';
 const POSTINGS = 'Anzeigen';
@@ -20,7 +20,7 @@ const MAX_TEXT = 45000; // Zellgrenze in Google Sheets liegt bei 50.000 Zeichen
 const COLS = {
   'Firma': 'company', 'Stelle': 'role', 'Ort / Remote': 'location', 'Status': 'status',
   'Beworben am': 'appliedOn', 'Gespräch am': 'interview', 'Gefällt mir (1-5)': 'like',
-  'CV passt (1-5)': 'fit', 'Gehalt angegeben': 'salary', 'Weg / Portal': 'channel',
+  'CV passt (1-5)': 'fit', 'CV passt (%)': 'fit', 'Gehalt angegeben': 'salary', 'Weg / Portal': 'channel',
   'Link Anzeige': 'url', 'CV-Datei': 'cv', 'Notizen': 'notes', 'ID': 'id',
   'Anzeige gespeichert': 'postingSaved', 'Fit-Begründung': 'fitNote', 'CV-Auftrag': 'cvRequest', 'CV-Link': 'cvLink'
 };
@@ -121,10 +121,16 @@ function toCell_(field, value) {
     const m = String(value).match(/^(\d{4})-(\d{2})-(\d{2})$/);
     return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : String(value);
   }
-  if (field === 'like' || field === 'fit') {
+  if (field === 'like') {
     const n = Number(value);
     if (!value && value !== 0) return '';
     if (!(n >= 1 && n <= 5)) throw new Error('Bewertung muss zwischen 1 und 5 liegen.');
+    return Math.round(n);
+  }
+  if (field === 'fit') { // CV-Passung in Prozent (ATS-Bewertung)
+    const n = Number(value);
+    if (!value && value !== 0) return '';
+    if (!(n >= 0 && n <= 100)) throw new Error('CV-Passung muss zwischen 0 und 100 % liegen.');
     return Math.round(n);
   }
   if (field === 'status' && STATUS.indexOf(value) < 0) throw new Error('Unbekannter Status: ' + value);
