@@ -277,7 +277,7 @@ header{background:rgba(11,15,23,.86);-webkit-backdrop-filter:saturate(160%) blur
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.33', NEED_SCRIPT = '1.6.12'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.34', NEED_SCRIPT = '1.6.34'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Careerway ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
@@ -323,7 +323,7 @@ const EN = {
   'Beworben am': 'Applied on', 'Gespräche': 'Interviews', '＋ Gespräch hinzufügen': '＋ Add interview', 'Gespräch entfernen': 'Remove interview',
   'Art …': 'Type …', 'Telefon': 'Phone', 'Video': 'Video', 'Persönlich (vor Ort)': 'In person (on-site)', 'Assessment Center': 'Assessment center', 'Sonstiges': 'Other',
   'Notiz (z. B. 2. Gespräch mit Teamlead)': 'Note (e.g. 2nd interview with team lead)',
-  'Bewertung': 'Rating', 'Lebenslauf passt (Einschätzung)': 'Résumé fit (estimate)', 'Details': 'Details',
+  'Bewertung': 'Rating', 'Lebenslauf passt (Einschätzung)': 'Résumé fit (estimate)', 'Lebenslauf passt (ATS-Bewertung, %)': 'Résumé fit (ATS score, %)', 'z. B. 80': 'e.g. 80', 'Details': 'Details',
   'Gehalt angegeben': 'Salary stated', 'Weg / Portal': 'Channel / portal', 'Notizen': 'Notes',
   'Mehr: Stellenausschreibung verwalten, Firma und Stelle ändern': 'More: manage job posting, edit company and role',
   'Stellenausschreibung noch nicht gespeichert.': 'Job posting not saved yet.', 'Vom Link speichern': 'Save from link', 'Text einfügen': 'Paste text', 'Löschen': 'Delete',
@@ -601,12 +601,12 @@ setInterval(() => autoRefresh(170000), 180000);
 function renderChips() {
   const c = {}; jobs.forEach((j) => { c[j.status] = (c[j.status] || 0) + 1; });
   const allOn = statuses.every((s) => filter.on.includes(s));
-  const fc = (n) => jobs.filter((j) => (j.fit || 0) >= n).length;
+  const fc = (n) => jobs.filter((j) => fitPct(j.fit) >= n).length;
   // Reihenfolge: zuerst die Status (Offen, Beworben, Gespräch, Vor Ort …), dann „Alle aus/an“ und die CV-Filter rechts
   $('chips').innerHTML = statuses.map((s) => '<button class="chip' + (filter.on.includes(s) ? ' on' : '') + '" data-s="' + esc(s) + '" style="--c:' + col(s) + '"><i></i>' + esc(SHORT[s] || s) + ' <b>' + (c[s] || 0) + '</b></button>').join('') +
     '<span class="chipsep" aria-hidden="true"></span>' +
     '<button class="chip meta" data-all="1">' + (allOn ? 'Alle aus' : 'Alle an') + '</button>' +
-    [4, 3].map((n) => '<button class="chip fitchip' + (filter.fitMin === n ? ' on' : '') + '" data-fit="' + n + '" style="--c:var(--acc)">CV ' + n + '+ <b>' + fc(n) + '</b></button>').join('');
+    [90, 70].map((n) => '<button class="chip fitchip' + (filter.fitMin === n ? ' on' : '') + '" data-fit="' + n + '" style="--c:var(--acc)">CV ' + n + ' %+ <b>' + fc(n) + '</b></button>').join('');
 }
 $('chips').onclick = (e) => {
   const b = e.target.closest('.chip'); if (!b) return;
@@ -618,17 +618,20 @@ $('chips').onclick = (e) => {
 $('q').oninput = () => { filter.q = $('q').value; render(); };
 $('sort').onchange = () => { filter.sort = $('sort').value; ls.set(FK, filter); render(); };
 
+// CV-Passung in Prozent (ATS-Bewertung). Alte Sternwerte 1–5 werden umgerechnet: 1→30, 2→50, 3→70, 4→90, 5→95
+const FIT_OLD = { 1: 30, 2: 50, 3: 70, 4: 90, 5: 95 };
+function fitPct(v) { const n = Number(v) || 0; return n > 0 && n <= 5 ? FIT_OLD[Math.round(n)] : n; }
 function dots(n, max) { n = Number(n) || 0; return n ? '●'.repeat(n) + '○'.repeat(max - n) : ''; }
 function fmtDate(iso) { const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? m[3] + '.' + m[2] + '.' + m[1].slice(2) : String(iso || ''); }
 
 const rankS = (st) => (st === 'Nicht bewerben' ? -1 : statuses.indexOf(st)); // „Nicht bewerben“ ganz unten
 function visible() {
   const q = filter.q.trim().toLowerCase();
-  let v = jobs.filter((j) => filter.on.includes(j.status) && (!filter.fitMin || (j.fit || 0) >= filter.fitMin) && (!q || (j.company + ' ' + j.role + ' ' + j.location).toLowerCase().includes(q)));
+  let v = jobs.filter((j) => filter.on.includes(j.status) && (!filter.fitMin || fitPct(j.fit) >= filter.fitMin) && (!q || (j.company + ' ' + j.role + ' ' + j.location).toLowerCase().includes(q)));
   const by = {
     date: (a, b) => String(b.appliedOn || '').localeCompare(String(a.appliedOn || '')),
     dateAsc: (a, b) => (!a.appliedOn) - (!b.appliedOn) || String(a.appliedOn || '').localeCompare(String(b.appliedOn || '')), // ohne Datum ans Ende
-    fit: (a, b) => (b.fit || 0) - (a.fit || 0),
+    fit: (a, b) => fitPct(b.fit) - fitPct(a.fit),
     like: (a, b) => (b.like || 0) - (a.like || 0),
     status: (a, b) => rankS(b.status) - rankS(a.status),
     company: (a, b) => String(a.company).localeCompare(String(b.company), 'de')
@@ -648,7 +651,7 @@ function render() {
         (j.location ? '<span>' + esc(j.location) + '</span>' : '') +
         (j.interview ? '<span class="iv">' + IC.cal + esc(ivShort(j.interview)) + '</span>' : '') +
         (j.like ? '<span class="rt like" title="Gefällt mir">' + IC.heart + j.like + '/5</span>' : '') +
-        (j.fit || j.cvLink || j.cv ? '<span class="rt fit" title="Lebenslauf passt">CV ' + (j.fit ? j.fit + '/5' : '') + ((j.cvLink || j.cv) ? ' <span class="mk" title="Zugeschnittener Lebenslauf vorhanden">' + IC.cv + '</span>' : '') + '</span>' : '') +
+        (j.fit || j.cvLink || j.cv ? '<span class="rt fit" title="Lebenslauf passt">CV ' + (j.fit ? fitPct(j.fit) + ' %' : '') + ((j.cvLink || j.cv) ? ' <span class="mk" title="Zugeschnittener Lebenslauf vorhanden">' + IC.cv + '</span>' : '') + '</span>' : '') +
         (j.status === statuses[0] && j.url ? '<button class="capply" data-apply="' + esc(j.id) + '">Bewerben →</button>' : '') +
       '</div></div>').join('')
     : '<div class="empty">' + (jobs.length ? 'Keine Jobs für diesen Filter.' : 'Noch keine Jobs. Tipp auf +.') + '</div>';
@@ -842,7 +845,7 @@ function openDetail(id) {
     inp('fApplied', 'Beworben am', j.appliedOn, 'date') + ivBlock(j.interview) +
     '<div class="sec">Bewertung</div>' +
     '<div class="fl"><span>Gefällt mir</span>' + starRow('fLike', j.like) + '</div>' +
-    '<div class="fl"><span>Lebenslauf passt (Einschätzung)</span>' + starRow('fFit', j.fit, 'fit') + '</div>' +
+    '<div class="fl"><span>Lebenslauf passt (ATS-Bewertung, %)</span><input id="fFit" class="notr" type="number" inputmode="numeric" min="0" max="100" step="1" placeholder="z. B. 80" value="' + (j.fit ? fitPct(j.fit) : '') + '"></div>' +
     (j.fitNote ? '<p class="fitnote">Claude: <span class="notr">' + esc(j.fitNote) + '</span></p>' : '') +
     (j.status === statuses[0] ? '<div class="cvbox" id="cvBox">' + cvBoxHtml(j) + '</div>' : '') +
     '<div class="sec">Details</div>' +
@@ -862,7 +865,7 @@ function openDetail(id) {
     '</details>',
     '<button class="ib" id="bClose">Schließen</button><button class="ib pri" id="bSave">Speichern</button>');
   wireCv(j);
-  wireStars('fLike'); wireStars('fFit'); wireIv();
+  wireStars('fLike'); wireIv();
   $('bClose').onclick = closeSheet;
   // Status von „Noch nicht beworben“ auf einen Bewerbungs-Status → „Beworben am“ mit heute vorbelegen (bleibt änderbar)
   $('fStatus').onchange = () => {
@@ -874,7 +877,7 @@ function openDetail(id) {
   $('bSave').onclick = async () => {
     const ch = {
       status: $('fStatus').value, appliedOn: $('fApplied').value, interview: readIv(),
-      like: Number($('fLike').dataset.v) || '', fit: Number($('fFit').dataset.v) || '',
+      like: Number($('fLike').dataset.v) || '', fit: Math.max(0, Math.min(100, Math.round(Number($('fFit').value) || 0))) || '',
       salary: $('fSalary').value.trim(), channel: $('fChannel').value.trim(), notes: $('fNotes').value,
       company: $('fCompany').value.trim(), role: $('fRole').value.trim(), location: $('fLocation').value.trim(),
       url: $('fUrl').value.trim(), cv: $('fCv').value.trim()
@@ -1236,16 +1239,16 @@ $('bAdd').onclick = () => {
 
 /* ---------- Demo-Daten (für Besucher und Screenshots) ---------- */
 const DEMO_JOBS = [
-  { id: 'd1', company: 'Nordlicht Robotics', role: 'Technical Support Engineer (m/w/d)', location: 'München, hybrid', status: 'Zum Gespräch eingeladen', appliedOn: '2026-11-10', interview: '18.11. 10:00', like: 5, fit: 4, salary: '68.000 €', channel: 'Personio', url: 'https://example.com/jobs/1', cv: 'Lebenslauf_Nordlicht.pdf', notes: 'Videocall mit Teamlead', postingSaved: '10.11.2026', fitNote: 'Support- und Fehleranalyse-Erfahrung passt gut; Robotik-Kenntnisse fehlen.', cvLink: 'https://example.com/cv.pdf', cvRequest: 'fertig' },
-  { id: 'd2', company: 'Alpenwerk Medizintechnik', role: 'Junior Projektmanager Produktentwicklung', location: 'Augsburg', status: 'Beworben', appliedOn: '2026-11-11', interview: '', like: 4, fit: 3, salary: '65.000 €', channel: 'Website', url: 'https://example.com/jobs/2', cv: '', notes: '', postingSaved: '11.11.2026' },
-  { id: 'd3', company: 'Brückner Mobility', role: 'Test Engineer Fahrzeugvernetzung', location: 'Remote', status: 'Persönliches Gespräch', appliedOn: '2026-11-03', interview: '20.11. 14:00 vor Ort', like: 4, fit: 5, salary: '70.000 €', channel: 'LinkedIn', url: '', cv: '', notes: 'Zweite Runde mit Abteilungsleitung', postingSaved: '' },
-  { id: 'd4', company: 'Kesselring Systems', role: 'Customer Success Manager', location: 'Berlin, remote', status: 'Noch nicht beworben', appliedOn: '', interview: '', like: 3, fit: 3, salary: '', channel: '', url: 'https://example.com/jobs/4', cv: '', notes: '', postingSaved: '' },
-  { id: 'd5', company: 'Vireo Software', role: 'Product Owner IoT-Plattform', location: 'München', status: 'Abgelehnt', appliedOn: '2026-10-28', interview: '', like: 3, fit: 2, salary: '72.000 €', channel: 'Greenhouse', url: '', cv: '', notes: 'Absage nach 1 Woche', postingSaved: '' },
-  { id: 'd6', company: 'Seewald Energie', role: 'Projektingenieur Batteriespeicher', location: 'Regensburg', status: 'Jobangebot', appliedOn: '2026-10-20', interview: '', like: 4, fit: 4, salary: '69.000 €', channel: 'E-Mail', url: '', cv: '', notes: 'Angebot bis 25.11. prüfen', postingSaved: '' },
-  { id: 'd7', company: 'Falkenstein Medical', role: 'Application Engineer Medizintechnik', location: 'München, hybrid', status: 'Noch nicht beworben', appliedOn: '', interview: '', like: null, fit: 4, salary: '', channel: 'LinkedIn', url: 'https://example.com/jobs/7', cv: '', notes: '', postingSaved: '12.11.2026', fitNote: 'Medizintechnik-Studium und Kundensupport passen; Erfahrung mit Laborgeräten fehlt.' },
-  { id: 'd8', company: 'Lindwurm Telematik', role: 'Projektleiter Connected Car', location: 'Ingolstadt', status: 'Beworben', appliedOn: '2026-11-08', interview: '', like: 4, fit: 4, salary: '70.000 €', channel: 'StepStone', url: 'https://example.com/jobs/8', cv: 'Lebenslauf_Lindwurm.pdf', notes: '', postingSaved: '08.11.2026' },
-  { id: 'd9', company: 'Isartal Analytics', role: 'Testmanager Software', location: 'München', status: 'Beworben', appliedOn: '2026-11-06', interview: '', like: 3, fit: 3, salary: '66.000 €', channel: 'Website', url: 'https://example.com/jobs/9', cv: '', notes: '', postingSaved: '06.11.2026' },
-  { id: 'd10', company: 'Hagen Automation', role: 'Vertriebsingenieur Außendienst', location: 'Stuttgart', status: 'Nicht bewerben', appliedOn: '', interview: '', like: 1, fit: 2, salary: '', channel: 'Indeed', url: 'https://example.com/jobs/10', cv: '', notes: '80 % Reise', postingSaved: '05.11.2026' }
+  { id: 'd1', company: 'Nordlicht Robotics', role: 'Technical Support Engineer (m/w/d)', location: 'München, hybrid', status: 'Zum Gespräch eingeladen', appliedOn: '2026-11-10', interview: '18.11. 10:00', like: 5, fit: 90, salary: '68.000 €', channel: 'Personio', url: 'https://example.com/jobs/1', cv: 'Lebenslauf_Nordlicht.pdf', notes: 'Videocall mit Teamlead', postingSaved: '10.11.2026', fitNote: 'Support- und Fehleranalyse-Erfahrung passt gut; Robotik-Kenntnisse fehlen.', cvLink: 'https://example.com/cv.pdf', cvRequest: 'fertig' },
+  { id: 'd2', company: 'Alpenwerk Medizintechnik', role: 'Junior Projektmanager Produktentwicklung', location: 'Augsburg', status: 'Beworben', appliedOn: '2026-11-11', interview: '', like: 4, fit: 70, salary: '65.000 €', channel: 'Website', url: 'https://example.com/jobs/2', cv: '', notes: '', postingSaved: '11.11.2026' },
+  { id: 'd3', company: 'Brückner Mobility', role: 'Test Engineer Fahrzeugvernetzung', location: 'Remote', status: 'Persönliches Gespräch', appliedOn: '2026-11-03', interview: '20.11. 14:00 vor Ort', like: 4, fit: 95, salary: '70.000 €', channel: 'LinkedIn', url: '', cv: '', notes: 'Zweite Runde mit Abteilungsleitung', postingSaved: '' },
+  { id: 'd4', company: 'Kesselring Systems', role: 'Customer Success Manager', location: 'Berlin, remote', status: 'Noch nicht beworben', appliedOn: '', interview: '', like: 3, fit: 70, salary: '', channel: '', url: 'https://example.com/jobs/4', cv: '', notes: '', postingSaved: '' },
+  { id: 'd5', company: 'Vireo Software', role: 'Product Owner IoT-Plattform', location: 'München', status: 'Abgelehnt', appliedOn: '2026-10-28', interview: '', like: 3, fit: 50, salary: '72.000 €', channel: 'Greenhouse', url: '', cv: '', notes: 'Absage nach 1 Woche', postingSaved: '' },
+  { id: 'd6', company: 'Seewald Energie', role: 'Projektingenieur Batteriespeicher', location: 'Regensburg', status: 'Jobangebot', appliedOn: '2026-10-20', interview: '', like: 4, fit: 90, salary: '69.000 €', channel: 'E-Mail', url: '', cv: '', notes: 'Angebot bis 25.11. prüfen', postingSaved: '' },
+  { id: 'd7', company: 'Falkenstein Medical', role: 'Application Engineer Medizintechnik', location: 'München, hybrid', status: 'Noch nicht beworben', appliedOn: '', interview: '', like: null, fit: 90, salary: '', channel: 'LinkedIn', url: 'https://example.com/jobs/7', cv: '', notes: '', postingSaved: '12.11.2026', fitNote: 'Medizintechnik-Studium und Kundensupport passen; Erfahrung mit Laborgeräten fehlt.' },
+  { id: 'd8', company: 'Lindwurm Telematik', role: 'Projektleiter Connected Car', location: 'Ingolstadt', status: 'Beworben', appliedOn: '2026-11-08', interview: '', like: 4, fit: 90, salary: '70.000 €', channel: 'StepStone', url: 'https://example.com/jobs/8', cv: 'Lebenslauf_Lindwurm.pdf', notes: '', postingSaved: '08.11.2026' },
+  { id: 'd9', company: 'Isartal Analytics', role: 'Testmanager Software', location: 'München', status: 'Beworben', appliedOn: '2026-11-06', interview: '', like: 3, fit: 70, salary: '66.000 €', channel: 'Website', url: 'https://example.com/jobs/9', cv: '', notes: '', postingSaved: '06.11.2026' },
+  { id: 'd10', company: 'Hagen Automation', role: 'Vertriebsingenieur Außendienst', location: 'Stuttgart', status: 'Nicht bewerben', appliedOn: '', interview: '', like: 1, fit: 50, salary: '', channel: 'Indeed', url: 'https://example.com/jobs/10', cv: '', notes: '80 % Reise', postingSaved: '05.11.2026' }
 ];
 let demoSug = [{ vid: 's1', jobId: 'd2', company: 'Alpenwerk Medizintechnik', role: 'Junior Projektmanager Produktentwicklung', art: 'Absage', status: 'Abgelehnt',
   date: '2026-11-12', from: 'Alpenwerk Recruiting <jobs@example.com>', subject: 'Ihre Bewerbung als Junior Projektmanager',
@@ -1321,7 +1324,7 @@ async function runTour() {
 /* ---------- Start ---------- */
 (function start() {
   startTr();
-  const f = ls.get(FK); if (f && Array.isArray(f.on)) { filter.on = f.on; filter.sort = f.sort || 'date'; filter.fitMin = f.fitMin || 0; }
+  const f = ls.get(FK); if (f && Array.isArray(f.on)) { filter.on = f.on; filter.sort = f.sort || 'date'; filter.fitMin = (f.fitMin || 0) > 5 ? f.fitMin : 0; }
   $('sort').value = filter.sort;
   const fromHash = parseSetup(location.hash);
   // Den #setup-Teil absichtlich in der Adresse lassen: „Zum Home-Bildschirm“ übernimmt so die Verbindung

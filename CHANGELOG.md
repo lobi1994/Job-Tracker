@@ -11,6 +11,17 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.34 – 14.11.2026 (App und Apps Script)
+- **CV-Passung in Prozent statt Sternen.** Claude bewertet Lebensläufe jetzt wie ein Bewerbermanagement-System (ATS): Anforderungen der Stellenausschreibung (Pflicht doppelt gewichtet) gegen die Begriffe im Lebenslauf. Ergebnis in %.
+- Filter heißen jetzt **CV 90 %+** (früher CV 4+) und **CV 70 %+** (früher CV 3+).
+- Karten zeigen „CV 83 %“, in der Detailansicht steht ein Zahlenfeld (0–100) statt Sternen.
+- Alte Sternwerte werden automatisch umgerechnet: 1 → 30 %, 2 → 50 %, 3 → 70 %, 4 → 90 %, 5 → 95 %.
+- Apps Script: Spalte darf „CV passt (%)“ heißen und nimmt Werte von 0 bis 100 an.
+
+**Apps Script: Bereitstellen nötig: ja** (Code.gs; falls 1.6.29 noch nicht bereitgestellt: auch Mail.gs)
+
+Beschreibung für die Bereitstellung: `1.6.34 – CV-Passung in Prozent (ATS-Bewertung)`
+
 ## 1.6.33 – 13.11.2026 (nur App)
 - Einstellungen: Icons und Texte der Menüpunkte stehen jetzt bündig links.
 
