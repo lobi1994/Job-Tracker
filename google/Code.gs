@@ -8,7 +8,7 @@
  * (z. B. {fn:"apiSavePosting", key, data:{url, title, text}} – data darf auch JSON-Text sein).
  */
 
-const VERSION = '1.6.34'; // siehe CHANGELOG.md
+const VERSION = '1.6.35'; // siehe CHANGELOG.md
 const APP_PAGE = 'https://lobi1994.github.io/Job-Tracker/';
 const SHEET = 'Bewerbungen';
 const POSTINGS = 'Anzeigen';
@@ -163,9 +163,9 @@ function apiList(key) {
 function profile_() {
   const ps = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(PROFILE);
   if (!ps || ps.getLastRow() < 2) return [];
-  return ps.getRange(2, 1, ps.getLastRow() - 1, 2).getValues()
+  return ps.getRange(2, 1, ps.getLastRow() - 1, 3).getValues()
     .filter(function (r) { return String(r[0]).trim(); })
-    .map(function (r) { return { skill: String(r[0]).trim(), type: /soft/i.test(String(r[1])) ? 'soft' : 'hard' }; });
+    .map(function (r) { return { skill: String(r[0]).trim(), type: /soft/i.test(String(r[1])) ? 'soft' : 'hard', note: String(r[2] || '').trim() }; });
 }
 
 /**
@@ -673,6 +673,46 @@ function apiGetPosting(key, id) {
   if (!r) return null;
   const v = ps.getRange(r, 1, 1, 4).getValues()[0];
   return { id: String(v[0]), url: String(v[1]), savedAt: iso_(v[2]), text: normalizePosting_(v[3]) };
+}
+
+/* ------------------------------------------------------------------ */
+/* Skill-Lücken (seit 1.6.35): alle gespeicherten Stellenausschreibungen */
+/* (ohne „Nicht bewerben“) plus Blatt „Lernplan“ für die Auswertung.     */
+/* ------------------------------------------------------------------ */
+const LEARN = 'Lernplan';
+function apiSkillData(key) {
+  check_(key);
+  const sh = sheet_(), map = colMap_(sh);
+  const last = sh.getLastRow();
+  const skip = {};
+  if (last >= 2 && map.id && map.status) {
+    sh.getRange(2, 1, last - 1, sh.getLastColumn()).getValues().forEach(function (r) {
+      if (String(r[map.status - 1]) === NOT_APPLYING) skip[String(r[map.id - 1])] = 1;
+    });
+  }
+  const ps = postingsSheet_();
+  const postings = [];
+  if (ps.getLastRow() >= 2) {
+    ps.getRange(2, 1, ps.getLastRow() - 1, 4).getValues().forEach(function (v) {
+      const id = String(v[0]);
+      if (!id || skip[id] || !String(v[3]).trim()) return;
+      postings.push({ id: id, text: normalizePosting_(v[3]).slice(0, 20000) });
+    });
+  }
+  return { postings: postings, plan: learnPlan_(), profile: profile_() };
+}
+
+function learnPlan_() {
+  const ls = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(LEARN);
+  if (!ls || ls.getLastRow() < 2) return [];
+  const v = ls.getRange(1, 1, ls.getLastRow(), ls.getLastColumn()).getDisplayValues();
+  const head = v[0].map(function (h) { return String(h).trim(); });
+  const KEYS = { 'Skill': 'skill', 'Erreichbarkeit': 'ease', 'Nachweis': 'proof', 'Lernweg': 'how', 'Dauer': 'time', 'Kosten': 'cost', 'Link': 'link', 'Für den Lebenslauf': 'cv', 'Stand': 'asOf' };
+  return v.slice(1).filter(function (r) { return String(r[0]).trim(); }).map(function (r) {
+    const o = {};
+    head.forEach(function (h, i) { if (KEYS[h]) o[KEYS[h]] = String(r[i]).trim(); });
+    return o;
+  });
 }
 
 /* ------------------------------------------------------------------ */
