@@ -11,6 +11,20 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.35 – 14.11.2026 (App und Apps Script)
+- **Neuer Bereich „Skill-Lücken“** (Zielscheiben-Symbol oben oder Einstellungen → Skill-Lücken): zählt über alle gespeicherten Stellenausschreibungen (ohne „Nicht bewerben“), welche Fähigkeiten gefordert sind, die laut Blatt „Profil“ fehlen.
+  - Wichtigkeit: Pflichtanforderungen zählen doppelt, PM-, Produkt- und Testrollen 1,5-fach.
+  - Pro Skill: in wie vielen Stellen gefordert, wie oft als Pflicht, und um wie viele Prozentpunkte deine Hard-Skill-Passung im Schnitt steigen würde.
+  - „Beste Hebel“ ganz oben: oft gefordert und leicht oder mittel erreichbar.
+  - Getrennt nach Hard Skills, Soft Skills und „Nur Grundlagen“ (Skills mit Hinweis „teilweise“ im Profil).
+  - Lernkarten aus dem neuen Blatt **„Lernplan“**: Erreichbarkeit, ob Grundlagen reichen oder ein Zertifikat nötig ist, Lernweg, Dauer, Kosten, Link und Formulierung für den Lebenslauf.
+- Skill-Erkennung genauer: „can“ im englischen Text zählt nicht mehr als CAN-Bus, „Budget“ aus Benefits und „AI“ aus Firmenbeschreibungen werden nicht mehr gezählt. Neu erkannt: Budgetverantwortung, Projektkalkulation, PM-Zertifikate, Vertragsmanagement, ERP, Power BI, CI/CD, KI, Photovoltaik/Speicher, BIM, Key Account, Business Development, Regulatorik Medizinprodukte.
+- Apps Script: neue Funktion `apiSkillData`, Profil liefert jetzt auch den Hinweis (z. B. „teilweise“).
+
+**Apps Script: Bereitstellen nötig: ja** (Code.gs)
+
+Beschreibung für die Bereitstellung: `1.6.35 – Skill-Lücken und Lernplan`
+
 ## 1.6.34 – 14.11.2026 (App und Apps Script)
 - **CV-Passung in Prozent statt Sternen.** Claude bewertet Lebensläufe jetzt wie ein Bewerbermanagement-System (ATS): Anforderungen der Stellenausschreibung (Pflicht doppelt gewichtet) gegen die Begriffe im Lebenslauf. Ergebnis in %.
 - Filter heißen jetzt **CV 90 %+** (früher CV 4+) und **CV 70 %+** (früher CV 3+).
