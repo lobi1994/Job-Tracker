@@ -11,6 +11,11 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.39 – 15.11.2026 (nur App)
+- Nach „Neuen Schlüssel erzeugen“ reicht es, sich in der Home-Bildschirm-App einmal neu zu verbinden. Vorher hat die App bei jedem Start wieder den alten Schlüssel aus ihrem Startlink genommen und erneut nach der Verbindung gefragt.
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.6.38 – 15.11.2026 (nur App) – Schneller Start
 - **Start ohne Warten aufs Netz:** Antwortet das Netz nicht innerhalb von 0,7 s, startet die App sofort aus dem Gerät (vorher bis zu 4 s Wartezeit). Gibt es eine neuere Version, lädt die App sie im Hintergrund und wechselt automatisch, sobald kein Fenster offen ist und nichts mehr gespeichert wird. Bei schnellem Netz siehst du wie bisher immer direkt die neueste Version.
 - Fällt GitHub Pages aus, startet die App trotzdem aus dem Gerät.

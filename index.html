@@ -296,7 +296,7 @@ header{background:rgba(11,15,23,.86);-webkit-backdrop-filter:saturate(160%) blur
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.38', NEED_SCRIPT = '1.6.35'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.39', NEED_SCRIPT = '1.6.35'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Careerway ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
@@ -509,7 +509,7 @@ async function apiOnce(fn, args) {
     throw err;
   }
   if (out.error) {
-    if (out.error === 'Kein Zugriff') { showSetup('Der Schlüssel passt nicht (mehr). Bitte deinen aktuellen Einrichtungs-Link öffnen.'); }
+    if (out.error === 'Kein Zugriff') { if (CFG) ls.set('jt-badkey', CFG.k); showSetup('Der Schlüssel passt nicht (mehr). Bitte deinen aktuellen Einrichtungs-Link öffnen.'); }
     const err = new Error(out.error); err.final = true; throw err;
   }
   return out.result;
@@ -1554,7 +1554,10 @@ function showKeyForInstall() {
   startTr();
   const f = ls.get(FK); if (f && Array.isArray(f.on)) { filter.on = f.on; filter.sort = f.sort || 'date'; filter.fitMin = (f.fitMin || 0) > 5 ? f.fitMin : 0; }
   $('sort').value = filter.sort;
-  const fromHash = parseSetup(location.hash);
+  // Ein Schlüssel, den Google schon abgelehnt hat (z. B. der alte im Link der Home-Bildschirm-App nach „Neuen Schlüssel erzeugen“),
+  // wird ignoriert. Dann gilt die Verbindung, die auf dem Gerät gespeichert ist.
+  let fromHash = parseSetup(location.hash);
+  if (fromHash && fromHash.k === ls.get('jt-badkey')) fromHash = null;
   // Den #setup-Teil absichtlich in der Adresse lassen: „Zum Home-Bildschirm“ übernimmt so die Verbindung
   // (die Home-Bildschirm-App hat auf dem iPhone einen eigenen Speicher, getrennt von Safari).
   if (fromHash) { const old = ls.get(CK); if (!old || old.u !== fromHash.u || old.k !== fromHash.k) ls.del(LK); ls.set(CK, fromHash); }
