@@ -249,6 +249,19 @@ header{background:rgba(11,15,23,.86);-webkit-backdrop-filter:saturate(160%) blur
 .setup .box{background:var(--card)}
 .credit{color:#5b6576}
 ::selection{background:rgba(52,211,153,.3)}
+.ib{position:relative}.nb{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;border-radius:9px;background:var(--danger);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px}.nb[hidden]{display:none}
+.fu{color:var(--danger);font-weight:600;font-size:12.5px}
+.fubox{display:flex;align-items:center;gap:10px;margin:8px 0;padding:10px 12px;border:1px solid var(--line);border-radius:12px;font-size:13.5px}.fubox span{flex:1}.fubox .ib{height:40px;white-space:nowrap;font-weight:600}.fubox.due{border-color:var(--danger)}
+.arow{display:flex;width:100%;align-items:center;gap:10px;text-align:left;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font:inherit;padding:10px 12px;margin:6px 0;cursor:pointer;min-height:52px}
+.arow .aw{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.arow .aw span{font-size:13px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.arow .ar{display:flex;flex-direction:column;align-items:flex-end;gap:2px;font-size:12.5px;color:var(--mute);text-align:right;flex:none;max-width:48%}.arow .ar b{color:var(--ink);font-size:14px}.arow.hot .ar b{color:var(--danger)}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}.tile{border:1px solid var(--line);border-radius:12px;padding:10px 6px;text-align:center;display:flex;flex-direction:column;gap:2px}.tile b{font-size:22px}.tile span{font-size:11.5px;color:var(--mute)}
+@media (max-width:420px){.tiles{grid-template-columns:repeat(2,1fr)}}
+.fbar{display:grid;grid-template-columns:118px 1fr 78px;align-items:center;gap:8px;margin:6px 0;font-size:13.5px}.fbar .ft{height:14px;border-radius:7px;background:color-mix(in srgb,var(--acc) 14%,transparent);overflow:hidden}.fbar .ft i{display:block;height:100%;background:var(--acc);border-radius:7px}.fbar b{text-align:right;font-size:12.5px;font-weight:600}
+.wk{display:flex;align-items:flex-end;gap:6px;margin:10px 0}.wk div{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--mute)}.wk i{display:block;width:100%;max-width:34px;min-height:2px;background:var(--acc);border-radius:4px 4px 0 0}.wk b{font-size:12px;color:var(--ink);min-height:15px}
+table.st{width:100%;border-collapse:collapse;font-size:13.5px}table.st th,table.st td{text-align:left;padding:7px 4px;border-bottom:1px solid var(--line)}table.st th{font-size:12px;color:var(--mute);font-weight:600}table.st td+td,table.st th+th{text-align:right}
+.prepiv{margin:6px 0}.prepiv span{color:var(--mute);font-size:13px}.prepdl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:6px 0;font-size:14px}.prepdl dt{color:var(--mute)}.prepdl dd{margin:0}.preph{margin:10px 0 4px;font-size:13.5px}.prepol{margin:6px 0;padding-left:20px;font-size:14px;line-height:1.5}
+@media (max-width:440px){#bGaps{display:none}}
 </style>
 </head>
 <body>
@@ -257,6 +270,7 @@ header{background:rgba(11,15,23,.86);-webkit-backdrop-filter:saturate(160%) blur
   <div class="top">
     <h1><img class="logo" src="icons/logo.svg?v=4" alt="" width="28" height="28">Careerway<small id="cnt"></small></h1>
     <span id="sync" class="sync" hidden></span>
+    <button class="ib" id="bAgenda" title="Termine und Fristen" aria-label="Termine und Fristen"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></button>
     <button class="ib" id="bGaps" title="Skill-Lücken" aria-label="Skill-Lücken"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2"/></svg></button>
     <button class="ib" id="bRefresh" title="Aktualisieren" aria-label="Aktualisieren"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/></svg></button>
     <button class="ib" id="bSettings" title="Einstellungen" aria-label="Einstellungen"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
@@ -297,7 +311,7 @@ header{background:rgba(11,15,23,.86);-webkit-backdrop-filter:saturate(160%) blur
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.40', NEED_SCRIPT = '1.6.35'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.41', NEED_SCRIPT = '1.6.35'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Careerway ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
@@ -343,6 +357,23 @@ const EN = {
   'Beworben am': 'Applied on', 'Gespräche': 'Interviews', '＋ Gespräch hinzufügen': '＋ Add interview', 'Gespräch entfernen': 'Remove interview',
   'Art …': 'Type …', 'Telefon': 'Phone', 'Video': 'Video', 'Persönlich (vor Ort)': 'In person (on-site)', 'Assessment Center': 'Assessment center', 'Sonstiges': 'Other',
   'Notiz (z. B. 2. Gespräch mit Teamlead)': 'Note (e.g. 2nd interview with team lead)',
+  'Termine und Fristen': 'Dates and deadlines', 'Was als Nächstes ansteht, nach Dringlichkeit sortiert.': 'What is coming up next, most urgent first.', 'Gerade ist nichts offen.': 'Nothing open right now.',
+  'Anstehende Gespräche': 'Upcoming interviews', 'Nachfassen': 'Follow up', 'Rückmeldung nach Gespräch offen': 'Waiting for feedback after interview', 'Angebot liegt vor': 'Offer received', 'Warten auf Antwort': 'Waiting for a reply',
+  'heute': 'today', 'morgen': 'tomorrow', 'gestern': 'yesterday', 'seit Nachfassen': 'since follow-up', 'seit Bewerbung': 'since applying', 'letztes Gespräch': 'last interview', 'Entscheiden': 'Decide', 'Nachfassen ab': 'Follow up from',
+  'Nachfassen ·': 'Follow up ·', 'Heute nachgefasst': 'Followed up today', 'Nachfassen eingetragen': 'Follow-up noted', 'Für heute schon eingetragen': 'Already noted for today',
+  'Statistik': 'Statistics', 'Bewerbungen': 'Applications', 'Antwortquote': 'Response rate', 'mit Gespräch': 'with interview', 'Angebote': 'Offers', 'Von der Bewerbung zum Angebot': 'From application to offer',
+  'Antwort erhalten': 'Got a reply', 'Bewerbungen pro Woche': 'Applications per week', 'Nach Weg / Portal': 'By channel', 'Weg': 'Channel', 'ohne Angabe': 'not set', 'CV-Passung': 'CV fit', 'Noch keine Bewerbung eingetragen.': 'No applications yet.',
+  'Aus deinen Jobs mit Status ab „Beworben“. „Nicht bewerben“ und „Noch nicht beworben“ zählen nicht mit.': 'From your jobs with status “Applied” or later. “Won\'t apply” and “Not applied yet” are not counted.',
+  'Als Antwort zählt jede Einladung, jedes Angebot und jede Absage.': 'Every invitation, offer and rejection counts as a reply.', 'Absagen,': 'rejections,', 'ohne Antwort, davon': 'without a reply, of which',
+  'Mit Gespräch im Schnitt': 'With interview on average', ', ohne Gespräch': ', without interview', 'Jobs stehen noch auf „Noch nicht beworben“.': 'jobs are still on “Not applied yet”.',
+  'Gesprächsvorbereitung': 'Interview prep', 'Vorbereitung': 'Prep', 'Termin': 'Date', 'Eckdaten': 'Key facts', 'Noch kein Termin eingetragen.': 'No date entered yet.', 'schon vorbei': 'already over',
+  'Was die Stelle verlangt': 'What the job asks for', 'Das bringst du mit': 'What you bring', 'Darauf brauchst du eine Antwort': 'Where you need an answer', 'Nichts erkannt.': 'Nothing found.', 'Stellenausschreibung lesen': 'Read job posting',
+  'Keine Stellenausschreibung gespeichert. Ohne sie kann die App Stärken und Lücken nicht zeigen.': 'No job posting saved. Without it the app cannot show strengths and gaps.', 'Stellenausschreibung nicht gefunden.': 'Job posting not found.',
+  'Vor dem Gespräch': 'Before the interview', 'Stellenausschreibung noch einmal lesen.': 'Read the job posting once more.', 'Zu jeder Lücke einen ehrlichen Satz vorbereiten.': 'Prepare one honest sentence for each gap.',
+  'Drei eigene Fragen an die Firma notieren.': 'Write down three questions for the company.', 'Gehaltswunsch und frühesten Starttermin parat haben.': 'Have your salary expectation and earliest start date ready.', 'Technik oder Anfahrt am Vortag prüfen.': 'Check the tech or the route the day before.',
+  'Meine Notizen und Fragen': 'My notes and questions', 'Fragen an die Firma, Beispiele aus meiner Arbeit, Namen der Gesprächspartner': 'Questions for the company, examples from my work, names of the interviewers',
+  'Stellenanzeige im Netz ↗': 'Posting on the web ↗', 'Ort': 'Location',
+  'Anstehende Gespräche, Nachfassen und offene Rückmeldungen': 'Upcoming interviews, follow-ups and open replies', 'Bewerbungen pro Woche, Antwortquote und der Weg bis zum Angebot': 'Applications per week, response rate and the path to an offer',
   'Skill-Lücken': 'Skill gaps', 'Beste Hebel': 'Best levers', 'Grundlagen': 'Basics only', 'Hard Skills': 'Hard skills', 'Soft Skills': 'Soft skills', 'Leicht': 'Easy', 'Mittel': 'Medium', 'Schwer': 'Hard', 'Nachweis': 'Proof', 'Lernweg': 'How to learn', 'Dauer': 'Duration', 'Kosten': 'Cost', 'Für den Lebenslauf': 'For your résumé', 'Stand': 'As of', 'Zum Angebot ↗': 'Open offer ↗', 'Oft gefordert und in Wochen bis wenigen Monaten erreichbar.': 'Often required and reachable within weeks to a few months.', 'Auf den Home-Bildschirm legen': 'Add to Home Screen', 'Blendet die Verbindung kurz in der Adresse ein, damit die Home-Bildschirm-App sie übernimmt': 'Briefly shows the connection in the address bar so the Home Screen app can take it over', 'Kein gültiger Link (muss mit https:// beginnen).': 'Not a valid link (must start with https://).', 'Speichert …': 'Saving …', 'Bewertung': 'Rating', 'Lebenslauf passt (Einschätzung)': 'Résumé fit (estimate)', 'Lebenslauf passt (ATS-Bewertung, %)': 'Résumé fit (ATS score, %)', 'z. B. 80': 'e.g. 80', 'Details': 'Details',
   'Gehalt angegeben': 'Salary stated', 'Weg / Portal': 'Channel / portal', 'Notizen': 'Notes',
   'Mehr: Stellenausschreibung verwalten, Firma und Stelle ändern': 'More: manage job posting, edit company and role',
@@ -417,6 +448,11 @@ const EN_PAT = [
   [/^Fehler: (.+)$/, (m, x) => 'Error: ' + trText(x)],
   [/^Laden fehlgeschlagen: (.+)$/, (m, x) => 'Loading failed: ' + trText(x)],
   [/^Mails geprüft – Liste aktualisiert$/, 'Emails checked – list updated'],
+  [/^in (\d+) Tagen$/, 'in $1 days'], [/^vor (\d+) Tagen$/, '$1 days ago'], [/^(\d+) Tage$/, '$1 days'], [/^länger als (\d+) Tage\.$/, 'for more than $1 days.'],
+  [/^Beworben und seit (\d+) Tagen keine Antwort\. Im Job auf „Heute nachgefasst“ tippen, dann zählt die Frist neu\.$/, 'Applied and no reply for $1 days. Tap “Followed up today” in the job and the count starts again.'],
+  [/^Seit (\d+) Tagen keine Antwort( auf dein Nachfassen)?\. Zeit zum Nachfassen\.$/, (m, n, a) => 'No reply for ' + n + ' days' + (a ? ' to your follow-up' : '') + '. Time to follow up.'],
+  [/^(Nachgefasst|Beworben) (heute|gestern|vor (\d+) Tagen)\. Nachfassen in (\d+) Tagen\.$/, (m, a, w, n, d) => (a === 'Beworben' ? 'Applied ' : 'Followed up ') + (w === 'heute' ? 'today' : w === 'gestern' ? 'yesterday' : n + ' days ago') + '. Follow up in ' + d + ' days.'],
+  [/^Steht in der Tabelle in der Spalte Notizen unter „\[Vorbereitung\]“\.$/, 'Stored in the sheet in the notes column under “[Vorbereitung]”.'],
   [/^Claude: /, 'Claude: ']
 ];
 function trText(s) {
@@ -592,6 +628,157 @@ async function openGaps() {
   };
   render();
 }
+/* ---------- Nachfassen, Termine, Statistik, Gesprächsvorbereitung (seit 1.6.41) ----------
+   Alles rechnet aus den vorhandenen Spalten. Es gibt keine neue Spalte in der Tabelle:
+   „Nachgefasst am …“ und die Vorbereitung stehen in den Notizen. */
+const FU_DAYS = 10, PREP_MARK = '[Vorbereitung]';
+const APPLIED_ST = ['Beworben', 'Zum Gespräch eingeladen', 'Persönliches Gespräch', 'Jobangebot', 'Abgelehnt'];
+const pad2 = (n) => String(n).padStart(2, '0');
+function isoDay(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+function dayNum(iso) { const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? Math.round(Date.UTC(+m[1], +m[2] - 1, +m[3]) / 864e5) : null; }
+function daysSince(iso, now) { const a = dayNum(iso); return a === null ? null : dayNum(isoDay(now || new Date())) - a; }
+function deDay(iso) { const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? m[3] + '.' + m[2] + '.' + m[1] : ''; }
+function splitNotes(n) {
+  const s = String(n || ''), i = s.indexOf(PREP_MARK);
+  return i < 0 ? { main: s, prep: '' } : { main: s.slice(0, i).replace(/\s+$/, ''), prep: s.slice(i + PREP_MARK.length).replace(/^\s+/, '') };
+}
+function joinNotes(main, prep) {
+  main = String(main || '').replace(/\s+$/, ''); prep = String(prep || '').trim();
+  return prep ? (main ? main + '\n\n' : '') + PREP_MARK + '\n' + prep : main;
+}
+function lastFollowUp(notes) {
+  let best = '';
+  String(notes || '').replace(/Nachgefasst am (\d{1,2})\.(\d{1,2})\.(\d{4})/g, (m, d, mo, y) => { const iso = y + '-' + pad2(mo) + '-' + pad2(d); if (iso > best) best = iso; return m; });
+  return best;
+}
+// Nur für „Beworben“ mit Datum. due = seit 10 Tagen keine Antwort (gerechnet ab Bewerbung oder ab dem letzten Nachfassen).
+function followUp(j, now) {
+  if (!j || j.status !== 'Beworben' || dayNum(j.appliedOn) === null) return null;
+  const lf = lastFollowUp(j.notes), base = lf && lf > String(j.appliedOn).slice(0, 10) ? lf : String(j.appliedOn).slice(0, 10);
+  const days = daysSince(base, now);
+  return { base: base, days: days, due: days >= FU_DAYS, dueIn: FU_DAYS - days, again: base === lf, total: daysSince(j.appliedOn, now) };
+}
+function agendaData(list, now) {
+  now = now || new Date();
+  const today = isoDay(now), out = { iv: [], after: [], due: [], wait: [], offer: [] };
+  list.forEach((j) => {
+    if (j.status === 'Abgelehnt' || j.status === 'Nicht bewerben') return;
+    const ivs = parseIv(j.interview).filter((e) => e.dt);
+    const fut = ivs.filter((e) => e.dt.slice(0, 10) >= today);
+    fut.forEach((e) => out.iv.push({ j: j, e: e, inDays: -daysSince(e.dt, now) }));
+    if (j.status === 'Jobangebot') { out.offer.push({ j: j }); return; }
+    if (!fut.length && ivs.length && (j.status === 'Zum Gespräch eingeladen' || j.status === 'Persönliches Gespräch')) {
+      const last = ivs.map((e) => e.dt).sort().pop(); out.after.push({ j: j, days: daysSince(last, now) });
+    }
+    const f = followUp(j, now); if (f) (f.due ? out.due : out.wait).push({ j: j, f: f });
+  });
+  out.iv.sort((a, b) => a.e.dt.localeCompare(b.e.dt));
+  out.after.sort((a, b) => b.days - a.days);
+  out.due.sort((a, b) => b.f.days - a.f.days);
+  out.wait.sort((a, b) => a.f.dueIn - b.f.dueIn);
+  return out;
+}
+function dayWord(n) { return n === 0 ? 'heute' : n === 1 ? 'morgen' : 'in ' + n + ' Tagen'; }
+function agoWord(n) { return n === 0 ? 'heute' : n === 1 ? 'gestern' : 'vor ' + n + ' Tagen'; }
+function openAgenda() {
+  const a = agendaData(jobs), now = new Date();
+  const who = (j) => '<b class="notr">' + esc(j.company || '–') + '</b><span class="notr">' + esc(j.role) + '</span>';
+  const row = (j, right, cls) => '<button class="arow' + (cls ? ' ' + cls : '') + '" data-open="' + esc(j.id) + '"><span class="aw">' + who(j) + '</span><span class="ar">' + right + '</span></button>';
+  const sec = (title, hint, rows) => rows.length ? '<h3 class="gapsec">' + title + ' <span class="notr">(' + rows.length + ')</span></h3>' + (hint ? '<p class="sub" style="font-size:13px">' + hint + '</p>' : '') + rows.join('') : '';
+  const addDays = (iso, n) => { const d = new Date(dayNum(iso) * 864e5 + n * 864e5); return pad2(d.getUTCDate()) + '.' + pad2(d.getUTCMonth() + 1) + '.'; };
+  const html =
+    sec('Anstehende Gespräche', '', a.iv.map((x) => row(x.j, '<b>' + dayWord(x.inDays) + '</b><span class="notr">' + esc(ivLine(x.e).split(' · ').slice(0, 2).join(' · ')) + '</span>', x.inDays <= 1 ? 'hot' : ''))) +
+    sec('Nachfassen', 'Beworben und seit ' + FU_DAYS + ' Tagen keine Antwort. Im Job auf „Heute nachgefasst“ tippen, dann zählt die Frist neu.', a.due.map((x) => row(x.j, '<b>' + x.f.days + ' Tage</b><span>' + (x.f.again ? 'seit Nachfassen' : 'seit Bewerbung') + '</span>', 'hot'))) +
+    sec('Rückmeldung nach Gespräch offen', '', a.after.map((x) => row(x.j, '<b>' + agoWord(x.days) + '</b><span>letztes Gespräch</span>'))) +
+    sec('Angebot liegt vor', '', a.offer.map((x) => row(x.j, '<b>Entscheiden</b>'))) +
+    sec('Warten auf Antwort', '', a.wait.map((x) => row(x.j, '<b>' + x.f.days + ' Tage</b><span>Nachfassen ab <i class="notr" style="font-style:normal">' + addDays(x.f.base, FU_DAYS) + '</i></span>')));
+  openSheet('<h2>Termine und Fristen</h2><p class="sub">Was als Nächstes ansteht, nach Dringlichkeit sortiert.</p>' + (html || '<p class="sub">Gerade ist nichts offen.</p>'),
+    '<button class="ib" id="agStats">Statistik</button><button class="ib" id="agClose">Schließen</button>');
+  $('agClose').onclick = closeSheet; $('agStats').onclick = openStats;
+  $('sbody').onclick = (e) => { const b = e.target.closest('[data-open]'); if (b) openDetail(b.dataset.open); };
+}
+function weekStart(iso) { const n = dayNum(iso); return n - ((new Date(n * 864e5).getUTCDay() + 6) % 7); } // Montag
+function isoWeek(n) { const d = new Date(n * 864e5), t = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + 3)), y0 = Date.UTC(t.getUTCFullYear(), 0, 4); return 1 + Math.round(((t - y0) / 864e5 - 3 + ((new Date(y0).getUTCDay() + 6) % 7)) / 7); }
+function computeStats(list, now) {
+  now = now || new Date();
+  const ap = list.filter((j) => APPLIED_ST.includes(j.status));
+  const hadIv = (j) => ['Zum Gespräch eingeladen', 'Persönliches Gespräch', 'Jobangebot'].includes(j.status) || (j.status === 'Abgelehnt' && String(j.interview || '').trim() !== '');
+  const onsite = (j) => ['Persönliches Gespräch', 'Jobangebot'].includes(j.status) || parseIv(j.interview).some((e) => e.type === 'Persönlich (vor Ort)');
+  const s = {
+    applied: ap.length, answered: ap.filter((j) => j.status !== 'Beworben').length, interview: ap.filter(hadIv).length,
+    onsite: ap.filter((j) => hadIv(j) && onsite(j)).length, offer: ap.filter((j) => j.status === 'Jobangebot').length,
+    rejected: ap.filter((j) => j.status === 'Abgelehnt').length, waiting: ap.filter((j) => j.status === 'Beworben').length,
+    silent: ap.filter((j) => { const f = followUp(j, now); return f && f.total >= FU_DAYS; }).length,
+    todo: list.filter((j) => j.status === 'Noch nicht beworben').length
+  };
+  s.rate = s.applied ? Math.round(100 * s.answered / s.applied) : null;
+  s.ivRate = s.applied ? Math.round(100 * s.interview / s.applied) : null;
+  const w0 = weekStart(isoDay(now)); s.weeks = [];
+  for (let i = 7; i >= 0; i--) { const st = w0 - 7 * i; s.weeks.push({ kw: isoWeek(st), n: ap.filter((j) => { const d = dayNum(j.appliedOn); return d !== null && d >= st && d < st + 7; }).length }); }
+  const ch = {}; ap.forEach((j) => { const k = String(j.channel || '').trim() || 'ohne Angabe'; (ch[k] = ch[k] || { name: k, n: 0, iv: 0 }).n++; if (hadIv(j)) ch[k].iv++; });
+  s.channels = Object.values(ch).sort((a, b) => b.n - a.n || b.iv - a.iv);
+  const avg = (arr) => { const v = arr.map((j) => fitPct(j.fit)).filter((x) => x > 0); return v.length ? Math.round(v.reduce((x, y) => x + y, 0) / v.length) : null; };
+  s.fitIv = avg(ap.filter(hadIv)); s.fitNo = avg(ap.filter((j) => !hadIv(j)));
+  return s;
+}
+function openStats() {
+  const s = computeStats(jobs);
+  const tile = (v, l) => '<div class="tile"><b class="notr">' + v + '</b><span>' + l + '</span></div>';
+  const bar = (l, n) => '<div class="fbar"><span class="fl2">' + l + '</span><span class="ft"><i style="width:' + (s.applied ? Math.max(n ? 3 : 0, Math.round(100 * n / s.applied)) : 0) + '%"></i></span><b class="notr">' + n + (s.applied ? ' · ' + Math.round(100 * n / s.applied) + ' %' : '') + '</b></div>';
+  const wmax = Math.max(1, ...s.weeks.map((w) => w.n));
+  openSheet('<h2>Statistik</h2><p class="sub">Aus deinen Jobs mit Status ab „Beworben“. „Nicht bewerben“ und „Noch nicht beworben“ zählen nicht mit.</p>' +
+    (s.applied ? '<div class="tiles">' + tile(s.applied, 'Bewerbungen') + tile(s.rate + ' %', 'Antwortquote') + tile(s.interview, 'mit Gespräch') + tile(s.offer, 'Angebote') + '</div>' +
+      '<h3 class="gapsec">Von der Bewerbung zum Angebot</h3>' + bar('Beworben', s.applied) + bar('Antwort erhalten', s.answered) + bar('Gespräch', s.interview) + bar('Vor Ort', s.onsite) + bar('Angebot', s.offer) +
+      '<p class="sub" style="font-size:13px">Als Antwort zählt jede Einladung, jedes Angebot und jede Absage. <span class="notr">' + s.rejected + '</span> Absagen, <span class="notr">' + s.waiting + '</span> ohne Antwort, davon <span class="notr">' + s.silent + '</span> länger als ' + FU_DAYS + ' Tage.</p>' +
+      '<h3 class="gapsec">Bewerbungen pro Woche</h3><div class="wk notr">' + s.weeks.map((w) => '<div><b>' + (w.n || '') + '</b><i style="height:' + Math.round(64 * w.n / wmax) + 'px"></i><span>KW ' + w.kw + '</span></div>').join('') + '</div>' +
+      (s.channels.length > 1 ? '<h3 class="gapsec">Nach Weg / Portal</h3><table class="st"><tr><th>Weg</th><th>Bewerbungen</th><th>mit Gespräch</th></tr>' + s.channels.slice(0, 5).map((c) => '<tr><td' + (c.name === 'ohne Angabe' ? '' : ' class="notr"') + '>' + esc(c.name) + '</td><td class="notr">' + c.n + '</td><td class="notr">' + c.iv + '</td></tr>').join('') + '</table>' : '') +
+      (s.fitIv !== null && s.fitNo !== null ? '<h3 class="gapsec">CV-Passung</h3><p class="sub">Mit Gespräch im Schnitt <b class="notr">' + s.fitIv + ' %</b>, ohne Gespräch <b class="notr">' + s.fitNo + ' %</b>.</p>' : '') +
+      '<p class="sub" style="font-size:13px;margin-top:12px"><span class="notr">' + s.todo + '</span> Jobs stehen noch auf „Noch nicht beworben“.</p>'
+      : '<p class="sub">Noch keine Bewerbung eingetragen.</p>'),
+    '<button class="ib" id="stClose">Schließen</button>');
+  $('stClose').onclick = closeSheet;
+}
+async function openPrep(j) {
+  const sp = splitNotes(j.notes), now = new Date(), today = isoDay(now);
+  const ivs = parseIv(j.interview), fut = ivs.filter((e) => e.dt && e.dt.slice(0, 10) >= today);
+  const fact = (k, v) => v ? '<dt>' + k + '</dt><dd class="notr">' + esc(v) + '</dd>' : '';
+  openSheet(head('Gesprächsvorbereitung', (j.company || '–') + ' · ' + j.role, '') +
+    '<div class="sec">Termin</div>' + (ivs.length ? (fut.length ? fut : ivs.slice(-1)).map((e) => '<p class="prepiv"><b class="notr">' + esc(ivLine(e)) + '</b>' + (e.dt && e.dt.slice(0, 10) >= today ? ' <span>' + dayWord(-daysSince(e.dt, now)) + '</span>' : ' <span>schon vorbei</span>') + '</p>').join('') : '<p class="sub">Noch kein Termin eingetragen.</p>') +
+    '<div class="sec">Eckdaten</div><dl class="prepdl">' + fact('Ort', j.location) + fact('Beworben am', deDay(j.appliedOn)) + fact('Weg / Portal', j.channel) + fact('Gehalt angegeben', j.salary) + fact('Lebenslauf', j.cv) + '</dl>' +
+    (j.fitNote ? '<p class="fitnote">Claude: <span class="notr">' + esc(j.fitNote) + '</span></p>' : '') +
+    '<div class="sec">Was die Stelle verlangt</div><div id="prepSk"><p class="sub">' + (j.postingSaved ? 'Lade Stellenausschreibung …' : 'Keine Stellenausschreibung gespeichert. Ohne sie kann die App Stärken und Lücken nicht zeigen.') + '</p></div>' +
+    '<div class="sec">Vor dem Gespräch</div><ol class="prepol"><li>Stellenausschreibung noch einmal lesen.</li><li>Zu jeder Lücke einen ehrlichen Satz vorbereiten.</li><li>Drei eigene Fragen an die Firma notieren.</li><li>Gehaltswunsch und frühesten Starttermin parat haben.</li><li>Technik oder Anfahrt am Vortag prüfen.</li></ol>' +
+    '<label class="fl"><span>Meine Notizen und Fragen</span><textarea id="pNotes" style="min-height:150px" placeholder="Fragen an die Firma, Beispiele aus meiner Arbeit, Namen der Gesprächspartner">' + esc(sp.prep) + '</textarea></label>' +
+    '<p class="sub" style="font-size:12.5px">Steht in der Tabelle in der Spalte Notizen unter „' + PREP_MARK + '“.</p>',
+    '<button class="ib" id="pBack">Zurück</button><button class="ib pri" id="pSave">Speichern</button>');
+  $('pBack').onclick = () => openDetail(j.id);
+  $('pSave').onclick = () => {
+    const n = joinNotes(splitNotes(j.notes).main, $('pNotes').value);
+    if (n !== String(j.notes || '')) saveLater(j.id, { notes: n });
+    openDetail(j.id);
+  };
+  if (!j.postingSaved) return;
+  const fill = (p) => {
+    const box = $('prepSk'); if (!box || !$('pSave')) return;
+    if (!p || !p.text) { box.innerHTML = '<p class="sub">Stellenausschreibung nicht gefunden.</p>'; return; }
+    const sk = extractSkills(htmlText(p.text), profile), all = sk.hard.concat(sk.soft);
+    const chips = (arr) => arr.length ? '<div class="sks notr">' + arr.map((x) => '<span class="sk' + (x.have ? ' have' : '') + '">' + esc(x.name) + '</span>').join('') + '</div>' : '<p class="sub">Nichts erkannt.</p>';
+    box.innerHTML = '<h4 class="preph">Das bringst du mit</h4>' + chips(all.filter((x) => x.have)) + '<h4 class="preph">Darauf brauchst du eine Antwort</h4>' + chips(all.filter((x) => !x.have && !GAP_SKIP_RE.test(x.name))) +
+      '<button class="toggle" id="pPost">Stellenausschreibung lesen</button>';
+    $('pPost').onclick = () => { const n = joinNotes(splitNotes(j.notes).main, $('pNotes').value); if (n !== String(j.notes || '')) saveLater(j.id, { notes: n }); openPosting(j); };
+  };
+  const cached = ls.get('jt-post-' + j.id);
+  if (cached && cached.text) { fill(cached); return; }
+  try { const p = await api('apiGetPosting', j.id); if (p) ls.set('jt-post-' + j.id, p); fill(p); }
+  catch (e) { if ($('prepSk') && $('pSave')) $('prepSk').innerHTML = '<p class="sub">' + esc(e.message) + '</p>'; }
+}
+function agendaBadge() {
+  const b = $('bAgenda'); if (!b) return;
+  const n = jobs.filter((j) => { const f = followUp(j); return f && f.due; }).length;
+  let s = b.querySelector('.nb'); if (!s) { s = document.createElement('span'); s.className = 'nb notr'; b.appendChild(s); }
+  s.textContent = n || ''; s.hidden = !n;
+}
+$('bAgenda').onclick = openAgenda;
 $('bGaps').onclick = () => openGaps();
 $('bSettings').onclick = () => {
   const sv = scriptVersion ? esc(scriptVersion) + (!DEMO && vLess(scriptVersion, NEED_SCRIPT) ? ' – <b style="color:var(--danger)">bitte aktualisieren</b>' : '') : 'wird geprüft …';
@@ -603,6 +790,8 @@ $('bSettings').onclick = () => {
       (sheetUrl ? btn('xSheet', 'Tabelle öffnen', 'Deine Google-Tabelle in Google Sheets', IC.sheet) : '') +
       (DEMO ? '' : btn('xShort', 'Kurzbefehle einrichten', 'Anleitung für „Job speichern“ und „Job-Link speichern“ mit deinem Schlüssel', IC.phone)) +
       btn('xGaps', 'Skill-Lücken', 'Welche Fähigkeiten in deinen Stellen fehlen, wie wichtig sie sind und wie du sie lernst', IC.target) +
+      btn('xAgenda', 'Termine und Fristen', 'Anstehende Gespräche, Nachfassen und offene Rückmeldungen', IC.cal) +
+      btn('xStats', 'Statistik', 'Bewerbungen pro Woche, Antwortquote und der Weg bis zum Angebot', IC.log) +
       btn('xLog', 'Änderungen', 'Was in welcher Version neu ist (CHANGELOG)', IC.log) +
       (DEMO ? '' : btn('xFetch', 'Fehlende Stellenausschreibungen holen', 'Holt für alle Jobs mit Link, aber ohne gespeicherte Stellenausschreibung, den Text über den Link (bis 25 pro Durchgang)', IC.down)) +
       (DEMO ? '' : btn('xMail', 'Mails jetzt prüfen', 'Sucht sofort nach Bestätigungen, Absagen und Einladungen. Läuft sonst automatisch alle 30 Minuten.', IC.mail)) +
@@ -616,6 +805,7 @@ $('bSettings').onclick = () => {
   if ($('xSheet')) $('xSheet').onclick = () => ext(sheetUrl);
   if ($('xShort')) $('xShort').onclick = () => ext(new URL('kurzbefehl.html', location.href).href.replace(/#.*$/, '') + '#setup=' + encSetup(CFG));
   $('xGaps').onclick = () => openGaps();
+  $('xAgenda').onclick = openAgenda; $('xStats').onclick = openStats;
   $('xLog').onclick = () => ext('https://github.com/lobi1994/Job-Tracker/blob/main/CHANGELOG.md');
   if ($('xHome')) $('xHome').onclick = showKeyForInstall;
   $('xRe').onclick = () => { closeSheet(); showSetup(); };
@@ -804,17 +994,19 @@ function render() {
   renderChips();
   const v = visible();
   $('cnt').textContent = v.length + ' von ' + jobs.length;
-  $('list').innerHTML = v.length ? v.map((j) =>
+  agendaBadge();
+  $('list').innerHTML = v.length ? v.map((j) => { const fu = followUp(j); return (
     '<div class="card" data-id="' + esc(j.id) + '" style="--c:' + col(j.status) + '">' +
       '<div class="r1"><span class="co notr">' + esc(j.company || '–') + '</span><span class="dt">' + esc(fmtDate(j.appliedOn)) + '</span></div>' +
       '<div class="ro"><span class="notr">' + esc(j.role) + '</span>' + (j.postingSaved ? ' <span class="mk" title="Stellenausschreibung gespeichert">' + IC.doc + '</span>' : '') + '</div>' +
       '<div class="r3"><span class="pill" style="--c:' + col(j.status) + '">' + esc(SHORT[j.status] || j.status) + '</span>' +
         (j.location ? '<span>' + esc(j.location) + '</span>' : '') +
+        (fu && fu.due ? '<span class="fu">Nachfassen · <span class="notr">' + fu.days + ' T.</span></span>' : '') +
         (j.interview ? '<span class="iv">' + IC.cal + esc(ivShort(j.interview)) + '</span>' : '') +
         (j.like ? '<span class="rt like" title="Gefällt mir">' + IC.heart + j.like + '/5</span>' : '') +
         (j.fit || j.cvLink || j.cv ? '<span class="rt fit" title="Lebenslauf passt">CV ' + (j.fit ? fitPct(j.fit) + ' %' : '') + ((j.cvLink || j.cv) ? ' <span class="mk" title="Zugeschnittener Lebenslauf vorhanden">' + IC.cv + '</span>' : '') + '</span>' : '') +
         (j.status === statuses[0] && j.url ? '<button class="capply" data-apply="' + esc(j.id) + '">Bewerben →</button>' : '') +
-      '</div></div>').join('')
+      '</div></div>'); }).join('')
     : '<div class="empty">' + (jobs.length ? 'Keine Jobs für diesen Filter.' : 'Noch keine Jobs. Tipp auf +.') + '</div>';
   $('list').insertAdjacentHTML('beforeend', CREDIT);
 }
@@ -990,23 +1182,28 @@ const IC = {
 const ICO = {
   doc: '<svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6M9 9h2"/></svg>',
   cv: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2.2"/><path d="M5.8 16c.6-1.8 1.8-2.7 3.2-2.7s2.6.9 3.2 2.7"/><path d="M14.5 9h4M14.5 12.5h4"/></svg>',
-  send: '<svg viewBox="0 0 24 24"><path d="M21 3 10 14"/><path d="M21 3l-7 18-4-7-7-4z"/></svg>'
+  send: '<svg viewBox="0 0 24 24"><path d="M21 3 10 14"/><path d="M21 3l-7 18-4-7-7-4z"/></svg>',
+  prep: '<svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><path d="m8.5 11 1.5 1.5 3-3M8.5 16.5h7"/></svg>'
 };
 
 function openDetail(id) {
   const j = jobs.find((x) => x.id === id); if (!j) return;
+  const fu = followUp(j), prepOn = j.status === 'Zum Gespräch eingeladen' || j.status === 'Persönliches Gespräch';
   openSheet(
     head(j.company || '–', j.role + (j.location ? ' · ' + j.location : ''), '') +
     // Schnellzugriff oben: Stellenausschreibung, Lebenslauf, Bewerben
     '<div class="qa">' +
       (j.postingSaved ? '<button class="qbtn" id="aShow">' + ICO.doc + '<span>Stellen&shy;ausschreibung</span></button>' : '') +
       (j.cvLink || j.cv ? '<button class="qbtn" id="aCv">' + ICO.cv + '<span>Lebenslauf</span></button>' : '') +
-      (j.url ? '<button class="qbtn' + (j.status === statuses[0] ? ' go' : '') + '" id="aUrl">' + ICO.send + '<span>Bewerben ↗</span></button>' : '') +
+      (j.url && !prepOn ? '<button class="qbtn' + (j.status === statuses[0] ? ' go' : '') + '" id="aUrl">' + ICO.send + '<span>Bewerben ↗</span></button>' : '') +
+      (prepOn ? '<button class="qbtn go" id="aPrep">' + ICO.prep + '<span>Vorbereitung</span></button>' : '') +
     '</div>' +
     (!j.postingSaved ? '<p class="qhint">Stellenausschreibung noch nicht gespeichert – unten unter „Mehr“ speichern.</p>' : '') +
     '<div class="sec">Status</div>' +
     '<label class="fl"><span>Status</span><select id="fStatus">' + statusOpts(j.status) + '</select></label>' +
-    inp('fApplied', 'Beworben am', j.appliedOn, 'date') + ivBlock(j.interview) +
+    inp('fApplied', 'Beworben am', j.appliedOn, 'date') +
+    (fu ? '<div class="fubox' + (fu.due ? ' due' : '') + '"><span>' + (fu.due ? 'Seit ' + fu.days + ' Tagen keine Antwort' + (fu.again ? ' auf dein Nachfassen.' : '.') + ' Zeit zum Nachfassen.' : (fu.again ? 'Nachgefasst ' : 'Beworben ') + agoWord(fu.days) + '. Nachfassen in ' + fu.dueIn + ' Tagen.') + '</span><button type="button" class="ib" id="bFu">Heute nachgefasst</button></div>' : '') +
+    ivBlock(j.interview) +
     '<div class="sec">Bewertung</div>' +
     '<div class="fl"><span>Gefällt mir</span>' + starRow('fLike', j.like) + '</div>' +
     '<div class="fl"><span>Lebenslauf passt (ATS-Bewertung, %)</span><input id="fFit" class="notr" type="number" inputmode="numeric" min="0" max="100" step="1" placeholder="z. B. 80" value="' + (j.fit ? fitPct(j.fit) : '') + '"></div>' +
@@ -1014,13 +1211,15 @@ function openDetail(id) {
     (j.status === statuses[0] ? '<div class="cvbox" id="cvBox">' + cvBoxHtml(j) + '</div>' : '') +
     '<div class="sec">Details</div>' +
     '<div class="row2 stack">' + inp('fSalary', 'Gehalt angegeben', j.salary) + inp('fChannel', 'Weg / Portal', j.channel) + '</div>' +
-    '<label class="fl"><span>Notizen</span><textarea id="fNotes">' + esc(j.notes) + '</textarea></label>' +
+    '<label class="fl"><span>Notizen</span><textarea id="fNotes">' + esc(splitNotes(j.notes).main) + '</textarea></label>' +
     // Selten Genutztes eingeklappt
     '<details class="more"><summary>Mehr: Stellenausschreibung verwalten, Firma und Stelle ändern</summary>' +
       '<p class="sub">' + (j.postingSaved ? 'Stellenausschreibung gespeichert am ' + esc(j.postingSaved) : '<span class="miss">Stellenausschreibung noch nicht gespeichert.</span>') +
         (j.cv ? '<br>Lebenslauf: ' + esc(j.cv) : '') + '</p>' +
       '<div class="ugrid small">' +
         (j.url ? '<button class="ib" id="bFetch">Vom Link speichern</button>' : '') +
+        (!prepOn ? '<button class="ib" id="aPrep">Gesprächsvorbereitung</button>' : '') +
+        (j.url && prepOn ? '<button class="ib" id="aUrl">Stellenanzeige im Netz ↗</button>' : '') +
         '<button class="ib" id="bPaste">Text einfügen</button>' +
         (j.postingSaved ? '<button class="ib del" id="aDel">' + IC.trash + 'Löschen</button>' : '') +
       '</div>' +
@@ -1042,7 +1241,7 @@ function openDetail(id) {
     const ch = {
       status: $('fStatus').value, appliedOn: $('fApplied').value, interview: readIv(),
       like: Number($('fLike').dataset.v) || '', fit: Math.max(0, Math.min(100, Math.round(Number($('fFit').value) || 0))) || '',
-      salary: $('fSalary').value.trim(), channel: $('fChannel').value.trim(), notes: $('fNotes').value,
+      salary: $('fSalary').value.trim(), channel: $('fChannel').value.trim(), notes: splitNotes(j.notes).prep ? joinNotes($('fNotes').value, splitNotes(j.notes).prep) : $('fNotes').value,
       company: $('fCompany').value.trim(), role: $('fRole').value.trim(), location: $('fLocation').value.trim(),
       url: $('fUrl').value.trim(), cv: $('fCv').value.trim()
     };
@@ -1063,6 +1262,12 @@ function openDetail(id) {
     catch (err) { toast(err.message, 5000); }
   };
   if ($('aShow')) $('aShow').onclick = () => openPosting(j);
+  $('aPrep').onclick = () => openPrep(j);
+  if ($('bFu')) $('bFu').onclick = () => {
+    const sp = splitNotes(j.notes), line = 'Nachgefasst am ' + deDay(isoDay(new Date()));
+    if (sp.main.indexOf(line) >= 0) { toast('Für heute schon eingetragen'); return; }
+    saveLater(j.id, { notes: joinNotes((sp.main ? sp.main.replace(/\s+$/, '') + '\n' : '') + line, sp.prep) }); closeSheet(); toast('Nachfassen eingetragen');
+  };
   if ($('aUrl')) $('aUrl').onclick = () => (j.status === statuses[0] ? applyNow(j) : openExt(j.url));
   if ($('aCv')) $('aCv').onclick = async (e) => {
     e.preventDefault();
@@ -1458,15 +1663,25 @@ const DEMO_JOBS = [
   { id: 'd6', company: 'Seewald Energie', role: 'Projektingenieur Batteriespeicher', location: 'Regensburg', status: 'Jobangebot', appliedOn: '2026-10-20', interview: '', like: 4, fit: 90, salary: '69.000 €', channel: 'E-Mail', url: '', cv: '', notes: 'Angebot bis 25.11. prüfen', postingSaved: '' },
   { id: 'd7', company: 'Falkenstein Medical', role: 'Application Engineer Medizintechnik', location: 'München, hybrid', status: 'Noch nicht beworben', appliedOn: '', interview: '', like: null, fit: 90, salary: '', channel: 'LinkedIn', url: 'https://example.com/jobs/7', cv: '', notes: '', postingSaved: '12.11.2026', fitNote: 'Medizintechnik-Studium und Kundensupport passen; Erfahrung mit Laborgeräten fehlt.' },
   { id: 'd8', company: 'Lindwurm Telematik', role: 'Projektleiter Connected Car', location: 'Ingolstadt', status: 'Beworben', appliedOn: '2026-11-08', interview: '', like: 4, fit: 90, salary: '70.000 €', channel: 'StepStone', url: 'https://example.com/jobs/8', cv: 'Lebenslauf_Lindwurm.pdf', notes: '', postingSaved: '08.11.2026' },
-  { id: 'd9', company: 'Isartal Analytics', role: 'Testmanager Software', location: 'München', status: 'Beworben', appliedOn: '2026-11-06', interview: '', like: 3, fit: 70, salary: '66.000 €', channel: 'Website', url: 'https://example.com/jobs/9', cv: '', notes: '', postingSaved: '06.11.2026' },
+  { id: 'd9', company: 'Isartal Analytics', role: 'Testmanager Software', location: 'München', status: 'Beworben', appliedOn: '2026-11-03', interview: '', like: 3, fit: 70, salary: '66.000 €', channel: 'Website', url: 'https://example.com/jobs/9', cv: '', notes: '', postingSaved: '06.11.2026' },
   { id: 'd10', company: 'Hagen Automation', role: 'Vertriebsingenieur Außendienst', location: 'Stuttgart', status: 'Nicht bewerben', appliedOn: '', interview: '', like: 1, fit: 50, salary: '', channel: 'Indeed', url: 'https://example.com/jobs/10', cv: '', notes: '80 % Reise', postingSaved: '05.11.2026' }
 ];
 let demoSug = [{ vid: 's1', jobId: 'd2', company: 'Alpenwerk Medizintechnik', role: 'Junior Projektmanager Produktentwicklung', art: 'Absage', status: 'Abgelehnt',
   date: '2026-11-12', from: 'Alpenwerk Recruiting <jobs@example.com>', subject: 'Ihre Bewerbung als Junior Projektmanager',
   excerpt: 'Leider müssen wir Ihnen mitteilen, dass wir uns für einen anderen Kandidaten entschieden haben.', link: '' }];
+// Demo-Daten wandern mit dem Kalender mit: alle Datumsangaben beziehen sich auf den 15.11.2026 und werden auf heute verschoben
+function demoShift(list) {
+  const off = dayNum(isoDay(new Date())) - dayNum('2026-11-15');
+  const mv = (iso) => { const d = new Date((dayNum(iso) + off) * 864e5); return d.getUTCFullYear() + '-' + pad2(d.getUTCMonth() + 1) + '-' + pad2(d.getUTCDate()); };
+  list.forEach((j) => {
+    if (j.appliedOn) j.appliedOn = mv(j.appliedOn);
+    if (j.interview) j.interview = j.interview.replace(/^(\d{1,2})\.(\d{1,2})\./, (m, d, mo) => deDay(mv('2026-' + pad2(mo) + '-' + pad2(d))));
+  });
+  return list;
+}
 function demoApi(fn, args) {
   return new Promise((res, rej) => setTimeout(() => {
-    if (fn === 'apiList') return res({ jobs: JSON.parse(JSON.stringify(DEMO_JOBS)), statuses: STATUS_DEF, sheetUrl: '',
+    if (fn === 'apiList') return res({ jobs: demoShift(JSON.parse(JSON.stringify(DEMO_JOBS))), statuses: STATUS_DEF, sheetUrl: '',
       profile: ['Technischer Support', 'Fehleranalyse', 'Jira', 'Bluetooth', 'Linux', 'Kommunikation', 'Kundenorientierung'].map((x, i) => ({ skill: x, type: i < 5 ? 'hard' : 'soft' })) });
     if (fn === 'apiUpdate') { const j = jobs.find((x) => x.id === args[0]); return res(Object.assign({}, j, args[1])); }
     if (fn === 'apiAdd') return res(Object.assign({ id: 'd' + Date.now(), status: STATUS_DEF[0], like: null, fit: null, appliedOn: '', postingSaved: '' }, args[0]));

@@ -11,6 +11,17 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.41 – 15.11.2026 (nur App) – Nachfassen, Termine, Statistik, Gesprächsvorbereitung
+- **Nachfassen:** Steht ein Job seit 10 Tagen auf „Beworben“, zeigt die Karte „Nachfassen“ und der Kalender-Knopf oben eine rote Zahl. Im Job gibt es den Knopf „Heute nachgefasst“. Er schreibt „Nachgefasst am …“ in die Notizen, danach zählen die 10 Tage neu.
+- **Termine und Fristen** (Kalender-Knopf oben): anstehende Gespräche, fällige Nachfass-Aktionen, offene Rückmeldungen nach einem Gespräch, Angebote und alles, was noch auf Antwort wartet. Ein Tipp öffnet den Job.
+- **Statistik** (in Termine und Fristen unten oder in den Einstellungen): Bewerbungen, Antwortquote, der Weg von der Bewerbung bis zum Angebot, Bewerbungen pro Woche, Wege und Portale im Vergleich.
+- **Gesprächsvorbereitung:** Bei „Zum Gespräch eingeladen“ und „Persönliches Gespräch“ steht oben im Job der Knopf „Vorbereitung“ (sonst unter „Mehr“). Die Seite zeigt Termin, Eckdaten, was du für die Stelle mitbringst, wo du eine Antwort brauchst, und ein Feld für eigene Notizen und Fragen. Die Notizen stehen in der Tabelle in der Spalte Notizen unter „[Vorbereitung]“.
+- Der Demo-Modus rechnet seine Datumsangaben auf heute um, damit Termine und Fristen dort immer sinnvoll aussehen.
+- Auf dem iPhone ist oben kein Platz für fünf Knöpfe. Der Knopf „Skill-Lücken“ steht dort deshalb nur noch in den Einstellungen, auf iPad und Desktop bleibt er oben.
+- Bei eingeladenen Jobs steht statt „Bewerben“ jetzt „Vorbereitung“ oben. Der Link zur Anzeige im Netz ist unter „Mehr“.
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.6.40 – 15.11.2026 (nur App)
 - Am Desktop (ab 1100 px Breite) steht die Liste in zwei Spalten.
 - README neu geschrieben: Englisch als Hauptfassung (`README.md`), Deutsch in `README.de.md`, mit Architektur, Einrichtung und neuen Screenshots aus dem Demo-Modus.

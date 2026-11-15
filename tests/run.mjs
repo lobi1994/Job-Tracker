@@ -80,6 +80,99 @@ await test('A-i saveLater sofort + Outbox leert sich', async () => {
   assert.equal(ev('outbox.length'), 0);
 });
 
+/* ---------- Teil A (seit 1.6.41): Nachfassen, Termine, Statistik ---------- */
+const NOW = 'new Date(2026, 10, 15, 12)';
+const J = (o) => JSON.stringify(Object.assign({ id: 'x', company: 'F', role: 'R', status: 'Beworben', appliedOn: '', interview: '', notes: '', channel: '', fit: '' }, o));
+await test('A-j splitNotes/joinNotes', () => {
+  const j = ev(`joinNotes('Hauptnotiz', 'Frage 1\\nFrage 2')`);
+  assert.ok(j.includes('[Vorbereitung]'), j);
+  const s = ev(`splitNotes(${JSON.stringify(j)})`);
+  assert.equal(s.main, 'Hauptnotiz'); assert.equal(s.prep, 'Frage 1\nFrage 2');
+  assert.equal(ev(`joinNotes(${JSON.stringify(s.main)}, ${JSON.stringify(s.prep)})`), j);
+  const p = ev(`splitNotes('Nur eine Notiz')`);
+  assert.equal(p.main, 'Nur eine Notiz'); assert.equal(p.prep, '');
+  assert.equal(ev(`joinNotes('Nur eine Notiz', '')`), 'Nur eine Notiz');
+  assert.equal(ev(`joinNotes('Nur eine Notiz', '  \\n ')`), 'Nur eine Notiz');
+});
+await test('A-k lastFollowUp', () => {
+  assert.equal(ev(`lastFollowUp('Nachgefasst am 03.11.2026\\nText\\nNachgefasst am 12.11.2026')`), '2026-11-12');
+  assert.equal(ev(`lastFollowUp('Nachgefasst am 12.11.2026\\nNachgefasst am 03.11.2026')`), '2026-11-12');
+  assert.equal(ev(`lastFollowUp('nichts hier')`), '');
+  assert.equal(ev(`lastFollowUp('')`), '');
+});
+await test('A-l followUp', () => {
+  const f = (o) => ev(`followUp(${J(o)}, ${NOW})`);
+  const a = f({ appliedOn: '2026-11-06' });
+  assert.equal(a.days, 9); assert.equal(a.due, false); assert.equal(a.dueIn, 1);
+  assert.equal(f({ appliedOn: '2026-11-05' }).due, true);
+  assert.equal(f({ appliedOn: '2026-11-05', status: 'Abgelehnt' }), null);
+  assert.equal(f({ appliedOn: '' }), null);
+  const b = f({ appliedOn: '2026-10-26', notes: 'Nachgefasst am 12.11.2026' });
+  assert.equal(b.due, false); assert.equal(b.again, true); assert.equal(b.total, 20); assert.equal(b.days, 3);
+});
+await test('A-m agendaData', () => {
+  const list = [
+    { id: 'i2', status: 'Zum Gespräch eingeladen', appliedOn: '2026-11-01', interview: '20.11.2026 10:00 · Video' },
+    { id: 'i1', status: 'Zum Gespräch eingeladen', appliedOn: '2026-11-01', interview: '17.11.2026 09:00 · Telefon' },
+    { id: 'rej', status: 'Abgelehnt', appliedOn: '2026-10-01', interview: '18.11.2026 09:00 · Video' },
+    { id: 'off', status: 'Jobangebot', appliedOn: '2026-10-01', interview: '05.11.2026 09:00 · Video' },
+    { id: 'aft', status: 'Zum Gespräch eingeladen', appliedOn: '2026-10-20', interview: '10.11.2026 10:00 · Video' },
+    { id: 'due', status: 'Beworben', appliedOn: '2026-11-03' },
+  ].map((o) => JSON.parse(J(o)));
+  const a = ev(`agendaData(${JSON.stringify(list)}, ${NOW})`);
+  assert.equal(JSON.stringify(a.iv.map((x) => x.j.id)), JSON.stringify(['i1', 'i2']));
+  assert.equal(a.iv[0].inDays, 2);
+  assert.equal(JSON.stringify(a.offer.map((x) => x.j.id)), JSON.stringify(['off']));
+  assert.equal(JSON.stringify(a.after.map((x) => x.j.id)), JSON.stringify(['aft'])); assert.equal(a.after[0].days, 5);
+  assert.equal(JSON.stringify(a.due.map((x) => x.j.id)), JSON.stringify(['due']));
+  const all = [].concat(a.iv, a.after, a.due, a.wait, a.offer).map((x) => x.j.id);
+  assert.ok(!all.includes('rej'), 'abgelehnter Job taucht auf');
+});
+await test('A-n computeStats', () => {
+  const list = [
+    { id: '1', status: 'Beworben', appliedOn: '2026-11-05', channel: 'Personio' },
+    { id: '2', status: 'Beworben', appliedOn: '2026-11-12', channel: 'Personio' },
+    { id: '3', status: 'Zum Gespräch eingeladen', appliedOn: '2026-11-01', interview: '20.11.2026 10:00 · Video', channel: 'LinkedIn', fit: 80 },
+    { id: '4', status: 'Persönliches Gespräch', appliedOn: '2026-10-20', interview: '12.11.2026 14:00 · Persönlich (vor Ort)', channel: 'LinkedIn', fit: 90 },
+    { id: '5', status: 'Jobangebot', appliedOn: '2026-10-01', channel: 'Personio', fit: 70 },
+    { id: '6', status: 'Abgelehnt', appliedOn: '2026-09-01' },
+    { id: '7', status: 'Noch nicht beworben' },
+    { id: '8', status: 'Nicht bewerben', appliedOn: '2026-11-10' },
+  ].map((o) => JSON.parse(J(o)));
+  const s = ev(`computeStats(${JSON.stringify(list)}, ${NOW})`);
+  assert.equal(s.applied, 6); assert.equal(s.answered, 4); assert.equal(s.interview, 3);
+  assert.equal(s.offer, 1); assert.equal(s.rejected, 1); assert.equal(s.waiting, 2); assert.equal(s.rate, 67);
+  assert.equal(s.onsite, 2); assert.equal(s.silent, 1); assert.equal(s.todo, 1);
+  assert.equal(s.weeks.length, 8);
+  assert.equal(s.weeks.reduce((a, b) => a + b.n, 0), 5, 'Wochensumme (Job 6 liegt außerhalb)');
+  assert.equal(s.weeks[7].n, 1);
+  assert.equal(JSON.stringify(s.channels.map((c) => c.name + ':' + c.n)), JSON.stringify(['Personio:3', 'LinkedIn:2', 'ohne Angabe:1']));
+});
+await test('A-o Oberfläche: Agenda, Statistik, Vorbereitung', () => {
+  ev('openAgenda()');
+  const sh = w.document.getElementById('sheet');
+  assert.ok(sh.textContent.includes('Termine und Fristen'));
+  assert.ok(sh.querySelectorAll('.arow').length >= 1, 'keine .arow');
+  ev('openStats()');
+  assert.ok(w.document.querySelectorAll('#sheet .tile').length >= 4, 'weniger als 4 .tile');
+  const id = ev(`(jobs.find((j) => j.status === 'Zum Gespräch eingeladen') || {}).id`);
+  assert.ok(id, 'kein Demo-Job mit Status Zum Gespräch eingeladen');
+  ev(`openDetail(${JSON.stringify(id)})`);
+  assert.ok(w.document.getElementById('aPrep'), '#aPrep fehlt');
+  ev('closeSheet()');
+});
+await test('A-p XSS in Agenda', () => {
+  ev(`jobs.push({ id: 'xss1', company: '<img src=x onerror=window.__x=1>', role: 'R', status: 'Beworben', appliedOn: '2026-01-01', interview: '', notes: '' }); render();`);
+  try {
+    ev('openAgenda()');
+    assert.ok(w.document.querySelectorAll('#sheet .arow').length >= 1);
+    assert.equal(w.document.querySelectorAll('#sheet img').length, 0, 'img in Agenda');
+    assert.ok(!w.__x);
+  } finally {
+    ev(`jobs.splice(jobs.findIndex((j) => j.id === 'xss1'), 1); render(); closeSheet();`);
+  }
+});
+
 /* ---------- Teil B: Apps Script ---------- */
 const gs = read('google/Code.gs') + '\n' + read('google/Mail.gs');
 await test('B Syntax Code.gs + Mail.gs', () => { new Function(gs); });
