@@ -11,6 +11,13 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.40 – 15.11.2026 (nur App)
+- Am Desktop (ab 1100 px Breite) steht die Liste in zwei Spalten.
+- README neu geschrieben: Englisch als Hauptfassung (`README.md`), Deutsch in `README.de.md`, mit Architektur, Einrichtung und neuen Screenshots aus dem Demo-Modus.
+- Demo-Modus: Beispielfirma umbenannt, alle Firmen dort sind erfunden.
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.6.39 – 15.11.2026 (nur App)
 - Nach „Neuen Schlüssel erzeugen“ reicht es, sich in der Home-Bildschirm-App einmal neu zu verbinden. Vorher hat die App bei jedem Start wieder den alten Schlüssel aus ihrem Startlink genommen und erneut nach der Verbindung gefragt.
 

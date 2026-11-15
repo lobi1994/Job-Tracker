@@ -186,6 +186,7 @@ header{background:rgba(11,15,23,.86);-webkit-backdrop-filter:saturate(160%) blur
 .ib svg,svg.i{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .chip{background:transparent;border:1px solid var(--line2);color:var(--mute);opacity:1;font-size:13px;padding:0 13px;min-height:40px}
 .capply{min-height:36px;padding:6px 12px}
+@media (min-width:1100px){main{max-width:1240px}#list{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;align-items:start}}
 #sort{max-width:42%;min-height:44px}.top small{white-space:nowrap}
 @media (max-width:420px){.top h1{font-size:19px}}#q{min-width:0;flex:1 1 auto;min-height:44px}#mailbar{min-height:44px}
 .chip.on{border-color:color-mix(in srgb,var(--c) 70%,transparent);box-shadow:none;color:var(--ink);background:color-mix(in srgb,var(--c) 10%,transparent)}
@@ -296,7 +297,7 @@ header{background:rgba(11,15,23,.86);-webkit-backdrop-filter:saturate(160%) blur
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.39', NEED_SCRIPT = '1.6.35'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.40', NEED_SCRIPT = '1.6.35'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Careerway ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
@@ -1451,7 +1452,7 @@ $('bAdd').onclick = () => {
 const DEMO_JOBS = [
   { id: 'd1', company: 'Nordlicht Robotics', role: 'Technical Support Engineer (m/w/d)', location: 'München, hybrid', status: 'Zum Gespräch eingeladen', appliedOn: '2026-11-10', interview: '18.11. 10:00', like: 5, fit: 90, salary: '68.000 €', channel: 'Personio', url: 'https://example.com/jobs/1', cv: 'Lebenslauf_Nordlicht.pdf', notes: 'Videocall mit Teamlead', postingSaved: '10.11.2026', fitNote: 'Support- und Fehleranalyse-Erfahrung passt gut; Robotik-Kenntnisse fehlen.', cvLink: 'https://example.com/cv.pdf', cvRequest: 'fertig' },
   { id: 'd2', company: 'Alpenwerk Medizintechnik', role: 'Junior Projektmanager Produktentwicklung', location: 'Augsburg', status: 'Beworben', appliedOn: '2026-11-11', interview: '', like: 4, fit: 70, salary: '65.000 €', channel: 'Website', url: 'https://example.com/jobs/2', cv: '', notes: '', postingSaved: '11.11.2026' },
-  { id: 'd3', company: 'Brückner Mobility', role: 'Test Engineer Fahrzeugvernetzung', location: 'Remote', status: 'Persönliches Gespräch', appliedOn: '2026-11-03', interview: '20.11. 14:00 vor Ort', like: 4, fit: 95, salary: '70.000 €', channel: 'LinkedIn', url: '', cv: '', notes: 'Zweite Runde mit Abteilungsleitung', postingSaved: '' },
+  { id: 'd3', company: 'Bergfink Mobility', role: 'Test Engineer Fahrzeugvernetzung', location: 'Remote', status: 'Persönliches Gespräch', appliedOn: '2026-11-03', interview: '20.11. 14:00 vor Ort', like: 4, fit: 95, salary: '70.000 €', channel: 'LinkedIn', url: '', cv: '', notes: 'Zweite Runde mit Abteilungsleitung', postingSaved: '' },
   { id: 'd4', company: 'Kesselring Systems', role: 'Customer Success Manager', location: 'Berlin, remote', status: 'Noch nicht beworben', appliedOn: '', interview: '', like: 3, fit: 70, salary: '', channel: '', url: 'https://example.com/jobs/4', cv: '', notes: '', postingSaved: '' },
   { id: 'd5', company: 'Vireo Software', role: 'Product Owner IoT-Plattform', location: 'München', status: 'Abgelehnt', appliedOn: '2026-10-28', interview: '', like: 3, fit: 50, salary: '72.000 €', channel: 'Greenhouse', url: '', cv: '', notes: 'Absage nach 1 Woche', postingSaved: '' },
   { id: 'd6', company: 'Seewald Energie', role: 'Projektingenieur Batteriespeicher', location: 'Regensburg', status: 'Jobangebot', appliedOn: '2026-10-20', interview: '', like: 4, fit: 90, salary: '69.000 €', channel: 'E-Mail', url: '', cv: '', notes: 'Angebot bis 25.11. prüfen', postingSaved: '' },
