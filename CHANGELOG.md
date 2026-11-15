@@ -11,6 +11,12 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.42 – 16.11.2026 (nur App) – Dubletten-Warnung
+- Legst du über „+“ einen Job an, den es schon gibt (gleicher Link, gleiche Stellen-ID im Link oder gleiche Firma und Stelle), fragt die App nach. „Abbrechen“ öffnet den vorhandenen Job, „OK“ legt ihn trotzdem an.
+- Beim Speichern über den Kurzbefehl prüft das Apps Script das schon länger selbst. Dort ändert sich nichts.
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.6.41 – 15.11.2026 (nur App) – Nachfassen, Termine, Statistik, Gesprächsvorbereitung
 - **Nachfassen:** Steht ein Job seit 10 Tagen auf „Beworben“, zeigt die Karte „Nachfassen“ und der Kalender-Knopf oben eine rote Zahl. Im Job gibt es den Knopf „Heute nachgefasst“. Er schreibt „Nachgefasst am …“ in die Notizen, danach zählen die 10 Tage neu.
 - **Termine und Fristen** (Kalender-Knopf oben): anstehende Gespräche, fällige Nachfass-Aktionen, offene Rückmeldungen nach einem Gespräch, Angebote und alles, was noch auf Antwort wartet. Ein Tipp öffnet den Job.

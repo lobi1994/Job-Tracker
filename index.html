@@ -311,7 +311,7 @@ table.st{width:100%;border-collapse:collapse;font-size:13.5px}table.st th,table.
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.41', NEED_SCRIPT = '1.6.35'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.42', NEED_SCRIPT = '1.6.35'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Careerway ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
@@ -453,6 +453,7 @@ const EN_PAT = [
   [/^Seit (\d+) Tagen keine Antwort( auf dein Nachfassen)?\. Zeit zum Nachfassen\.$/, (m, n, a) => 'No reply for ' + n + ' days' + (a ? ' to your follow-up' : '') + '. Time to follow up.'],
   [/^(Nachgefasst|Beworben) (heute|gestern|vor (\d+) Tagen)\. Nachfassen in (\d+) Tagen\.$/, (m, a, w, n, d) => (a === 'Beworben' ? 'Applied ' : 'Followed up ') + (w === 'heute' ? 'today' : w === 'gestern' ? 'yesterday' : n + ' days ago') + '. Follow up in ' + d + ' days.'],
   [/^Steht in der Tabelle in der Spalte Notizen unter „\[Vorbereitung\]“\.$/, 'Stored in the sheet in the notes column under “[Vorbereitung]”.'],
+  [/^Diesen Job gibt es schon:\n([\s\S]*)\nStatus: ([^\n]*?)(?:, beworben am ([^\n]*))?\n\nTrotzdem neu anlegen\?$/, (m, jb, st, d) => 'This job already exists:\n' + jb + '\nStatus: ' + trText(st) + (d ? ', applied on ' + d : '') + '\n\nAdd it anyway?'],
   [/^Claude: /, 'Claude: ']
 ];
 function trText(s) {
@@ -1629,6 +1630,23 @@ function loadBar() {
 }
 
 /* ---------- Neuer Job ---------- */
+/* Dublette? Gleiche Regeln wie findSameJob_ / normUrl_ im Apps Script (google/Code.gs). */
+function findDuplicate(job, list) {
+  const normUrl = (u) => String(u || '').trim().toLowerCase().replace(/^https?:\/\/(www\.|de\.)?/, '').replace(/[?#].*$/, '').replace(/\/+$/, '');
+  const norm = (t) => String(t || '').toLowerCase().replace(/\((m|w|d|f|x|all genders?|alle)[^)]*\)/g, ' ').replace(/[^a-z0-9äöüß]+/g, '');
+  const ids = (u) => (String(u || '').match(/[A-Za-z0-9]{8,}/g) || []).filter((x) => /\d/.test(x) && !/^(https?|linkedin|personio|greenhouse|workable)$/i.test(x));
+  const normC = (t) => norm(String(t || '').toLowerCase().replace(/\b(gmbh|mbh|ag|se|kg|kgaa|co|inc|ltd|llc|bv|sa|sas|plc|germany|deutschland|europe|europa|emea|group|gruppe|holding)\b\.?/g, ' '));
+  const sameCo = (a, b) => a === b || (Math.min(a.length, b.length) >= 4 && (a.indexOf(b) === 0 || b.indexOf(a) === 0));
+  const myUrl = normUrl(job.url), myIds = ids(job.url), c = normC(job.company), ro = norm(job.role);
+  for (const j of list || []) {
+    if (myUrl && normUrl(j.url) === myUrl) return j;
+    const theirIds = ids(j.url);
+    if (myIds.some((x) => theirIds.indexOf(x) >= 0)) return j;
+    const rc = normC(j.company), rr = norm(j.role);
+    if (c && ro && rc && sameCo(rc, c) && rr && (rr === ro || (Math.min(rr.length, ro.length) >= 12 && (rr.indexOf(ro) >= 0 || ro.indexOf(rr) >= 0)))) return j;
+  }
+  return null;
+}
 $('bAdd').onclick = () => {
   openSheet(head('Neuer Job', 'oder in Safari / LinkedIn: Teilen → Job speichern', '') +
     inp('nCompany', 'Firma', '') + inp('nRole', 'Stelle', '') + inp('nLocation', 'Ort / Remote', '') + inp('nUrl', 'Link zur Stellenausschreibung', '', 'url') +
@@ -1640,6 +1658,8 @@ $('bAdd').onclick = () => {
   $('nSave').onclick = async () => {
     const job = { company: $('nCompany').value.trim(), role: $('nRole').value.trim(), location: $('nLocation').value.trim(), url: $('nUrl').value.trim(), status: $('nStatus').value };
     if (!job.company && !job.role) { toast('Bitte Firma oder Stelle angeben.'); return; }
+    const dup = findDuplicate(job, jobs);
+    if (dup && !confirm('Diesen Job gibt es schon:\n' + dup.company + ' · ' + dup.role + '\nStatus: ' + dup.status + (dup.appliedOn ? ', beworben am ' + fmtDate(dup.appliedOn) : '') + '\n\nTrotzdem neu anlegen?')) { closeSheet(); openDetail(dup.id); return; }
     $('nSave').disabled = true;
     try {
       let j = await api('apiAdd', job); jobs.push(j); render();

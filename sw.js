@@ -2,7 +2,7 @@
  * App page: fresh from the network when it answers within 0.7 s, otherwise the device copy at once
  * (the page is told when a newer version arrived and reloads itself).
  * Fonts: cached once. Calls to Google (your list) are never cached here. */
-var CACHE = 'jt-shell-v57';
+var CACHE = 'jt-shell-v58';
 var SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-32.png', 'icons/logo.svg'];
 
 self.addEventListener('install', function (e) {

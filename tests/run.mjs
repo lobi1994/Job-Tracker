@@ -173,6 +173,32 @@ await test('A-p XSS in Agenda', () => {
   }
 });
 
+await test('A-q findDuplicate Treffer', () => {
+  const r = ev(`(() => {
+    const L = [{ id: 'a', company: 'X', role: 'Y', url: 'https://example.com/jobs/1' }, { id: 'b', company: 'Q', role: 'R', url: 'https://a.com/p/ab12cd34ef' }, { id: 'c', company: 'Spheros', role: 'Projektleiter', url: '' }];
+    const f = (j) => (findDuplicate(j, L) || {}).id || null;
+    return JSON.stringify([f({ company: 'Z', role: 'W', url: 'https://www.example.com/jobs/1/?utm=x' }), f({ company: 'Z', role: 'W', url: 'https://b.org/view/ab12cd34ef?x=1' }), f({ company: 'Spheros Germany GmbH', role: 'Projektleiter (m/w/d)', url: '' })]);
+  })()`);
+  assert.equal(r, JSON.stringify(['a', 'b', 'c']));
+});
+await test('A-r findDuplicate kein Treffer', () => {
+  const r = ev(`(() => {
+    const L = [{ id: 'a', company: 'Spheros', role: 'Projektleiter', url: '' }];
+    const f = (j, l) => (findDuplicate(j, l) || {}).id || null;
+    return JSON.stringify([f({ company: 'Spheros', role: 'Entwickler', url: '' }, L), f({ company: 'Andere AG', role: 'Projektleiter', url: '' }, L), f({ company: 'Spheros', role: 'Projektleiter', url: '' }, []), f({ company: 'Andere AG', role: 'Entwickler', url: '' }, L)]);
+  })()`);
+  assert.equal(r, JSON.stringify([null, null, null, null]));
+});
+await test('A-s Oberfläche: Dublette fragt nach', () => {
+  const n0 = ev('jobs.length');
+  ev(`window.__cf = null; window.confirm = (t) => { window.__cf = t; return false; };`);
+  ev(`$('bAdd').click(); $('nCompany').value = jobs[0].company; $('nRole').value = jobs[0].role; $('nSave').click();`);
+  try {
+    assert.ok(String(w.__cf).includes('Diesen Job gibt es schon'), 'kein confirm');
+    assert.equal(ev('jobs.length'), n0);
+  } finally { ev('closeSheet()'); }
+});
+
 /* ---------- Teil B: Apps Script ---------- */
 const gs = read('google/Code.gs') + '\n' + read('google/Mail.gs');
 await test('B Syntax Code.gs + Mail.gs', () => { new Function(gs); });
