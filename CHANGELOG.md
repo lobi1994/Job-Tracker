@@ -11,6 +11,14 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.37 – 15.11.2026 (nur App) – Sofort speichern
+- **Speichern ohne Warten:** Änderungen an einem Job (Status, Datum, Gespräche, Bewertung, Notizen …) erscheinen sofort in der Liste, das Fenster schließt direkt. Gespeichert wird im Hintergrund; oben steht kurz „Speichert …“.
+- **Ohne Netz geht nichts verloren:** Änderungen warten auf dem Gerät („Offline – 1 Änderung(en) warten“) und werden automatisch nachgeschickt, auch nach dem Schließen der App.
+- Lehnt Google eine Änderung ab (z. B. Job wurde gelöscht), wird sie zurückgenommen und du bekommst eine Meldung.
+- Ein Nachladen der Liste, das noch vor dem Speichern gestartet ist, überschreibt die neue Änderung nicht mehr.
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.6.36 – 15.11.2026 (App und Apps Script) – Sicherheit
 - **Schlüssel nicht mehr dauerhaft in der Adresszeile.** Im Browser wird der Teil `#setup=…` sofort nach dem Übernehmen entfernt, damit er nicht in Screenshots, im Verlauf oder im Teilen-Menü landet. Für „Zum Home-Bildschirm“ gibt es in den Einstellungen den Punkt **„Auf den Home-Bildschirm legen“** (blendet die Verbindung 3 Minuten ein). Bereits angelegte Home-Bildschirm-Apps laufen unverändert weiter.
 - **Schutz beim Schreiben ins Sheet:** Text, der mit „=“ oder „+“ beginnt (z. B. ein Seitentitel oder ein Mail-Betreff), wird nicht mehr als Formel ausgeführt. Werte wie „10-12“ oder „17.11.2026 15:00“ bleiben Text und werden nicht mehr in ein Datum umgewandelt.
