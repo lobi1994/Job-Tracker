@@ -291,7 +291,7 @@ header{background:rgba(11,15,23,.86);-webkit-backdrop-filter:saturate(160%) blur
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.35', NEED_SCRIPT = '1.6.35'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.36', NEED_SCRIPT = '1.6.35'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Careerway ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
@@ -337,7 +337,7 @@ const EN = {
   'Beworben am': 'Applied on', 'Gespräche': 'Interviews', '＋ Gespräch hinzufügen': '＋ Add interview', 'Gespräch entfernen': 'Remove interview',
   'Art …': 'Type …', 'Telefon': 'Phone', 'Video': 'Video', 'Persönlich (vor Ort)': 'In person (on-site)', 'Assessment Center': 'Assessment center', 'Sonstiges': 'Other',
   'Notiz (z. B. 2. Gespräch mit Teamlead)': 'Note (e.g. 2nd interview with team lead)',
-  'Skill-Lücken': 'Skill gaps', 'Beste Hebel': 'Best levers', 'Grundlagen': 'Basics only', 'Hard Skills': 'Hard skills', 'Soft Skills': 'Soft skills', 'Leicht': 'Easy', 'Mittel': 'Medium', 'Schwer': 'Hard', 'Nachweis': 'Proof', 'Lernweg': 'How to learn', 'Dauer': 'Duration', 'Kosten': 'Cost', 'Für den Lebenslauf': 'For your résumé', 'Stand': 'As of', 'Zum Angebot ↗': 'Open offer ↗', 'Oft gefordert und in Wochen bis wenigen Monaten erreichbar.': 'Often required and reachable within weeks to a few months.', 'Bewertung': 'Rating', 'Lebenslauf passt (Einschätzung)': 'Résumé fit (estimate)', 'Lebenslauf passt (ATS-Bewertung, %)': 'Résumé fit (ATS score, %)', 'z. B. 80': 'e.g. 80', 'Details': 'Details',
+  'Skill-Lücken': 'Skill gaps', 'Beste Hebel': 'Best levers', 'Grundlagen': 'Basics only', 'Hard Skills': 'Hard skills', 'Soft Skills': 'Soft skills', 'Leicht': 'Easy', 'Mittel': 'Medium', 'Schwer': 'Hard', 'Nachweis': 'Proof', 'Lernweg': 'How to learn', 'Dauer': 'Duration', 'Kosten': 'Cost', 'Für den Lebenslauf': 'For your résumé', 'Stand': 'As of', 'Zum Angebot ↗': 'Open offer ↗', 'Oft gefordert und in Wochen bis wenigen Monaten erreichbar.': 'Often required and reachable within weeks to a few months.', 'Auf den Home-Bildschirm legen': 'Add to Home Screen', 'Blendet die Verbindung kurz in der Adresse ein, damit die Home-Bildschirm-App sie übernimmt': 'Briefly shows the connection in the address bar so the Home Screen app can take it over', 'Kein gültiger Link (muss mit https:// beginnen).': 'Not a valid link (must start with https://).', 'Bewertung': 'Rating', 'Lebenslauf passt (Einschätzung)': 'Résumé fit (estimate)', 'Lebenslauf passt (ATS-Bewertung, %)': 'Résumé fit (ATS score, %)', 'z. B. 80': 'e.g. 80', 'Details': 'Details',
   'Gehalt angegeben': 'Salary stated', 'Weg / Portal': 'Channel / portal', 'Notizen': 'Notes',
   'Mehr: Stellenausschreibung verwalten, Firma und Stelle ändern': 'More: manage job posting, edit company and role',
   'Stellenausschreibung noch nicht gespeichert.': 'Job posting not saved yet.', 'Vom Link speichern': 'Save from link', 'Text einfügen': 'Paste text', 'Löschen': 'Delete',
@@ -451,6 +451,7 @@ let CFG = null, DEMO = false, jobs = [], statuses = STATUS_DEF.slice(), sheetUrl
 let filter = { on: STATUS_DEF.slice(), q: '', sort: 'date', fitMin: 0 };
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const webUrl = (u) => (/^https?:\/\//i.test(String(u || '').trim()) ? String(u).trim() : ''); // nur echte Web-Links öffnen
 const col = (s) => 'var(--s' + Math.max(0, statuses.indexOf(s)) + ')';
 
 /* ---------- Speicher ---------- */
@@ -591,6 +592,7 @@ $('bSettings').onclick = () => {
       btn('xLog', 'Änderungen', 'Was in welcher Version neu ist (CHANGELOG)', IC.log) +
       (DEMO ? '' : btn('xFetch', 'Fehlende Stellenausschreibungen holen', 'Holt für alle Jobs mit Link, aber ohne gespeicherte Stellenausschreibung, den Text über den Link (bis 25 pro Durchgang)', IC.down)) +
       (DEMO ? '' : btn('xMail', 'Mails jetzt prüfen', 'Sucht sofort nach Bestätigungen, Absagen und Einladungen. Läuft sonst automatisch alle 30 Minuten.', IC.mail)) +
+      (DEMO || STANDALONE ? '' : btn('xHome', 'Auf den Home-Bildschirm legen', 'Blendet die Verbindung kurz in der Adresse ein, damit die Home-Bildschirm-App sie übernimmt', IC.down)) +
       btn('xRe', 'Anders verbinden', 'Neuen App-Link oder Schlüssel eintragen, z. B. nach einem neuen Schlüssel', IC.link) +
       (DEMO ? '' : btn('xOut', 'Verbindung trennen', 'Löscht App-Link und Schlüssel auf diesem Gerät. Die Tabelle bleibt unverändert.', IC.out)) +
     '</div><p class="sub" style="margin-top:12px">Created by Matthias Lobinger</p>',
@@ -601,6 +603,7 @@ $('bSettings').onclick = () => {
   if ($('xShort')) $('xShort').onclick = () => ext(new URL('kurzbefehl.html', location.href).href.replace(/#.*$/, '') + '#setup=' + encSetup(CFG));
   $('xGaps').onclick = () => openGaps();
   $('xLog').onclick = () => ext('https://github.com/lobi1994/Job-Tracker/blob/main/CHANGELOG.md');
+  if ($('xHome')) $('xHome').onclick = showKeyForInstall;
   $('xRe').onclick = () => { closeSheet(); showSetup(); };
   if ($('xFetch')) $('xFetch').onclick = async () => {
     const b = $('xFetch'); b.disabled = true; b.querySelector('b').textContent = 'Hole Stellenausschreibungen … (bis zu 3 Minuten)';
@@ -722,6 +725,8 @@ $('list').onclick = (e) => {
    x-safari-https:// öffnet ab iOS 17 direkt Safari; dort greift „Job speichern“. */
 const IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 function openExt(url) {
+  url = webUrl(url);
+  if (!url) { toast('Kein gültiger Link (muss mit https:// beginnen).'); return; }
   if (IOS && /^https?:\/\//i.test(url)) { location.href = 'x-safari-' + url; return; }
   window.open(url, '_blank', 'noopener');
 }
@@ -960,7 +965,7 @@ function openDetail(id) {
   if ($('aUrl')) $('aUrl').onclick = () => (j.status === statuses[0] ? applyNow(j) : openExt(j.url));
   if ($('aCv')) $('aCv').onclick = async (e) => {
     e.preventDefault();
-    if (j.cvLink) { window.open(j.cvLink, '_blank', 'noopener'); return; }
+    if (webUrl(j.cvLink)) { window.open(webUrl(j.cvLink), '_blank', 'noopener'); return; }
     const w = window.open('', '_blank'); // sofort öffnen, sonst blockiert Safari das Fenster nach dem Warten
     try {
       const u = await api('apiCvLink', j.cv);
@@ -1005,7 +1010,7 @@ async function openPosting(j) {
     openSheet(head('Stellenausschreibung', j.company + ' · ' + j.role + (p ? (LANG === 'en' ? ' · saved ' : ' · gespeichert ') + fmtDate(p.savedAt) : ''), '') +
       note + (f ? f.nav + '<div id="pFmt">' + skillsHtml(extractSkills(htmlText(p.text), profile)) + f.html + '</div><div id="pRaw" class="ptext" hidden>' + esc(htmlText(p.text)) + '</div>' +
         '<button class="toggle" id="pToggle">Originaltext anzeigen</button>' : '<p>Nichts gespeichert.</p>'),
-      '<button class="ib" id="tBack">Zurück</button>' + (p && p.url ? '<a class="ib" href="' + esc(p.url) + '" target="_blank" rel="noopener" data-ext="1">Original öffnen</a>' : ''));
+      '<button class="ib" id="tBack">Zurück</button>' + (p && webUrl(p.url) ? '<a class="ib" href="' + esc(webUrl(p.url)) + '" target="_blank" rel="noopener" data-ext="1">Original öffnen</a>' : ''));
     $('tBack').onclick = () => openDetail(j.id);
     if ($('pToggle')) $('pToggle').onclick = () => {
       const raw = $('pRaw').hidden; $('pRaw').hidden = !raw; $('pFmt').hidden = raw;
@@ -1297,7 +1302,7 @@ function openSuggestion(i) {
       '<div class="meta">' + esc(s.art) + ' · ' + esc(fmtDate(s.date)) + ' · ' + esc(s.from) + '</div>' +
       '<div><b>' + esc(s.subject) + '</b></div>' + (s.excerpt ? '<blockquote>' + esc(s.excerpt) + '</blockquote>' : '') + '</div>' +
     (LANG === 'en' ? '<p>Should I <b>' + trText(verb) + '</b> this application?</p>' : '<p>Soll ich die Bewerbung <b>' + verb + '</b>?</p>') +
-    (s.link ? '<p><a href="' + esc(s.link) + '" target="_blank" rel="noopener">Mail in Gmail öffnen</a></p>' : ''),
+    (webUrl(s.link) ? '<p><a href="' + esc(webUrl(s.link)) + '" target="_blank" rel="noopener">Mail in Gmail öffnen</a></p>' : ''),
     '<button class="ib" id="gLater">Später</button><button class="ib" id="gNo">Nein</button><button class="ib pri" id="gYes">Ja</button>');
   const done = async (accept) => {
     $('gYes').disabled = $('gNo').disabled = true;
@@ -1433,6 +1438,17 @@ async function runTour() {
   cap('');
 }
 
+const STANDALONE = navigator.standalone === true || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+function hideKey() { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* egal */ } }
+/* Für „Zum Home-Bildschirm“: Die Home-Bildschirm-App hat einen eigenen Speicher und übernimmt die Verbindung nur aus der Adresse.
+   Darum den Schlüssel auf Wunsch für 3 Minuten wieder einblenden. */
+function showKeyForInstall() {
+  if (!CFG) return;
+  try { history.replaceState(null, '', location.pathname + location.search + '#setup=' + encSetup(CFG)); } catch (e) { return; }
+  clearTimeout(showKeyForInstall._t); showKeyForInstall._t = setTimeout(hideKey, 180000);
+  closeSheet(); toast('Jetzt Teilen → „Zum Home-Bildschirm“ tippen. Der Schlüssel steht dafür 3 Minuten in der Adresse – in dieser Zeit keinen Screenshot teilen.', 12000);
+}
+
 /* ---------- Start ---------- */
 (function start() {
   startTr();
@@ -1442,6 +1458,9 @@ async function runTour() {
   // Den #setup-Teil absichtlich in der Adresse lassen: „Zum Home-Bildschirm“ übernimmt so die Verbindung
   // (die Home-Bildschirm-App hat auf dem iPhone einen eigenen Speicher, getrennt von Safari).
   if (fromHash) { const old = ls.get(CK); if (!old || old.u !== fromHash.u || old.k !== fromHash.k) ls.del(LK); ls.set(CK, fromHash); }
+  // Seit 1.6.36: Im Browser-Tab den Schlüssel sofort aus der Adresszeile nehmen (sonst landet er in Screenshots, im Verlauf
+  // und im Teilen-Menü). Die Home-Bildschirm-App hat keine Adresszeile und braucht den Teil beim Start, dort bleibt er.
+  if (fromHash && !STANDALONE && ls.get(CK)) hideKey();
   if (/#tour/.test(location.hash)) { DEMO = true; shownSug = true; showApp(); load().then(() => setTimeout(runTour, 600)); return; }
   if (/#demo/.test(location.hash)) { DEMO = true; showApp(); load(); return; }
   CFG = fromHash || ls.get(CK);

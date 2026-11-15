@@ -11,6 +11,17 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.36 – 15.11.2026 (App und Apps Script) – Sicherheit
+- **Schlüssel nicht mehr dauerhaft in der Adresszeile.** Im Browser wird der Teil `#setup=…` sofort nach dem Übernehmen entfernt, damit er nicht in Screenshots, im Verlauf oder im Teilen-Menü landet. Für „Zum Home-Bildschirm“ gibt es in den Einstellungen den Punkt **„Auf den Home-Bildschirm legen“** (blendet die Verbindung 3 Minuten ein). Bereits angelegte Home-Bildschirm-Apps laufen unverändert weiter.
+- **Schutz beim Schreiben ins Sheet:** Text, der mit „=“ oder „+“ beginnt (z. B. ein Seitentitel oder ein Mail-Betreff), wird nicht mehr als Formel ausgeführt. Werte wie „10-12“ oder „17.11.2026 15:00“ bleiben Text und werden nicht mehr in ein Datum umgewandelt.
+- Links werden nur noch geöffnet, wenn sie mit http(s) beginnen.
+- Die Lebenslauf-Suche in Google Drive findet nur noch Dateien, die bei einem Job als „CV-Datei“ eingetragen sind.
+- CHANGELOG: Beispiele mit Firmennamen entfernt.
+
+**Apps Script: Bereitstellen nötig: ja** (Code.gs und Mail.gs)
+
+Beschreibung für die Bereitstellung: `1.6.36 – Schutz vor Formeln, sichere Links`
+
 ## 1.6.35 – 14.11.2026 (App und Apps Script)
 - **Neuer Bereich „Skill-Lücken“** (Zielscheiben-Symbol oben oder Einstellungen → Skill-Lücken): zählt über alle gespeicherten Stellenausschreibungen (ohne „Nicht bewerben“), welche Fähigkeiten gefordert sind, die laut Blatt „Profil“ fehlen.
   - Wichtigkeit: Pflichtanforderungen zählen doppelt, PM-, Produkt- und Testrollen 1,5-fach.

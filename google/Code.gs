@@ -8,7 +8,7 @@
  * (z. B. {fn:"apiSavePosting", key, data:{url, title, text}} – data darf auch JSON-Text sein).
  */
 
-const VERSION = '1.6.35'; // siehe CHANGELOG.md
+const VERSION = '1.6.36'; // siehe CHANGELOG.md
 const APP_PAGE = 'https://lobi1994.github.io/Job-Tracker/';
 const SHEET = 'Bewerbungen';
 const POSTINGS = 'Anzeigen';
@@ -115,6 +115,17 @@ function findRow_(sh, map, id) {
   return 0;
 }
 
+/**
+ * Schutz beim Schreiben von Text ins Sheet (seit 1.6.36): Google Sheets behandelt Text, der mit „=“ oder „+“
+ * beginnt, als Formel, und wandelt z. B. „10-12“ in ein Datum um. Ein vorangestelltes Hochkomma zwingt die Zelle
+ * auf „nur Text“; das Hochkomma selbst wird nicht angezeigt und nicht zurückgelesen.
+ */
+function textCell_(v) {
+  const s = v === null || v === undefined ? '' : String(v);
+  if (/^[=+]/.test(s) || /^[\d\s.,:\/\-%€$]*\d[\d\s.,:\/\-%€$]*$/.test(s)) return "'" + s;
+  return s;
+}
+
 function toCell_(field, value) {
   if (value === null || value === undefined) return '';
   if (field === 'appliedOn') {
@@ -134,7 +145,7 @@ function toCell_(field, value) {
     return Math.round(n);
   }
   if (field === 'status' && STATUS.indexOf(value) < 0) throw new Error('Unbekannter Status: ' + value);
-  return String(value);
+  return textCell_(value);
 }
 
 function withLock_(fn) {
@@ -474,7 +485,7 @@ function fetchMissing_(max) {
     if (!info.text) { failed.push(name); continue; }
     withLock_(function () {
       const now = new Date();
-      ps.appendRow([String(t.job.id), t.job.url, now, info.text.slice(0, MAX_TEXT)]);
+      ps.appendRow([String(t.job.id), textCell_(t.job.url), now, textCell_(info.text.slice(0, MAX_TEXT))]);
       markPostingChanged_(sh, map, t.row, now);
     });
     ok.push(name);
@@ -506,7 +517,7 @@ function jtAnzeigenAufraeumen() {
   const rg = ps.getRange(2, 4, last - 1, 1);
   const vals = rg.getValues();
   let n = 0;
-  const out = vals.map(function (r) { const t = normalizePosting_(r[0]); if (t !== String(r[0])) n++; return [t]; });
+  const out = vals.map(function (r) { const t = normalizePosting_(r[0]); if (t !== String(r[0])) n++; return [textCell_(t)]; });
   rg.setValues(out);
   SpreadsheetApp.getUi().alert('Anzeigen aufgeräumt', n + ' von ' + vals.length + ' Anzeigen wurden vereinheitlicht.', SpreadsheetApp.getUi().ButtonSet.OK);
 }
@@ -579,7 +590,7 @@ function savePosting_(data, linkOnly) {
       created = true;
     }
     // Bestehender Job ohne Link: den Link der gespeicherten Seite übernehmen
-    if (!created && url && map.url && !String(sh.getRange(r, map.url).getValue() || '').trim()) sh.getRange(r, map.url).setValue(url);
+    if (!created && url && map.url && !String(sh.getRange(r, map.url).getValue() || '').trim()) sh.getRange(r, map.url).setValue(textCell_(url));
     const job0 = rowToJob_(sh.getRange(r, 1, 1, sh.getLastColumn()).getValues()[0], map);
     const name = [job0.company, job0.role].filter(String).join(' – ');
     if (!text) {
@@ -595,13 +606,13 @@ function savePosting_(data, linkOnly) {
       if (sameText_(old[3], text)) return { created: false, job: job0, chars: String(old[3]).length, message: 'Anzeige war schon gespeichert (unverändert): ' + name };
       // Nicht still überschreiben: neue Anzeige parken und nachfragen. Bestätigt wird über confirmUrl (Kurzbefehl) oder replace:true (App).
       const token = Utilities.getUuid().replace(/-/g, '');
-      ps.getRange(existing, 5, 1, 3).setValues([[text.slice(0, MAX_TEXT), url, token + '|' + now.getTime()]]);
+      ps.getRange(existing, 5, 1, 3).setValues([[textCell_(text.slice(0, MAX_TEXT)), textCell_(url), token + '|' + now.getTime()]]);
       const savedOn = old[2] instanceof Date ? Utilities.formatDate(old[2], Session.getScriptTimeZone(), 'dd.MM.yyyy') : String(old[2]);
       return { created: false, job: job0, chars: 0, ask: true,
         confirm: ScriptApp.getService().getUrl() + '?confirm=' + token,
         message: 'Für ' + name + ' ist schon eine Anzeige gespeichert (' + savedOn + '). Durch die neue ersetzen?' };
     }
-    const values = [[id, url, now, text.slice(0, MAX_TEXT)]];
+    const values = [[id, textCell_(url), now, textCell_(text.slice(0, MAX_TEXT))]];
     if (existing) { ps.getRange(existing, 1, 1, 4).setValues(values); ps.getRange(existing, 5, 1, 3).clearContent(); }
     else ps.appendRow(values[0]);
     markPostingChanged_(sh, map, r, now);
@@ -635,14 +646,14 @@ function confirmReplace_(token) {
       if (parts[0] !== token) continue;
       if (Date.now() - Number(parts[1]) > 30 * 60 * 1000) { ps.getRange(i + 2, 5, 1, 3).clearContent(); throw new Error('Zu spät – bitte den Kurzbefehl nochmal ausführen.'); }
       const now = new Date();
-      ps.getRange(i + 2, 1, 1, 7).setValues([[rows[i][0], rows[i][5] || rows[i][1], now, rows[i][4], '', '', '']]);
+      ps.getRange(i + 2, 1, 1, 7).setValues([[rows[i][0], textCell_(rows[i][5] || rows[i][1]), now, textCell_(rows[i][4]), '', '', '']]);
       const sh = sheet_(), map = colMap_(sh);
       const r = findRow_(sh, map, rows[i][0]);
       if (r) markPostingChanged_(sh, map, r, now);
       // Link des Jobs mitziehen, wenn er leer ist oder auf die alte (falsche) Seite zeigte
       if (r && map.url && rows[i][5]) {
         const cur = String(sh.getRange(r, map.url).getValue() || '');
-        if (!cur || normUrl_(cur) === normUrl_(rows[i][1])) sh.getRange(r, map.url).setValue(rows[i][5]);
+        if (!cur || normUrl_(cur) === normUrl_(rows[i][1])) sh.getRange(r, map.url).setValue(textCell_(rows[i][5]));
       }
       return 'Anzeige ersetzt ✓';
     }
@@ -754,7 +765,7 @@ function apiTranslatePosting(key, id) {
   if (looksEnglish_(text)) return { id: String(id), text: text, translated: false };
   if (String(v[8]) === sig && v[7]) return { id: String(id), text: String(v[7]), translated: true };
   const en = translateLong_(text);
-  ps.getRange(r, 8, 1, 2).setValues([[en, sig]]);
+  ps.getRange(r, 8, 1, 2).setValues([[textCell_(en), sig]]);
   return { id: String(id), text: en, translated: true };
 }
 
@@ -763,6 +774,11 @@ function apiCvLink(key, name) {
   check_(key);
   name = String(name || '').trim();
   if (!name) return null;
+  // Nur Dateien, die bei einem Job als „CV-Datei“ eingetragen sind (nicht beliebige Dateien aus Drive).
+  const sh = sheet_(), map = colMap_(sh), last = sh.getLastRow();
+  if (!map.cv || last < 2) return null;
+  const known = sh.getRange(2, map.cv, last - 1, 1).getValues().some(function (r) { return String(r[0]).trim() === name; });
+  if (!known) return null;
   const it = DriveApp.getFilesByName(name);
   return it.hasNext() ? it.next().getUrl() : null;
 }

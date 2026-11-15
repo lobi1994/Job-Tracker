@@ -191,7 +191,7 @@ function jtMailPruefen() {
           done = 'automatisch';
         }
         rows.push([Utilities.getUuid().slice(0, 8), sug.job.id, sug.job.company, sug.job.role, ART_NAME[sug.art], sug.status,
-          m.getDate(), from, mail.subject, excerpt_(mail.body), 'https://mail.google.com/mail/u/0/#all/' + t.getId(), done, id]);
+          m.getDate(), textCell_(from), textCell_(mail.subject), textCell_(excerpt_(mail.body)), 'https://mail.google.com/mail/u/0/#all/' + t.getId(), done, id]);
       });
     });
     if (threads.length < 100) break;
