@@ -11,6 +11,15 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.38 – 15.11.2026 (nur App) – Schneller Start
+- **Start ohne Warten aufs Netz:** Antwortet das Netz nicht innerhalb von 0,7 s, startet die App sofort aus dem Gerät (vorher bis zu 4 s Wartezeit). Gibt es eine neuere Version, lädt die App sie im Hintergrund und wechselt automatisch, sobald kein Fenster offen ist und nichts mehr gespeichert wird. Bei schnellem Netz siehst du wie bisher immer direkt die neueste Version.
+- Fällt GitHub Pages aus, startet die App trotzdem aus dem Gerät.
+- **Diagnose** unten in den Einstellungen: App bedienbar nach … · Liste von Google … · letztes Speichern …
+- Größere Tippflächen (Knöpfe oben 44 px, Filter 40 px, Suchfeld und Sortierung 44 px), Suchfeld auf dem iPhone nicht mehr abgeschnitten.
+- Gerätespeicher: Stellenausschreibungen gelöschter Jobs werden entfernt; ist der Speicher voll, werden zwischengespeicherte Stellenausschreibungen verworfen statt die Liste nicht mehr zu sichern.
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.6.37 – 15.11.2026 (nur App) – Sofort speichern
 - **Speichern ohne Warten:** Änderungen an einem Job (Status, Datum, Gespräche, Bewertung, Notizen …) erscheinen sofort in der Liste, das Fenster schließt direkt. Gespeichert wird im Hintergrund; oben steht kurz „Speichert …“.
 - **Ohne Netz geht nichts verloren:** Änderungen warten auf dem Gerät („Offline – 1 Änderung(en) warten“) und werden automatisch nachgeschickt, auch nach dem Schließen der App.

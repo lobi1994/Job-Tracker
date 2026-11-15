@@ -23,7 +23,7 @@ header{position:sticky;top:0;z-index:5;background:var(--bg);padding:calc(env(saf
 .top h1{font-size:21px;margin:0;flex:1;color:var(--navy);display:flex;align-items:center;gap:8px}
 .top h1 .logo{width:28px;height:28px;border-radius:7px;flex:none}
 .top small{color:var(--mute);font-weight:400;font-size:13px;margin-left:6px}
-.ib{text-decoration:none;color:inherit;border:0;background:var(--card);border:1px solid var(--line);border-radius:10px;height:36px;min-width:36px;padding:0 10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.ib{text-decoration:none;color:inherit;border:0;background:var(--card);border:1px solid var(--line);border-radius:10px;height:44px;min-width:44px;padding:0 10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
 .ib.pri{background:var(--navy);color:#fff;border-color:var(--navy)}
 @media (prefers-color-scheme:dark){.ib.pri{color:#0f1318}}
 .ib svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -184,7 +184,10 @@ header{background:rgba(11,15,23,.86);-webkit-backdrop-filter:saturate(160%) blur
 .ib:hover{background:#151d2b}
 .ib.pri{background:var(--acc);border-color:var(--acc);color:var(--onacc);font-weight:600}
 .ib svg,svg.i{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
-.chip{background:transparent;border:1px solid var(--line2);color:var(--mute);opacity:1;font-size:12.5px;padding:5px 11px}
+.chip{background:transparent;border:1px solid var(--line2);color:var(--mute);opacity:1;font-size:13px;padding:0 13px;min-height:40px}
+.capply{min-height:36px;padding:6px 12px}
+#sort{max-width:42%;min-height:44px}.top small{white-space:nowrap}
+@media (max-width:420px){.top h1{font-size:19px}}#q{min-width:0;flex:1 1 auto;min-height:44px}#mailbar{min-height:44px}
 .chip.on{border-color:color-mix(in srgb,var(--c) 70%,transparent);box-shadow:none;color:var(--ink);background:color-mix(in srgb,var(--c) 10%,transparent)}
 .chip b{font-weight:600;color:var(--mute)}.chip.on b{color:var(--ink)}
 .chip i{width:7px;height:7px}
@@ -260,7 +263,7 @@ header{background:rgba(11,15,23,.86);-webkit-backdrop-filter:saturate(160%) blur
   <button class="mailbar" id="mailbar"></button>
   <div class="chips" id="chips"></div>
   <div class="bar">
-    <input id="q" type="search" placeholder="Firma oder Stelle suchen" autocomplete="off">
+    <input id="q" type="search" placeholder="Firma oder Stelle" autocomplete="off">
     <select id="sort" aria-label="Sortierung">
       <option value="date">Beworben: neueste</option>
       <option value="dateAsc">Beworben: älteste</option>
@@ -293,7 +296,7 @@ header{background:rgba(11,15,23,.86);-webkit-backdrop-filter:saturate(160%) blur
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.37', NEED_SCRIPT = '1.6.35'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.38', NEED_SCRIPT = '1.6.35'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Careerway ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
@@ -312,7 +315,7 @@ const EN = {
   'Offen': 'Open', 'Gespräch': 'Interview', 'Vor Ort': 'On-site', 'Angebot': 'Offer',
   'Alle aus': 'All off', 'Alle an': 'All on',
   // Kopf, Suche, Sortierung
-  'Aktualisieren': 'Refresh', 'Einstellungen': 'Settings', 'Firma oder Stelle suchen': 'Search company or role', 'Sortierung': 'Sort',
+  'Aktualisieren': 'Refresh', 'Einstellungen': 'Settings', 'Firma oder Stelle': 'Company or role', 'Firma oder Stelle suchen': 'Search company or role', 'Sortierung': 'Sort',
   'Beworben: neueste': 'Applied: newest', 'Beworben: älteste': 'Applied: oldest', 'Lebenslauf passt': 'Résumé fit', 'Gefällt mir': 'Interest',
   'Status': 'Status', 'Firma A–Z': 'Company A–Z', 'Neuer Job': 'New job', 'Nach Status filtern': 'Filter by status',
   'Demo mit Beispieldaten – Änderungen werden nicht gespeichert.': 'Demo with sample data – changes are not saved.',
@@ -461,7 +464,13 @@ const col = (s) => 'var(--s' + Math.max(0, statuses.indexOf(s)) + ')';
 /* ---------- Speicher ---------- */
 const ls = {
   get(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } },
-  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+  set(k, v) {
+    const s = JSON.stringify(v);
+    try { localStorage.setItem(k, s); }
+    catch (e) { // Speicher voll: zwischengespeicherte Stellenausschreibungen verwerfen (werden bei Bedarf neu geladen), dann nochmal
+      try { Object.keys(localStorage).filter((x) => x.indexOf('jt-post-') === 0).forEach((x) => localStorage.removeItem(x)); localStorage.setItem(k, s); } catch (e2) { /* egal */ }
+    }
+  },
   del(k) { try { localStorage.removeItem(k); } catch (e) {} }
 };
 
@@ -599,7 +608,7 @@ $('bSettings').onclick = () => {
       (DEMO || STANDALONE ? '' : btn('xHome', 'Auf den Home-Bildschirm legen', 'Blendet die Verbindung kurz in der Adresse ein, damit die Home-Bildschirm-App sie übernimmt', IC.down)) +
       btn('xRe', 'Anders verbinden', 'Neuen App-Link oder Schlüssel eintragen, z. B. nach einem neuen Schlüssel', IC.link) +
       (DEMO ? '' : btn('xOut', 'Verbindung trennen', 'Löscht App-Link und Schlüssel auf diesem Gerät. Die Tabelle bleibt unverändert.', IC.out)) +
-    '</div><p class="sub" style="margin-top:12px">Created by Matthias Lobinger</p>',
+    '</div><p class="sub notr" style="margin-top:12px;font-size:12.5px">' + esc(perfLine()) + '</p><p class="sub" style="margin-top:6px">Created by Matthias Lobinger</p>',
     '<button class="ib" id="xClose">Schließen</button>');
   document.querySelectorAll('.langsw [data-lang]').forEach((b) => { b.onclick = () => { if (b.dataset.lang !== LANG) setLang(b.dataset.lang); }; });
   const ext = (u) => { if (IOS) openExt(u); else window.open(u, '_blank', 'noopener'); };
@@ -626,6 +635,29 @@ $('bSettings').onclick = () => {
   if ($('xOut')) $('xOut').onclick = () => { if (confirm('Verbindung auf diesem Gerät trennen?')) { ls.del(CK); ls.del(LK); ls.del(OK_KEY); outbox = []; CFG = null; closeSheet(); showSetup(); } };
   $('xClose').onclick = closeSheet;
 };
+
+/* ---------- Diagnose und Versionswechsel (seit 1.6.38) ---------- */
+const perf = ls.get('jt-perf') || {};
+function perfSet(k, ms) { perf[k] = Math.round(ms); perf.at = Date.now(); ls.set('jt-perf', perf); }
+const sec = (ms) => (ms == null ? '–' : (ms / 1000).toFixed(ms < 995 ? 2 : 1).replace('.', ',') + ' s');
+function perfLine() {
+  return 'Diagnose: App bedienbar nach ' + sec(perf.start) + ' · Liste von Google ' + sec(perf.list) + ' · letztes Speichern ' + sec(perf.save);
+}
+/* Gespeicherte Stellenausschreibungen von Jobs, die es nicht mehr gibt, vom Gerät entfernen. */
+function prunePostCache() {
+  try {
+    const ids = {}; jobs.forEach((j) => { ids[j.id] = 1; });
+    Object.keys(localStorage).forEach((k) => { const m = k.match(/^jt-post-(?:en-)?(.+)$/); if (m && !ids[m[1]]) localStorage.removeItem(k); });
+  } catch (e) { /* egal */ }
+}
+/* Der Service Worker meldet eine neuere App-Version: neu laden, sobald nichts offen ist und nichts mehr gespeichert wird. */
+let updateWaiting = false;
+function applyUpdate() {
+  if (!updateWaiting) return;
+  if ($('ov').classList.contains('show') || inflight || outbox.length) { setTimeout(applyUpdate, 1500); return; }
+  location.reload();
+}
+if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', (e) => { if (e.data === 'jt-update') { updateWaiting = true; applyUpdate(); } });
 
 /* ---------- Sofort speichern (seit 1.6.37) ----------
    Änderungen an einem Job werden sofort in der Liste gezeigt und im Hintergrund an Google geschickt.
@@ -659,7 +691,9 @@ async function flushOutbox() {
   inflight = outbox.shift(); syncBadge();
   const e = inflight;
   try {
+    const t0 = performance.now();
     const upd = await apiOnceOrDemo('apiUpdate', [e.id, e.ch]);
+    perfSet('save', performance.now() - t0);
     inflight = null; writeEpoch++; flushTries = 0;
     const j = jobById(e.id), newer = outbox.find((x) => x.id === e.id);
     if (j && upd) { Object.keys(upd).forEach((k) => { if (!newer || !(k in newer.ch)) j[k] = upd[k]; }); }
@@ -697,13 +731,14 @@ async function load(spin, quiet) {
   if (spin) $('bRefresh').classList.add('spin');
   load._at = Date.now();
   try {
-    const epoch = writeEpoch;
+    const epoch = writeEpoch, t0 = performance.now();
     const r = await api('apiList');
+    if (!DEMO) perfSet('list', performance.now() - t0);
     // Wurde während des Ladens etwas gespeichert, kann diese Antwort schon veraltet sein: verwerfen und neu laden.
     if (epoch !== writeEpoch || inflight) { setTimeout(() => load(false, true), inflight ? 1500 : 0); return; }
     jobs = r.jobs || []; statuses = r.statuses || STATUS_DEF; sheetUrl = r.sheetUrl || ''; profile = r.profile || []; scriptVersion = DEMO ? APP_VERSION : (r.version || '');
     if (!DEMO && vLess(scriptVersion, NEED_SCRIPT) && !load._warned) { load._warned = true; toast('Dein Apps Script ist veraltet (' + (scriptVersion || 'alt') + '). Bitte Code aus GitHub neu kopieren und neue Version bereitstellen – siehe CHANGELOG.', 9000); }
-    applyPending(); saveCache();
+    applyPending(); saveCache(); prunePostCache();
     render();
     loadSuggestions(!shownSug);
   } catch (e) {
@@ -1533,7 +1568,7 @@ function showKeyForInstall() {
   showApp();
   const c = ls.get(LK);
   outbox = (ls.get(OK_KEY) || []).filter((e) => e && e.id && e.ch);
-  if (c && c.jobs) { jobs = c.jobs; statuses = c.statuses || STATUS_DEF; sheetUrl = c.sheetUrl || ''; profile = c.profile || []; scriptVersion = c.version || ''; applyPending(); render(); }
+  if (c && c.jobs) { jobs = c.jobs; statuses = c.statuses || STATUS_DEF; sheetUrl = c.sheetUrl || ''; profile = c.profile || []; scriptVersion = c.version || ''; applyPending(); render(); perfSet('start', performance.now()); }
   syncBadge(); flushOutbox();
   load(!c);
 })();

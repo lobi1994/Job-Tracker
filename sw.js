@@ -1,7 +1,8 @@
 /* Careerway – starts the app from the device cache.
- * App page: loaded fresh from the network first (no browser cache), device copy only when offline or slow.
+ * App page: fresh from the network when it answers within 0.7 s, otherwise the device copy at once
+ * (the page is told when a newer version arrived and reloads itself).
  * Fonts: cached once. Calls to Google (your list) are never cached here. */
-var CACHE = 'jt-shell-v53';
+var CACHE = 'jt-shell-v54';
 var SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-32.png', 'icons/logo.svg'];
 
 self.addEventListener('install', function (e) {
@@ -20,15 +21,30 @@ self.addEventListener('fetch', function (e) {
   var url = new URL(req.url);
 
   if (url.origin === self.location.origin && req.mode === 'navigate') {
-    // App-Seite: zuerst frisch aus dem Netz (ohne Browser-Cache), damit Updates sofort da sind.
-    // Offline oder nach 4 s ohne Antwort: Version aus dem Gerät.
+    // App-Seite: frisch aus dem Netz, wenn es schnell antwortet (dann ist nie eine alte Version zu sehen).
+    // Braucht das Netz länger als 0,7 s oder fehlt es: sofort die Version aus dem Gerät zeigen, im Hintergrund
+    // weiterladen und der Seite Bescheid geben, falls es eine neuere Version gibt (sie lädt sich dann selbst neu).
     e.respondWith(caches.open(CACHE).then(function (c) {
+      var served = '';
       var net = fetch(req.url, { cache: 'no-store' }).then(function (res) {
-        if (res && res.ok) c.put('index.html', res.clone());
+        if (!res || !res.ok) throw new Error('HTTP ' + (res && res.status)); // Serverfehler wie „kein Netz“ behandeln
+        var fresh = res.clone();
+        var job = Promise.all([c.match('index.html').then(function (old) { return old ? old.text() : ''; }), res.clone().text()]).then(function (t) {
+          return c.put('index.html', fresh).then(function () {
+            if (served === 'cache' && t[0] && t[0] !== t[1]) {
+              return self.clients.matchAll({ type: 'window' }).then(function (cl) { cl.forEach(function (w) { w.postMessage('jt-update'); }); });
+            }
+          });
+        });
+        e.waitUntil(job.catch(function () {}));
         return res;
       });
-      var slow = new Promise(function (ok) { setTimeout(ok, 4000); }).then(function () { return c.match('index.html'); });
-      return Promise.race([net.catch(function () { return c.match('index.html'); }), slow.then(function (hit) { return hit || net; })]);
+      var fromCache = function () { return c.match('index.html').then(function (hit) { if (hit) served = 'cache'; return hit; }); };
+      var slow = new Promise(function (ok) { setTimeout(ok, 700); }).then(fromCache);
+      return Promise.race([
+        net.then(function (res) { if (served !== 'cache') served = 'net'; return res; }).catch(function () { return fromCache().then(function (hit) { return hit || fetch(req); }); }),
+        slow.then(function (hit) { return hit || net.catch(function () { return fetch(req); }); })
+      ]);
     }));
     return;
   }
