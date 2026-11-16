@@ -8,7 +8,7 @@
  * (z. B. {fn:"apiSavePosting", key, data:{url, title, text}} – data darf auch JSON-Text sein).
  */
 
-const VERSION = '1.6.36'; // siehe CHANGELOG.md
+const VERSION = '1.6.44'; // siehe CHANGELOG.md
 const APP_PAGE = 'https://lobi1994.github.io/Job-Tracker/';
 const SHEET = 'Bewerbungen';
 const POSTINGS = 'Anzeigen';
@@ -711,6 +711,48 @@ function apiSkillData(key) {
     });
   }
   return { postings: postings, plan: learnPlan_(), profile: profile_() };
+}
+
+/**
+ * Schreibt eine Fähigkeit aus der App ins Blatt „Profil“ (seit 1.6.44).
+ * level: 'have' (Hab ich) oder 'partial' (Grundlagen). Vorhandene Zeile mit gleichem Skill wird in B und C überschrieben.
+ */
+function apiSetProfile(key, skill, type, level, text) {
+  check_(key);
+  skill = String(skill || '').trim();
+  if (!skill) throw new Error('Skill fehlt.');
+  if (skill.length > 80) throw new Error('Skill ist zu lang (max. 80 Zeichen).');
+  if (level !== 'have' && level !== 'partial') throw new Error('Ungültige Stufe.');
+  if (type !== 'hard' && type !== 'soft') throw new Error('Ungültige Art.');
+  text = String(text || '').trim();
+  if (text.length > 500) throw new Error('Text ist zu lang (max. 500 Zeichen).');
+  return withLock_(function () {
+    const ps = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(PROFILE);
+    if (!ps) throw new Error('Blatt Profil fehlt');
+    const last = ps.getLastRow();
+    const vals = last >= 2 ? ps.getRange(2, 1, last - 1, 3).getValues() : [];
+    let hardWord = 'Hard', softWord = 'Soft', gotHard = false, gotSoft = false, lastFilled = 1, found = 0;
+    const want = skill.toLowerCase();
+    vals.forEach(function (r, i) {
+      const a = String(r[0]).trim(), b = String(r[1]).trim();
+      if (a) lastFilled = i + 2;
+      if (a.toLowerCase() === want && !found) found = i + 2;
+      if (b && /soft/i.test(b) && !gotSoft) { softWord = b; gotSoft = true; }
+      else if (b && !/soft/i.test(b) && !gotHard) { hardWord = b; gotHard = true; }
+    });
+    const date = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'dd.MM.');
+    let note;
+    if (level === 'have') {
+      const clean = text.replace(/teilweise|grundlagen|grundkenntnisse/gi, '').replace(/\s{2,}/g, ' ').replace(/^[\s:;,.\-–]+/, '').trim();
+      note = (clean || 'vorhanden').replace(/[.\s]+$/, '') + '. In der App bestätigt ' + date;
+    } else {
+      note = 'Grundlagen' + (text ? ': ' + text.replace(/[.\s]+$/, '') : '') + '. In der App bestätigt ' + date;
+    }
+    const row = found || lastFilled + 1;
+    ps.getRange(row, 2, 1, 2).setValues([[textCell_(type === 'soft' ? softWord : hardWord), textCell_(note)]]);
+    if (!found) ps.getRange(row, 1).setValue(textCell_(skill));
+    return profile_();
+  });
 }
 
 function learnPlan_() {

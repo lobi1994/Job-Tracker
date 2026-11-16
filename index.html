@@ -276,6 +276,13 @@ html,body{overflow-x:hidden;overflow-x:clip}body{max-width:100%}
 .atsr .atm{font-size:12.5px;color:var(--mute)}
 .atsr .atp{flex:none;font-weight:600;white-space:nowrap;text-align:right;max-width:45%}
 .atsr.atmiss .atp{color:var(--danger)}.atsr.have .atp{color:var(--s4)}
+/* Skill-Lücken bearbeiten (seit 1.6.44) */
+.gfilt{display:flex;gap:6px;overflow-x:auto;margin:0 0 8px;padding-bottom:2px;max-width:100%}
+.gfilt .ib{flex:none;min-height:40px;height:40px;font-size:13.5px;padding:0 12px;white-space:nowrap;border-radius:999px}
+.gown{border-top:1px solid var(--line);margin-top:10px;padding-top:10px;display:flex;flex-direction:column;gap:8px}
+.gseg{display:flex;gap:6px}.gseg .ib{flex:1;justify-content:center}
+.gtxt{width:100%;box-sizing:border-box;min-height:70px;font:inherit;font-size:14px;padding:8px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:inherit;resize:vertical}
+.gsave{width:100%;justify-content:center}.gsave:disabled{opacity:.5;cursor:default}
 </style>
 </head>
 <body>
@@ -325,7 +332,7 @@ html,body{overflow-x:hidden;overflow-x:clip}body{max-width:100%}
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.43', NEED_SCRIPT = '1.6.35'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.44', NEED_SCRIPT = '1.6.44'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Careerway ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
@@ -388,7 +395,7 @@ const EN = {
   'Meine Notizen und Fragen': 'My notes and questions', 'Fragen an die Firma, Beispiele aus meiner Arbeit, Namen der Gesprächspartner': 'Questions for the company, examples from my work, names of the interviewers',
   'Stellenanzeige im Netz ↗': 'Posting on the web ↗', 'Ort': 'Location',
   'Anstehende Gespräche, Nachfassen und offene Rückmeldungen': 'Upcoming interviews, follow-ups and open replies', 'Bewerbungen pro Woche, Antwortquote und der Weg bis zum Angebot': 'Applications per week, response rate and the path to an offer',
-  'Skill-Lücken': 'Skill gaps', 'Beste Hebel': 'Best levers', 'Grundlagen': 'Basics only', 'Hard Skills': 'Hard skills', 'Soft Skills': 'Soft skills', 'Leicht': 'Easy', 'Mittel': 'Medium', 'Schwer': 'Hard', 'Nachweis': 'Proof', 'Lernweg': 'How to learn', 'Dauer': 'Duration', 'Kosten': 'Cost', 'Für den Lebenslauf': 'For your résumé', 'Stand': 'As of', 'Zum Angebot ↗': 'Open offer ↗', 'Oft gefordert und in Wochen bis wenigen Monaten erreichbar.': 'Often required and reachable within weeks to a few months.', 'Auf den Home-Bildschirm legen': 'Add to Home Screen', 'Blendet die Verbindung kurz in der Adresse ein, damit die Home-Bildschirm-App sie übernimmt': 'Briefly shows the connection in the address bar so the Home Screen app can take it over', 'Kein gültiger Link (muss mit https:// beginnen).': 'Not a valid link (must start with https://).', 'Speichert …': 'Saving …', 'Bewertung': 'Rating', 'Lebenslauf passt (Einschätzung)': 'Résumé fit (estimate)', 'Lebenslauf passt (ATS-Bewertung, %)': 'Résumé fit (ATS score, %)', 'z. B. 80': 'e.g. 80', 'Details': 'Details',
+  'Skill-Lücken': 'Skill gaps', 'Beste Hebel': 'Best levers', 'Grundlagen': 'Basics only', 'Hard Skills': 'Hard skills', 'Soft Skills': 'Soft skills', 'Leicht': 'Easy', 'Alle': 'All', 'Ohne Einstufung': 'Not rated', 'Kann ich doch': 'I do have this', 'Hab ich': 'I have it', 'Ins Profil übernehmen': 'Save to profile', 'Speichere …': 'Saving …', 'Wo und wie? z. B. Projekt, Zeitraum, Werkzeug. Claude nutzt das für deinen Lebenslauf.': 'Where and how? E.g. project, period, tool. Claude uses this for your résumé.', 'Bitte Apps Script 1.6.44 bereitstellen.': 'Please deploy Apps Script 1.6.44.', 'Mittel': 'Medium', 'Schwer': 'Hard', 'Nachweis': 'Proof', 'Lernweg': 'How to learn', 'Dauer': 'Duration', 'Kosten': 'Cost', 'Für den Lebenslauf': 'For your résumé', 'Stand': 'As of', 'Zum Angebot ↗': 'Open offer ↗', 'Oft gefordert und in Wochen bis wenigen Monaten erreichbar.': 'Often required and reachable within weeks to a few months.', 'Auf den Home-Bildschirm legen': 'Add to Home Screen', 'Blendet die Verbindung kurz in der Adresse ein, damit die Home-Bildschirm-App sie übernimmt': 'Briefly shows the connection in the address bar so the Home Screen app can take it over', 'Kein gültiger Link (muss mit https:// beginnen).': 'Not a valid link (must start with https://).', 'Speichert …': 'Saving …', 'Bewertung': 'Rating', 'Lebenslauf passt (Einschätzung)': 'Résumé fit (estimate)', 'Lebenslauf passt (ATS-Bewertung, %)': 'Résumé fit (ATS score, %)', 'z. B. 80': 'e.g. 80', 'Details': 'Details',
   'Gehalt angegeben': 'Salary stated', 'Weg / Portal': 'Channel / portal', 'Notizen': 'Notes',
   'Mehr: Stellenausschreibung verwalten, Firma und Stelle ändern': 'More: manage job posting, edit company and role',
   'Stellenausschreibung noch nicht gespeichert.': 'Job posting not saved yet.', 'Vom Link speichern': 'Save from link', 'Text einfügen': 'Paste text', 'Löschen': 'Delete',
@@ -476,6 +483,8 @@ const EN_PAT = [
   [/^([+−][\d.,]+(?: \/ [+−][\d.,]+)?) Pp\.$/, '$1 pp'],
   [/^\(\+([\d.,]+) Pp\.\)$/, '(+$1 pp)'],
   [/^App-Rechnung (\d+) %(?: · (?:(\d+) Lücken? kostet?n? ([\d.,]+) Pp\.|keine Lücken))?$/, (m, n, c, pp) => 'App calculation ' + n + ' %' + (c ? ' · ' + c + (c === '1' ? ' gap costs ' : ' gaps cost ') + pp + ' pp' : ' · no gaps')],
+  [/^(.+) im Profil gespeichert$/, '$1 saved to profile'],
+  [/^(Alle|Leicht|Mittel|Schwer|Ohne Einstufung) \((\d+)\)$/, (m, l, n) => ({ Alle: 'All', Leicht: 'Easy', Mittel: 'Medium', Schwer: 'Hard', 'Ohne Einstufung': 'Not rated' })[l] + ' (' + n + ')'],
   [/^Claude: /, 'Claude: ']
 ];
 function trText(s) {
@@ -492,7 +501,7 @@ function trNode(root) {
   if (root.nodeType === 3) { if (!root.parentElement || !root.parentElement.closest(TR_SKIP)) { const v = trText(root.nodeValue); if (v !== root.nodeValue) root.nodeValue = v; } return; }
   if (root.nodeType !== 1 || root.closest(TR_SKIP)) return;
   const els = [root].concat(Array.from(root.querySelectorAll('[placeholder],[title],[aria-label]')));
-  els.forEach((el) => ['placeholder', 'title', 'aria-label'].forEach((a) => { if (el.hasAttribute && el.hasAttribute(a) && !el.closest(TR_SKIP)) { const v = trText(el.getAttribute(a)); if (v !== el.getAttribute(a)) el.setAttribute(a, v); } }));
+  els.forEach((el) => ['placeholder', 'title', 'aria-label'].forEach((a) => { if (el.hasAttribute && el.hasAttribute(a) && !(el.parentElement && el.parentElement.closest(TR_SKIP)) && !el.classList.contains('notr')) { const v = trText(el.getAttribute(a)); if (v !== el.getAttribute(a)) el.setAttribute(a, v); } }));
   const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.parentElement && n.parentElement.closest(TR_SKIP) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT) });
   const nodes = []; while (w.nextNode()) nodes.push(w.currentNode);
   nodes.forEach((n) => { const v = trText(n.nodeValue); if (v !== n.nodeValue) n.nodeValue = v; });
@@ -614,7 +623,7 @@ $('sSave').onclick = () => {
 $('sDemo').onclick = () => { DEMO = true; showApp(); load(true); };
 $('sCancel').onclick = () => { showApp(); };
 // ---------- Skill-Lücken (seit 1.6.35) ----------
-let gapTab = 'hard';
+let gapTab = 'hard', gapEase = 0;
 async function openGaps() {
   openSheet('<h2>Skill-Lücken</h2><p class="sub">Lade Stellenausschreibungen …</p>', '<button class="ib" id="gClose">Schließen</button>');
   $('gClose').onclick = closeSheet;
@@ -622,34 +631,73 @@ async function openGaps() {
   try { d = await api('apiSkillData'); } catch (e) {
     $('sbody').innerHTML = '<h2>Skill-Lücken</h2><p class="sub">' + esc(e.message) + '</p><p class="sub">Falls „Unbekannte Funktion“: Apps Script ab Version 1.6.35 bereitstellen.</p>'; return;
   }
-  const prof = (d.profile && d.profile.length) ? d.profile : profile;
-  const r = computeGaps(jobs, d.postings, prof);
+  let prof = (d.profile && d.profile.length) ? d.profile : profile;
+  let r, missing, best, lists;
   const plan = {}; (d.plan || []).forEach((p) => { if (p.skill) plan[p.skill.toLowerCase()] = p; });
   const pl = (g) => plan[g.name.toLowerCase()];
   const easeOf = (g) => { const e = (pl(g) && pl(g).ease || '').toLowerCase(); return e.startsWith('leicht') ? 1 : e.startsWith('mittel') ? 2 : e.startsWith('schwer') ? 3 : 0; };
   const badge = (g) => { const e = easeOf(g); return e ? '<span class="ease e' + e + '">' + ['', 'Leicht', 'Mittel', 'Schwer'][e] + '</span>' : ''; };
+  const noteOf = (g) => { const p = prof.find((x) => x.skill.toLowerCase() === g.name.toLowerCase()); return p ? String(p.note || '').replace(/\.?\s*In der App bestätigt.*$/, '').replace(/^Grundlagen:?\s*/i, '').trim() : ''; };
   const item = (g) => {
     const p = pl(g);
     const row = (k, v) => v ? '<dt>' + k + '</dt><dd>' + v + '</dd>' : '';
     const link = p && /^https?:\/\//.test(p.link || '') ? '<a href="' + esc(p.link) + '" target="_blank" rel="noopener">Zum Angebot ↗</a>' : '';
-    return '<details class="gap"><summary><span class="gt">' + esc(g.name) + (g.state === 'partial' ? ' <span class="sub">(nur Grundlagen)</span>' : '') + badge(g) + '</span>' +
+    const part = g.state === 'partial';
+    return '<details class="gap"><summary><span class="gt"><span class="notr">' + esc(g.name) + '</span>' + (part ? ' <span class="sub">(nur Grundlagen)</span>' : '') + badge(g) + '</span>' +
       '<span class="gm">in ' + g.jobs.length + ' von ' + r.total + ' Stellen · ' + g.must + '× Pflicht' + (g.uplift >= 0.1 ? ' · +' + g.uplift.toFixed(1).replace('.', ',') + ' Pp. Ø Hard-Skill-Passung' : '') + '</span></summary>' +
       '<div class="gb">' + (p ? '<dl>' + row('Nachweis', esc(p.proof)) + row('Lernweg', esc(p.how)) + row('Dauer', esc(p.time)) + row('Kosten', esc(p.cost)) + row('Für den Lebenslauf', esc(p.cv)) + row('Link', link) + row('Stand', esc(p.asOf)) + '</dl>'
         : '<p class="sub">Noch keine Lernkarte. Claude ergänzt sie beim nächsten Lauf, sobald der Skill mindestens 3-mal fehlt.</p>') +
-      '<p class="sub notr" style="font-size:12.5px">Gefordert bei: ' + g.jobs.map((x) => esc((jobs.find((j) => j.id === x.id) || {}).company || x.company || '?')).join(', ') + '</p></div></details>';
+      '<p class="sub notr" style="font-size:12.5px">Gefordert bei: ' + g.jobs.map((x) => esc((jobs.find((j) => j.id === x.id) || {}).company || x.company || '?')).join(', ') + '</p>' +
+      '<div class="gown" data-skill="' + esc(g.name) + '" data-type="' + esc(g.type) + '" data-lv="' + (part ? 'partial' : '') + '"><b>Kann ich doch</b>' +
+      '<div class="gseg"><button class="ib' + (part ? '' : '') + '" data-lv="have">Hab ich</button><button class="ib' + (part ? ' pri' : '') + '" data-lv="partial">Grundlagen</button></div>' +
+      '<textarea class="gtxt" maxlength="500" placeholder="Wo und wie? z. B. Projekt, Zeitraum, Werkzeug. Claude nutzt das für deinen Lebenslauf.">' + (part ? esc(noteOf(g)) : '') + '</textarea>' +
+      '<button class="ib pri gsave"' + (part ? '' : ' disabled') + '>Ins Profil übernehmen</button></div></div></details>';
   };
-  const missing = r.list.filter((g) => g.state === 'missing');
-  const best = missing.filter((g) => easeOf(g) === 1 || easeOf(g) === 2).slice(0, 5);
-  const lists = { hard: missing.filter((g) => g.type === 'hard'), soft: missing.filter((g) => g.type === 'soft'), partial: r.list.filter((g) => g.state === 'partial') };
+  const calc = () => {
+    r = computeGaps(jobs, d.postings, prof);
+    missing = r.list.filter((g) => g.state === 'missing');
+    best = missing.filter((g) => easeOf(g) === 1 || easeOf(g) === 2).slice(0, 5);
+    lists = { hard: missing.filter((g) => g.type === 'hard'), soft: missing.filter((g) => g.type === 'soft'), partial: r.list.filter((g) => g.state === 'partial') };
+  };
+  const easeKey = (g) => { const e = easeOf(g); return e || 4; };
   const render = () => {
+    const keep = $('sbody').scrollTop;
+    const tab = lists[gapTab], cnt = (k) => tab.filter((g) => easeKey(g) === k).length;
+    const shown = gapEase ? tab.filter((g) => easeKey(g) === gapEase) : tab;
     $('sbody').innerHTML = '<h2>Skill-Lücken</h2><p class="sub">Aus ' + r.total + ' gespeicherten Stellenausschreibungen (ohne „Nicht bewerben“). Pflichtanforderungen zählen doppelt, PM-, Produkt- und Testrollen 1,5-fach. Fehlt laut Blatt „Profil“.</p>' +
       (best.length ? '<h3 class="gapsec">Beste Hebel</h3><p class="sub" style="font-size:13px">Oft gefordert und in Wochen bis wenigen Monaten erreichbar.</p>' + best.map(item).join('') : '') +
       '<div class="gtabs notr">' + [['hard', 'Hard Skills', lists.hard.length], ['soft', 'Soft Skills', lists.soft.length], ['partial', 'Grundlagen', lists.partial.length]].map(([k, l, n]) => '<button class="ib' + (gapTab === k ? ' pri' : '') + '" data-gt="' + k + '">' + l + ' (' + n + ')</button>').join('') + '</div>' +
-      (lists[gapTab].length ? lists[gapTab].map(item).join('') : '<p class="sub">Keine Lücken in dieser Gruppe.</p>') +
-      '<p class="sub" style="font-size:12.5px;margin-top:12px">Du kannst etwas doch? Trag es im Blatt „Profil“ ein, dann verschwindet es hier. Lernkarten stehen im Blatt „Lernplan“.</p>';
+      '<div class="gfilt">' + [[0, 'Alle', tab.length], [1, 'Leicht', cnt(1)], [2, 'Mittel', cnt(2)], [3, 'Schwer', cnt(3)], [4, 'Ohne Einstufung', cnt(4)]].map(([k, l, n]) => '<button class="ib' + (gapEase === k ? ' pri' : '') + '" data-ge="' + k + '">' + l + ' (' + n + ')</button>').join('') + '</div>' +
+      (shown.length ? shown.map(item).join('') : '<p class="sub">Keine Lücken in dieser Gruppe.</p>') +
+      '<p class="sub" style="font-size:12.5px;margin-top:12px">Lernkarten stehen im Blatt „Lernplan“.</p>';
     document.querySelectorAll('[data-gt]').forEach((b) => { b.onclick = () => { gapTab = b.dataset.gt; render(); }; });
+    document.querySelectorAll('[data-ge]').forEach((b) => { b.onclick = () => { gapEase = +b.dataset.ge; render(); }; });
+    $('sbody').scrollTop = keep;
   };
-  render();
+  $('sbody').onclick = async (ev) => {
+    const b = ev.target.closest && ev.target.closest('.gown button');
+    if (!b) return;
+    const box = b.closest('.gown');
+    if (b.dataset.lv) {
+      box.dataset.lv = b.dataset.lv;
+      box.querySelectorAll('.gseg button').forEach((x) => x.classList.toggle('pri', x === b));
+      box.querySelector('.gsave').disabled = false;
+      return;
+    }
+    if (!b.classList.contains('gsave') || b.disabled || !box.dataset.lv) return;
+    const skill = box.dataset.skill, text = box.querySelector('.gtxt').value;
+    b.disabled = true; b.textContent = trText('Speichere …');
+    try {
+      const np = await api('apiSetProfile', skill, box.dataset.type, box.dataset.lv, text);
+      prof = np; profile = np;
+      calc(); render();
+      toast(skill + ' im Profil gespeichert');
+    } catch (e) {
+      toast(/Unbekannte Funktion/.test(e.message) ? 'Bitte Apps Script 1.6.44 bereitstellen.' : e.message);
+      b.disabled = false; b.textContent = trText('Ins Profil übernehmen');
+    }
+  };
+  calc(); render();
 }
 /* ---------- Nachfassen, Termine, Statistik, Gesprächsvorbereitung (seit 1.6.41) ----------
    Alles rechnet aus den vorhandenen Spalten. Es gibt keine neue Spalte in der Tabelle:
@@ -1797,6 +1845,7 @@ function demoShift(list) {
   });
   return list;
 }
+let demoProfile = [{ skill: 'Technischer Support', type: 'hard', note: '' }, { skill: 'Projektmanagement', type: 'hard', note: '' }, { skill: 'Testmanagement', type: 'hard', note: '' }, { skill: 'Testautomatisierung', type: 'hard', note: 'teilweise' }, { skill: 'Medizintechnik', type: 'hard', note: '' }];
 function demoApi(fn, args) {
   return new Promise((res, rej) => setTimeout(() => {
     if (fn === 'apiList') return res({ jobs: demoShift(JSON.parse(JSON.stringify(DEMO_JOBS))), statuses: STATUS_DEF, sheetUrl: '',
@@ -1804,13 +1853,20 @@ function demoApi(fn, args) {
     if (fn === 'apiUpdate') { const j = jobs.find((x) => x.id === args[0]); return res(Object.assign({}, j, args[1])); }
     if (fn === 'apiAdd') return res(Object.assign({ id: 'd' + Date.now(), status: STATUS_DEF[0], like: null, fit: null, appliedOn: '', postingSaved: '' }, args[0]));
     if (fn === 'apiSuggestions') return res(demoSug);
+    if (fn === 'apiSetProfile') {
+      const [sk, ty, lv, tx] = args, t = String(tx || '').trim(), i = demoProfile.findIndex((x) => x.skill.toLowerCase() === String(sk).trim().toLowerCase());
+      const note = lv === 'partial' ? 'Grundlagen' + (t ? ': ' + t : '') + '. In der App bestätigt' : (t.replace(/teilweise|grundlagen|grundkenntnisse/gi, '').trim() || 'vorhanden') + '. In der App bestätigt';
+      const e = { skill: String(sk).trim(), type: ty, note: note };
+      if (i >= 0) demoProfile[i] = e; else demoProfile.push(e);
+      return res(JSON.parse(JSON.stringify(demoProfile)));
+    }
     if (fn === 'apiSkillData') return res({ postings: [
       { id: 'd1', text: 'Was du mitbringst: Erfahrung im technischen Support. Sehr gute SQL-Kenntnisse. Erste Erfahrung mit Python ist ein Plus. Budgetverantwortung für Serviceverträge.' },
       { id: 'd2', text: 'Projektleitung in der Medizintechnik. Budgetverantwortung und Projektkalkulation. PRINCE2- oder IPMA-Zertifizierung wünschenswert. SAP-Kenntnisse.' },
       { id: 'd8', text: 'Projektleitung Connected Car. Budgetverantwortung. Kenntnisse in SQL und Power BI. Führungserfahrung von Vorteil.' },
       { id: 'd9', text: 'Testmanagement, ISTQB-Zertifizierung, Testautomatisierung mit Python, SQL-Grundlagen.' }],
       plan: [{ skill: 'SQL', ease: 'Leicht', proof: 'Grundlagen reichen meist', how: 'Selbststudium, eigenes Projekt', time: '2–3 Wochen', cost: 'kostenlos', link: 'https://sqlbolt.com', cv: 'SQL-Grundlagen (eigenes Projekt)' }],
-      profile: [{ skill: 'Technischer Support', type: 'hard', note: '' }, { skill: 'Projektmanagement', type: 'hard', note: '' }, { skill: 'Testmanagement', type: 'hard', note: '' }, { skill: 'Testautomatisierung', type: 'hard', note: 'teilweise' }, { skill: 'Medizintechnik', type: 'hard', note: '' }] });
+      profile: JSON.parse(JSON.stringify(demoProfile)) });
     if (fn === 'apiRequestCv') { const j = jobs.find((x) => x.id === args[0]); return res(Object.assign({}, j, { cvRequest: 'angefordert ' + new Date().toLocaleString('de-DE').slice(0, 17), cvLink: '' })); }
     if (fn === 'apiResolveSuggestion') { const sg = demoSug.find((x) => x.vid === args[0]); demoSug = demoSug.filter((x) => x.vid !== args[0]);
       const j = jobs.find((x) => x.id === (sg || {}).jobId); return res({ job: args[1] && j ? Object.assign({}, j, { status: sg.status }) : null }); }

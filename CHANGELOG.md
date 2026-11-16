@@ -11,6 +11,13 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.44 – 16.11.2026 (App und Apps Script) – Skill-Lücken bearbeiten
+- **Filter nach Erreichbarkeit** in Skill-Lücken: Leicht, Mittel, Schwer oder ohne Einstufung.
+- **„Kann ich doch“** bei jedem Skill: „Hab ich“ oder „Grundlagen“ wählen, kurz notieren, wo du es gelernt oder genutzt hast, und ins Blatt „Profil“ übernehmen. Der Skill verschwindet dann aus „Fehlt“ bzw. wandert zu „Grundlagen“. Claude nutzt den Text für deine Lebensläufe.
+
+**Apps Script: Bereitstellen nötig: ja** (Code.gs)
+Beschreibung für die Bereitstellung: `1.6.44 Fähigkeiten aus der App ins Profil schreiben`
+
 ## 1.6.43 – 16.11.2026 (nur App)
 - iPhone: Die Startseite lässt sich nicht mehr seitlich verschieben. Ursache war die Kopfzeile, die auf schmalen Geräten ein paar Pixel zu breit war.
 - **ATS-Aufschlüsselung** in jedem Job mit gespeicherter Stellenausschreibung: „So setzt sich die Passung zusammen“ zeigt je Fähigkeit, ob sie Pflicht oder Wunsch ist, den Satz aus der Anzeige und wie viele Prozentpunkte sie bringt oder kostet. Pflicht zählt doppelt, Grundlagen halb.

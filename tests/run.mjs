@@ -231,6 +231,40 @@ await test('A-w CSS gegen seitliches Wischen', () => {
   assert.ok(html.includes('overflow-x:clip'));
 });
 
+await test('A-x Skill-Lücken: Filter Leicht', async () => {
+  try {
+    ev(`gapTab = 'hard'; gapEase = 0; openGaps()`);
+    await sleep(500);
+    const chip = Array.from(w.document.querySelectorAll('.gfilt button')).find((b) => b.textContent.startsWith('Leicht'));
+    assert.ok(chip, 'Chip Leicht fehlt');
+    chip.click();
+    const list = Array.from(w.document.querySelectorAll('.gfilt ~ details.gap'));
+    assert.ok(list.length >= 1, 'kein Leicht-Eintrag (SQL erwartet)');
+    assert.ok(list.every((el) => el.querySelector('.ease.e1')), 'Eintrag ohne Leicht-Badge');
+    assert.equal(JSON.stringify(list.map((el) => el.querySelector('.gt .notr').textContent)), JSON.stringify(['SQL']));
+  } finally { ev(`gapEase = 0; closeSheet()`); }
+});
+await test('A-y Skill-Lücken: Kann ich doch speichern', async () => {
+  try {
+    ev(`gapTab = 'hard'; gapEase = 0; openGaps()`);
+    await sleep(500);
+    const names = () => Array.from(w.document.querySelectorAll('.gfilt ~ details.gap .gt .notr')).map((e) => e.textContent);
+    assert.ok(names().includes('SQL'), 'SQL fehlt vorab');
+    const det = Array.from(w.document.querySelectorAll('.gfilt ~ details.gap')).find((e) => e.querySelector('.gt .notr').textContent === 'SQL');
+    det.open = true;
+    const save = det.querySelector('.gsave');
+    assert.ok(save.disabled, 'Speichern vorab aktiv');
+    det.querySelector('[data-lv="have"]').click();
+    assert.ok(!save.disabled, 'Speichern nach Stufenwahl noch deaktiviert');
+    det.querySelector('.gtxt').value = 'Eigenes Projekt 2025, SQLite';
+    save.click();
+    await sleep(600);
+    assert.ok(!names().includes('SQL'), 'SQL noch in Fehlt-Liste');
+    assert.ok(ev(`profile.some((p) => p.skill === 'SQL')`), 'profile ohne SQL');
+    assert.equal(JSON.stringify(ev(`profile.find((p) => p.skill === 'SQL').type`)), JSON.stringify('hard'));
+  } finally { ev(`closeSheet()`); }
+});
+
 /* ---------- Teil B: Apps Script ---------- */
 const gs = read('google/Code.gs') + '\n' + read('google/Mail.gs');
 await test('B Syntax Code.gs + Mail.gs', () => { new Function(gs); });
