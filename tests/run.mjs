@@ -265,6 +265,13 @@ await test('A-y Skill-Lücken: Kann ich doch speichern', async () => {
   } finally { ev(`closeSheet()`); }
 });
 
+await test('A-appUrl', () => {
+  assert.equal(ev(`appUrl('https://drive.google.com/file/d/abc/view?usp=drivesdk')`), 'googledrive://https://drive.google.com/file/d/abc/view?usp=drivesdk');
+  assert.equal(ev(`appUrl('https://docs.google.com/spreadsheets/d/xyz/edit#gid=0')`), 'googledrive://https://docs.google.com/spreadsheets/d/xyz/edit#gid=0');
+  assert.equal(ev(`appUrl('https://www.linkedin.com/jobs/view/4488834282/')`), 'linkedin://jobs/view/4488834282');
+  assert.equal(ev(`appUrl('https://example.com/x')`), null);
+  assert.equal(ev(`appUrl('https://evil.com/drive.google.com/x')`), null);
+});
 await test('A-LinkedIn linkedInJobId', () => {
   assert.equal(ev(`linkedInJobId('https://de.linkedin.com/jobs/view/technischer-projektmanager-at-ferchau-4438587077')`), '4438587077');
   assert.equal(ev(`linkedInJobId('https://www.linkedin.com/jobs/view/4488834282/')`), '4488834282');

@@ -351,7 +351,7 @@ html,body{overflow-x:hidden;overflow-x:clip}body{max-width:100%}
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.45', NEED_SCRIPT = '1.6.44'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.46', NEED_SCRIPT = '1.6.44'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Careerway ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
@@ -898,7 +898,7 @@ $('bSettings').onclick = () => {
     '</div><p class="sub notr" style="margin-top:12px;font-size:12.5px">' + esc(perfLine()) + '</p><p class="sub" style="margin-top:6px">Created by Matthias Lobinger</p>',
     '<button class="ib" id="xClose">Schließen</button>');
   document.querySelectorAll('.langsw [data-lang]').forEach((b) => { b.onclick = () => { if (b.dataset.lang !== LANG) setLang(b.dataset.lang); }; });
-  const ext = (u) => { if (IOS) openExt(u); else window.open(u, '_blank', 'noopener'); };
+  const ext = (u) => openExt(u);
   if ($('xSheet')) $('xSheet').onclick = () => ext(sheetUrl);
   if ($('xShort')) $('xShort').onclick = () => ext(new URL('kurzbefehl.html', location.href).href.replace(/#.*$/, '') + '#setup=' + encSetup(CFG));
   $('xGaps').onclick = () => openGaps();
@@ -1174,19 +1174,27 @@ function linkedInJobId(url) {
   const m = u.match(/\/jobs\/view\/(?:[^/?#]*-)?(\d{6,})/) || u.match(/[?&]currentJobId=(\d{6,})/);
   return m ? m[1] : null;
 }
+// App-URL für den iOS-Direktsprung (LinkedIn-Job, Google Drive/Docs), sonst null
+function appUrl(url) {
+  const u = String(url || '').trim();
+  const lid = linkedInJobId(u);
+  if (lid) return 'linkedin://jobs/view/' + lid;
+  if (/^https:\/\/(drive|docs)\.google\.com(\/|\?|#|$)/i.test(u)) return 'googledrive://' + u;
+  return null;
+}
 function openExt(url) {
   url = webUrl(url);
   if (!url) { toast('Kein gültiger Link (muss mit https:// beginnen).'); return; }
-  const lid = IOS ? linkedInJobId(url) : null;
-  if (lid) {
-    // Das App-Schema linkedin://jobs/view/<id> ist nicht offiziell dokumentiert. Greift es nicht (Seite bleibt sichtbar),
+  const app = IOS ? appUrl(url) : null;
+  if (app) {
+    // Die App-Schemas (linkedin://jobs/view/<id>, googledrive://<https-Link>) sind nicht offiziell dokumentiert. Greift es nicht (Seite bleibt sichtbar),
     // öffnet nach 1,5 s wie bisher Safari. Wechselt iOS in die App, wird die Seite unsichtbar und der Timer abgebrochen.
     let t = 0;
     const stop = () => { clearTimeout(t); document.removeEventListener('visibilitychange', onVis); window.removeEventListener('pagehide', stop); };
     const onVis = () => { if (document.visibilityState === 'hidden') stop(); };
     document.addEventListener('visibilitychange', onVis); window.addEventListener('pagehide', stop);
     t = setTimeout(() => { stop(); if (document.visibilityState === 'visible') location.href = 'x-safari-' + url; }, 1500);
-    location.href = 'linkedin://jobs/view/' + lid;
+    location.href = app;
     return;
   }
   if (IOS && /^https?:\/\//i.test(url)) { location.href = 'x-safari-' + url; return; }
@@ -1440,11 +1448,11 @@ function openDetail(id) {
   if ($('aUrl')) $('aUrl').onclick = () => (j.status === statuses[0] ? applyNow(j) : openExt(j.url));
   if ($('aCv')) $('aCv').onclick = async (e) => {
     e.preventDefault();
-    if (webUrl(j.cvLink)) { window.open(webUrl(j.cvLink), '_blank', 'noopener'); return; }
-    const w = window.open('', '_blank'); // sofort öffnen, sonst blockiert Safari das Fenster nach dem Warten
+    if (webUrl(j.cvLink)) { openExt(j.cvLink); return; }
+    const w = IOS ? null : window.open('', '_blank'); // sofort öffnen, sonst blockiert Safari das Fenster nach dem Warten
     try {
       const u = await api('apiCvLink', j.cv);
-      if (u) { if (w) w.location.href = u; else location.href = u; }
+      if (u) { if (w) w.location.href = u; else openExt(u); }
       else { if (w) w.close(); toast('Datei nicht in Google Drive gefunden.'); }
     } catch (err) { if (w) w.close(); toast(err.message, 4000); }
   };

@@ -11,6 +11,11 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.46 – 16.11.2026 (nur App)
+- Links zu Google Drive (z. B. dein Lebenslauf) und Google-Tabellen öffnen auf dem iPhone direkt die Google-Drive-App statt erst Safari. Damit bleibt in Safari keine weiße Seite mehr zurück. Klappt der Direktsprung nicht, öffnet sich wie bisher Safari.
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.6.45 – 16.11.2026 (nur App)
 - **Mehrere Jobs auf einmal bearbeiten:** „Auswählen“ neben der Sortierung. Jobs antippen oder „ATS unter 40 %“ auf einmal auswählen, dann Status für alle ändern und eine gemeinsame Notiz anhängen.
 - **LinkedIn-Links** öffnen auf dem iPhone direkt die LinkedIn-App statt erst Safari. Klappt das nicht, öffnet sich wie bisher Safari.
