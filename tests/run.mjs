@@ -265,6 +265,49 @@ await test('A-y Skill-Lücken: Kann ich doch speichern', async () => {
   } finally { ev(`closeSheet()`); }
 });
 
+await test('A-LinkedIn linkedInJobId', () => {
+  assert.equal(ev(`linkedInJobId('https://de.linkedin.com/jobs/view/technischer-projektmanager-at-ferchau-4438587077')`), '4438587077');
+  assert.equal(ev(`linkedInJobId('https://www.linkedin.com/jobs/view/4488834282/')`), '4488834282');
+  assert.equal(ev(`linkedInJobId('https://www.linkedin.com/jobs/search/?currentJobId=4123456789')`), '4123456789');
+  assert.equal(ev(`linkedInJobId('https://example.com/jobs/view/123456789')`), null);
+});
+await test('A-Bulk Mehrfachauswahl: Status + Notiz, [Vorbereitung] bleibt', async () => {
+  w.confirm = () => true;
+  ev(`jobs[1].notes = 'Alt\\n\\n' + PREP_MARK + '\\nPrep-Text'`);
+  const id1 = ev('jobs[0].id'), id2 = ev('jobs[1].id');
+  w.document.getElementById('bSel').click();
+  assert.ok(ev('selMode'));
+  const cards = w.document.querySelectorAll('#list .card');
+  const pick = (id) => w.document.querySelector('#list .card[data-id="' + id + '"]').click();
+  pick(id1); pick(id2);
+  assert.equal(ev('sel.size'), 2);
+  w.document.getElementById('bEdit').click();
+  w.document.getElementById('bkStatus').value = 'Nicht bewerben';
+  w.document.getElementById('bkNote').value = 'Test';
+  w.document.getElementById('bkNote').dispatchEvent(new w.Event('input'));
+  w.document.getElementById('bkStatus').dispatchEvent(new w.Event('change'));
+  assert.ok(!w.document.getElementById('bkGo').disabled);
+  w.document.getElementById('bkGo').click();
+  await sleep(300);
+  for (const id of [id1, id2]) {
+    assert.equal(ev(`jobById('${id}').status`), 'Nicht bewerben');
+    assert.ok(/: Test$/.test(ev(`splitNotes(jobById('${id}').notes).main`)), 'Notiz endet nicht auf „: Test“');
+  }
+  assert.equal(ev(`splitNotes(jobById('${id2}').notes).prep`), 'Prep-Text');
+  assert.ok(!ev('selMode'));
+});
+await test('A-Bulk ATS unter 50 wählt genau 0 < fit < 50', () => {
+  ev(`filter.on = statuses.slice(); filter.q = ''; render()`);
+  ev(`jobs[2].fit = 30; jobs[3].fit = 49; jobs[4].fit = 50; jobs[5].fit = ''`);
+  w.document.getElementById('bSel').click();
+  w.document.getElementById('bAts').value = '50';
+  w.document.getElementById('bAtsGo').click();
+  const exp = ev(`visible().filter((j) => fitPct(j.fit) > 0 && fitPct(j.fit) < 50).map((j) => j.id).sort().join()`);
+  assert.equal(ev(`[...sel].sort().join()`), exp);
+  assert.ok(ev('sel.size') >= 2);
+  w.document.getElementById('bDone').click();
+});
+
 /* ---------- Teil B: Apps Script ---------- */
 const gs = read('google/Code.gs') + '\n' + read('google/Mail.gs');
 await test('B Syntax Code.gs + Mail.gs', () => { new Function(gs); });

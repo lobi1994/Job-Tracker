@@ -188,6 +188,19 @@ header{background:rgba(11,15,23,.86);-webkit-backdrop-filter:saturate(160%) blur
 .capply{min-height:36px;padding:6px 12px}
 @media (min-width:1100px){main{max-width:1240px}#list{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;align-items:start}}
 #sort{max-width:42%;min-height:44px}.top small{white-space:nowrap}
+#bSel{min-height:44px;padding:0 12px;white-space:nowrap;flex:none;font-size:14px}#bSel.on{border-color:var(--acc);color:var(--acc)}
+@media (max-width:440px){#sort{max-width:36%}#bSel{padding:0 10px;font-size:13px}#bulk .ib{padding:0 8px;font-size:13px}}
+.card{position:relative}.selmode .card{padding-left:44px}.selmode .fab{display:none}
+.chk{position:absolute;left:12px;top:50%;margin-top:-12px;width:24px;height:24px;border-radius:50%;border:2px solid var(--line2);box-sizing:border-box;display:flex;align-items:center;justify-content:center;color:var(--onacc,#fff);font-size:14px;line-height:1}
+.card.sel{border-color:var(--acc);border-left-color:var(--c);box-shadow:0 0 0 1px var(--acc)}.card.sel .chk{background:var(--acc);border-color:var(--acc)}
+.selmode #list{padding-bottom:calc(env(safe-area-inset-bottom) + 190px)}
+#bulk{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--card);border-top:1px solid var(--line);padding:8px 12px calc(env(safe-area-inset-bottom) + 8px);display:none;box-sizing:border-box;max-width:100vw}
+.selmode #bulk{display:block}
+#bulk .brow{display:flex;gap:6px;align-items:center;margin-bottom:6px;min-width:0;flex-wrap:wrap}#bulk .brow:last-child{margin-bottom:0}
+#bulk .ib{min-height:40px;padding:0 10px;font-size:14px;white-space:nowrap}#bulk .ib.pri{flex:1}#bulk .ib:disabled{opacity:.45}
+#bulk .bn{flex:1 0 auto;font-weight:600;white-space:nowrap}
+#bulk input{width:64px;min-height:40px;box-sizing:border-box;border:1px solid var(--line2);background:var(--field,var(--bg));color:var(--ink);border-radius:10px;padding:0 8px;font-size:16px}
+.bl{margin:8px 0 0;padding-left:18px;font-size:14px}
 @media (max-width:420px){.top h1{font-size:19px}}#q{min-width:0;flex:1 1 auto;min-height:44px}#mailbar{min-height:44px}
 .chip.on{border-color:color-mix(in srgb,var(--c) 70%,transparent);box-shadow:none;color:var(--ink);background:color-mix(in srgb,var(--c) 10%,transparent)}
 .chip b{font-weight:600;color:var(--mute)}.chip.on b{color:var(--ink)}
@@ -308,10 +321,16 @@ html,body{overflow-x:hidden;overflow-x:clip}body{max-width:100%}
       <option value="status">Status</option>
       <option value="company">Firma A–Z</option>
     </select>
+    <button class="ib" id="bSel" type="button">Auswählen</button>
   </div>
 </header>
 <main id="list" hidden></main>
 <button class="fab" id="bAdd" hidden aria-label="Neuer Job">+</button>
+<div id="bulk" role="toolbar">
+  <div class="brow"><span class="bn" id="bnCount"></span><button class="ib" id="bAll" type="button">Alle sichtbaren</button><button class="ib" id="bNone" type="button">Keine</button><button class="ib" id="bDone" type="button">Fertig</button></div>
+  <div class="brow"><span>ATS unter</span><input id="bAts" type="number" inputmode="numeric" min="1" max="100" value="40" aria-label="ATS unter"><span>%</span><button class="ib" id="bAtsGo" type="button">auswählen</button></div>
+  <div class="brow"><button class="ib pri" id="bEdit" type="button" disabled>Bearbeiten …</button></div>
+</div>
 
 <div class="setup" id="setup" hidden>
   <img src="icons/logo.svg?v=4" alt="" width="96" height="96" style="display:block;margin:0 auto 12px"><h1 style="color:var(--navy)">Careerway</h1>
@@ -332,7 +351,7 @@ html,body{overflow-x:hidden;overflow-x:clip}body{max-width:100%}
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.44', NEED_SCRIPT = '1.6.44'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.45', NEED_SCRIPT = '1.6.44'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Careerway ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
@@ -449,6 +468,8 @@ const EN = {
   'Pflicht zählt doppelt, Wunsch einfach. Grundlagen bringen die Hälfte der Punkte.': 'Must-haves count double, nice-to-haves once. Basics earn half the points.',
   'Am meisten bringt dir:': 'Biggest gain for you:', 'Nicht gewertet:': 'Not counted:',
   'In dieser Stellenausschreibung erkennt die App keine Fähigkeiten aus ihrer Liste.': 'The app finds no skills from its list in this job posting.',
+  'Auswählen': 'Select', 'Alle sichtbaren': 'All visible', 'Keine': 'None', 'Fertig': 'Done', 'ATS unter': 'ATS below', 'auswählen': 'select',
+  'Bearbeiten …': 'Edit …', 'Status ändern auf': 'Change status to', 'nicht ändern': 'keep', 'Notiz für alle anhängen': 'Add a note to all',
   // Übersetzung
   'Maschinell übersetzt': 'Machine-translated'
 };
@@ -485,6 +506,11 @@ const EN_PAT = [
   [/^App-Rechnung (\d+) %(?: · (?:(\d+) Lücken? kostet?n? ([\d.,]+) Pp\.|keine Lücken))?$/, (m, n, c, pp) => 'App calculation ' + n + ' %' + (c ? ' · ' + c + (c === '1' ? ' gap costs ' : ' gaps cost ') + pp + ' pp' : ' · no gaps')],
   [/^(.+) im Profil gespeichert$/, '$1 saved to profile'],
   [/^(Alle|Leicht|Mittel|Schwer|Ohne Einstufung) \((\d+)\)$/, (m, l, n) => ({ Alle: 'All', Leicht: 'Easy', Mittel: 'Medium', Schwer: 'Hard', 'Ohne Einstufung': 'Not rated' })[l] + ' (' + n + ')'],
+  [/^(\d+) ausgewählt$/, '$1 selected'],
+  [/^\+(\d+) weitere$/, '+$1 more'],
+  [/^Auf (\d+) Jobs? anwenden$/, (m, n) => 'Apply to ' + n + ' job' + (n === '1' ? '' : 's')],
+  [/^(\d+) Jobs? geändert$/, (m, n) => n + ' job' + (n === '1' ? '' : 's') + ' updated'],
+  [/^(\d+) Jobs? ändern\?([\s\S]*)$/, (m, n, r) => 'Change ' + n + ' job' + (n === '1' ? '' : 's') + '?' + r.replace('Status auf ', 'Status to ').replace('Notiz anhängen: ', 'Append note: ')],
   [/^Claude: /, 'Claude: ']
 ];
 function trText(s) {
@@ -1067,7 +1093,7 @@ function render() {
   $('cnt').textContent = v.length + ' von ' + jobs.length;
   agendaBadge();
   $('list').innerHTML = v.length ? v.map((j) => { const fu = followUp(j); return (
-    '<div class="card" data-id="' + esc(j.id) + '" style="--c:' + col(j.status) + '">' +
+    '<div class="card' + (selMode && sel.has(j.id) ? ' sel' : '') + '" data-id="' + esc(j.id) + '" style="--c:' + col(j.status) + '">' + (selMode ? '<span class="chk" aria-hidden="true">' + (sel.has(j.id) ? '✓' : '') + '</span>' : '') +
       '<div class="r1"><span class="co notr">' + esc(j.company || '–') + '</span><span class="dt">' + esc(fmtDate(j.appliedOn)) + '</span></div>' +
       '<div class="ro"><span class="notr">' + esc(j.role) + '</span>' + (j.postingSaved ? ' <span class="mk" title="Stellenausschreibung gespeichert">' + IC.doc + '</span>' : '') + '</div>' +
       '<div class="r3"><span class="pill" style="--c:' + col(j.status) + '">' + esc(SHORT[j.status] || j.status) + '</span>' +
@@ -1083,16 +1109,86 @@ function render() {
 }
 $('list').onclick = (e) => {
   const a = e.target.closest('[data-apply]');
-  if (a) { const j = jobs.find((x) => x.id === a.dataset.apply); if (j) applyNow(j); return; }
-  const c = e.target.closest('.card'); if (c) openDetail(c.dataset.id);
+  if (a && !selMode) { const j = jobs.find((x) => x.id === a.dataset.apply); if (j) applyNow(j); return; }
+  const c = e.target.closest('.card');
+  if (c && selMode) { toggleSel(c.dataset.id); return; }
+  if (c) openDetail(c.dataset.id);
+};
+
+/* ---------- Mehrfachauswahl (Bulk-Bearbeitung) ---------- */
+let selMode = false, sel = new Set();
+function bulkSync() {
+  document.body.classList.toggle('selmode', selMode);
+  $('bSel').classList.toggle('on', selMode);
+  $('bnCount').textContent = sel.size + ' ausgewählt';
+  $('bEdit').disabled = !sel.size;
+  trNode($('bulk'));
+}
+function setSelMode(on) { selMode = !!on; sel = new Set(); bulkSync(); render(); }
+function toggleSel(id) { if (sel.has(id)) sel.delete(id); else sel.add(id); bulkSync(); render(); }
+$('bSel').onclick = () => setSelMode(!selMode);
+$('bDone').onclick = () => setSelMode(false);
+$('bNone').onclick = () => { sel = new Set(); bulkSync(); render(); };
+$('bAll').onclick = () => { visible().forEach((j) => sel.add(j.id)); bulkSync(); render(); };
+$('bAtsGo').onclick = () => {
+  const lim = Number($('bAts').value) || 0;
+  visible().forEach((j) => { const f = fitPct(j.fit); if (f > 0 && f < lim) sel.add(j.id); });
+  bulkSync(); render();
+};
+$('bEdit').onclick = () => {
+  const ids = jobs.filter((j) => sel.has(j.id)), n = ids.length; if (!n) return;
+  const lis = ids.slice(0, 8).map((j) => '<li><b class="notr">' + esc(j.company || '–') + '</b> · <span class="notr">' + esc(j.role) + '</span></li>').join('') + (n > 8 ? '<li>+' + (n - 8) + ' weitere</li>' : '');
+  openSheet(head('Bearbeiten …', '', '') +
+    '<label class="fl"><span>Status ändern auf</span><select id="bkStatus"><option value="">nicht ändern</option>' + statusOpts('') + '</select></label>' +
+    '<label class="fl"><span>Notiz für alle anhängen</span><textarea id="bkNote" rows="3"></textarea></label>' +
+    '<ul class="bl">' + lis + '</ul>',
+    '<button class="ib" id="bkCancel">Abbrechen</button><button class="ib pri" id="bkGo" disabled>Auf ' + n + (n === 1 ? ' Job' : ' Jobs') + ' anwenden</button>');
+  const upd = () => { $('bkGo').disabled = !$('bkStatus').value && !$('bkNote').value.trim(); };
+  $('bkStatus').onchange = upd; $('bkNote').oninput = upd;
+  $('bkCancel').onclick = closeSheet;
+  $('bkGo').onclick = () => {
+    const st = $('bkStatus').value, txt = $('bkNote').value.trim(); if (!st && !txt) return;
+    const desc = (st ? '\nStatus auf ' + st : '') + (txt ? '\nNotiz anhängen: ' + txt : '');
+    if (!confirm(n + (n === 1 ? ' Job' : ' Jobs') + ' ändern?' + desc)) return;
+    const now = new Date(), line = pad2(now.getDate()) + '.' + pad2(now.getMonth() + 1) + '.: ' + txt;
+    ids.forEach((j) => {
+      const ch = {};
+      if (st && st !== j.status) {
+        ch.status = st;
+        if (st !== STATUS_DEF[0] && st !== 'Nicht bewerben' && !j.appliedOn) ch.appliedOn = isoDay(now);
+      }
+      if (txt) { const sp = splitNotes(j.notes); ch.notes = joinNotes(sp.main ? sp.main + '\n' + line : line, sp.prep); }
+      if (Object.keys(ch).length) saveLater(j.id, ch);
+    });
+    closeSheet(); setSelMode(false); toast(n + (n === 1 ? ' Job' : ' Jobs') + ' geändert');
+  };
 };
 
 /* Stellenausschreibungen auf iPhone/iPad immer in Safari öffnen (nicht in der LinkedIn-App o. Ä.).
    x-safari-https:// öffnet ab iOS 17 direkt Safari; dort greift „Job speichern“. */
 const IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+// LinkedIn-Job-ID aus einem Link ziehen (…/jobs/view/<titel>-<id> oder ?currentJobId=<id>), sonst null
+function linkedInJobId(url) {
+  const u = String(url || '');
+  if (!/^https?:\/\/([a-z0-9-]+\.)*linkedin\.com\//i.test(u)) return null;
+  const m = u.match(/\/jobs\/view\/(?:[^/?#]*-)?(\d{6,})/) || u.match(/[?&]currentJobId=(\d{6,})/);
+  return m ? m[1] : null;
+}
 function openExt(url) {
   url = webUrl(url);
   if (!url) { toast('Kein gültiger Link (muss mit https:// beginnen).'); return; }
+  const lid = IOS ? linkedInJobId(url) : null;
+  if (lid) {
+    // Das App-Schema linkedin://jobs/view/<id> ist nicht offiziell dokumentiert. Greift es nicht (Seite bleibt sichtbar),
+    // öffnet nach 1,5 s wie bisher Safari. Wechselt iOS in die App, wird die Seite unsichtbar und der Timer abgebrochen.
+    let t = 0;
+    const stop = () => { clearTimeout(t); document.removeEventListener('visibilitychange', onVis); window.removeEventListener('pagehide', stop); };
+    const onVis = () => { if (document.visibilityState === 'hidden') stop(); };
+    document.addEventListener('visibilitychange', onVis); window.addEventListener('pagehide', stop);
+    t = setTimeout(() => { stop(); if (document.visibilityState === 'visible') location.href = 'x-safari-' + url; }, 1500);
+    location.href = 'linkedin://jobs/view/' + lid;
+    return;
+  }
   if (IOS && /^https?:\/\//i.test(url)) { location.href = 'x-safari-' + url; return; }
   window.open(url, '_blank', 'noopener');
 }
