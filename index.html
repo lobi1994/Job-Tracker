@@ -262,6 +262,20 @@ header{background:rgba(11,15,23,.86);-webkit-backdrop-filter:saturate(160%) blur
 table.st{width:100%;border-collapse:collapse;font-size:13.5px}table.st th,table.st td{text-align:left;padding:7px 4px;border-bottom:1px solid var(--line)}table.st th{font-size:12px;color:var(--mute);font-weight:600}table.st td+td,table.st th+th{text-align:right}
 .prepiv{margin:6px 0}.prepiv span{color:var(--mute);font-size:13px}.prepdl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:6px 0;font-size:14px}.prepdl dt{color:var(--mute)}.prepdl dd{margin:0}.preph{margin:10px 0 4px;font-size:13.5px}.prepol{margin:6px 0;padding-left:20px;font-size:14px;line-height:1.5}
 @media (max-width:440px){#bGaps{display:none}}
+html,body{overflow-x:hidden;overflow-x:clip}body{max-width:100%}
+.top h1{min-width:0;flex:1 1 auto;overflow:hidden}.top h1 #cnt{min-width:0;flex:0 1 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.top .ib{flex:none}.top .sync{flex:0 1 auto;min-width:0}
+@media (max-width:399px){.top{gap:6px}.top:has(#sync:not([hidden])) #cnt{display:none}}
+.atsbox{border:1px solid var(--line);border-radius:12px;margin:8px 0;background:var(--card)}
+.atsbox>summary{list-style:none;cursor:pointer;padding:10px 12px;display:flex;flex-direction:column;gap:3px;font-weight:600;min-height:44px;justify-content:center}
+.atsbox>summary::-webkit-details-marker{display:none}
+.atsbox>summary .sub{margin:0;font-size:13px;font-weight:400}
+.atsbox #atsBody{padding:0 12px 12px;font-size:14px}.atsbox #atsBody p{margin:6px 0}.atsbox .sub{color:var(--mute);font-size:13px}
+.atsbox h4{margin:12px 0 2px;font-size:13px;color:var(--mute);font-weight:600}
+.atsr{display:flex;gap:10px;align-items:flex-start;min-height:44px;padding:8px 0;border-top:1px solid var(--line)}
+.atsr .atl{flex:1;min-width:0;overflow-wrap:anywhere;display:flex;flex-direction:column;gap:2px}
+.atsr .atm{font-size:12.5px;color:var(--mute)}
+.atsr .atp{flex:none;font-weight:600;white-space:nowrap;text-align:right;max-width:45%}
+.atsr.atmiss .atp{color:var(--danger)}.atsr.have .atp{color:var(--s4)}
 </style>
 </head>
 <body>
@@ -311,7 +325,7 @@ table.st{width:100%;border-collapse:collapse;font-size:13.5px}table.st th,table.
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.42', NEED_SCRIPT = '1.6.35'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.43', NEED_SCRIPT = '1.6.35'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Careerway ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
@@ -423,6 +437,11 @@ const EN = {
   'Keine Internetverbindung.': 'No internet connection.', 'In der Demo nicht verfügbar': 'Not available in the demo', 'Kein Zugriff': 'No access',
   'Der Schlüssel passt nicht (mehr). Bitte deinen aktuellen Einrichtungs-Link öffnen.': 'The key does not match (anymore). Please open your current setup link.',
   'Link oder Schlüssel stimmen nicht. Der App-Link beginnt mit https://script.google.com/ und endet auf /exec.': 'Link or key is wrong. The app link starts with https://script.google.com/ and ends with /exec.',
+  'So setzt sich die Passung zusammen': 'How the fit adds up', 'App-Rechnung:': 'App calculation:', 'Fehlt': 'Missing', 'Nur Grundlagen': 'Basics only', 'Bringst du mit': 'You bring', 'Pflicht': 'Must-have', 'Wunsch': 'Nice-to-have',
+  'Claude bewertet zusätzlich Erfahrung, Branche und Aufgaben. Die App zählt nur Fähigkeiten aus ihrer Stichwortliste.': 'Claude also rates experience, industry and tasks. The app only counts skills from its keyword list.',
+  'Pflicht zählt doppelt, Wunsch einfach. Grundlagen bringen die Hälfte der Punkte.': 'Must-haves count double, nice-to-haves once. Basics earn half the points.',
+  'Am meisten bringt dir:': 'Biggest gain for you:', 'Nicht gewertet:': 'Not counted:',
+  'In dieser Stellenausschreibung erkennt die App keine Fähigkeiten aus ihrer Liste.': 'The app finds no skills from its list in this job posting.',
   // Übersetzung
   'Maschinell übersetzt': 'Machine-translated'
 };
@@ -454,6 +473,9 @@ const EN_PAT = [
   [/^(Nachgefasst|Beworben) (heute|gestern|vor (\d+) Tagen)\. Nachfassen in (\d+) Tagen\.$/, (m, a, w, n, d) => (a === 'Beworben' ? 'Applied ' : 'Followed up ') + (w === 'heute' ? 'today' : w === 'gestern' ? 'yesterday' : n + ' days ago') + '. Follow up in ' + d + ' days.'],
   [/^Steht in der Tabelle in der Spalte Notizen unter „\[Vorbereitung\]“\.$/, 'Stored in the sheet in the notes column under “[Vorbereitung]”.'],
   [/^Diesen Job gibt es schon:\n([\s\S]*)\nStatus: ([^\n]*?)(?:, beworben am ([^\n]*))?\n\nTrotzdem neu anlegen\?$/, (m, jb, st, d) => 'This job already exists:\n' + jb + '\nStatus: ' + trText(st) + (d ? ', applied on ' + d : '') + '\n\nAdd it anyway?'],
+  [/^([+−][\d.,]+(?: \/ [+−][\d.,]+)?) Pp\.$/, '$1 pp'],
+  [/^\(\+([\d.,]+) Pp\.\)$/, '(+$1 pp)'],
+  [/^App-Rechnung (\d+) %(?: · (?:(\d+) Lücken? kostet?n? ([\d.,]+) Pp\.|keine Lücken))?$/, (m, n, c, pp) => 'App calculation ' + n + ' %' + (c ? ' · ' + c + (c === '1' ? ' gap costs ' : ' gaps cost ') + pp + ' pp' : ' · no gaps')],
   [/^Claude: /, 'Claude: ']
 ];
 function trText(s) {
@@ -1209,6 +1231,7 @@ function openDetail(id) {
     '<div class="fl"><span>Gefällt mir</span>' + starRow('fLike', j.like) + '</div>' +
     '<div class="fl"><span>Lebenslauf passt (ATS-Bewertung, %)</span><input id="fFit" class="notr" type="number" inputmode="numeric" min="0" max="100" step="1" placeholder="z. B. 80" value="' + (j.fit ? fitPct(j.fit) : '') + '"></div>' +
     (j.fitNote ? '<p class="fitnote">Claude: <span class="notr">' + esc(j.fitNote) + '</span></p>' : '') +
+    (j.postingSaved ? '<details class="atsbox" id="atsBox"><summary>So setzt sich die Passung zusammen<span class="sub" id="atsSum"></span></summary><div id="atsBody"><p class="sub">Lade Stellenausschreibung …</p></div></details>' : '') +
     (j.status === statuses[0] ? '<div class="cvbox" id="cvBox">' + cvBoxHtml(j) + '</div>' : '') +
     '<div class="sec">Details</div>' +
     '<div class="row2 stack">' + inp('fSalary', 'Gehalt angegeben', j.salary) + inp('fChannel', 'Weg / Portal', j.channel) + '</div>' +
@@ -1229,6 +1252,7 @@ function openDetail(id) {
     '</details>',
     '<button class="ib" id="bClose">Schließen</button><button class="ib pri" id="bSave">Speichern</button>');
   wireCv(j);
+  wireAts(j);
   wireStars('fLike'); wireIv();
   $('bClose').onclick = closeSheet;
   // Status von „Noch nicht beworben“ auf einen Bewerbungs-Status → „Beworben am“ mit heute vorbelegen (bleibt änderbar)
@@ -1456,6 +1480,80 @@ function computeGaps(jobList, postings, profile) {
   list.forEach((g) => { g.uplift = used.length ? g.uplift / used.length : 0; });
   list.sort((a, b) => b.score - a.score || b.jobs.length - a.jobs.length);
   return { total: used.length, list: list };
+}
+/* ---------- ATS-Aufschlüsselung (seit 1.6.43) ----------
+   Zeigt je Anforderung der Stelle, wie viele Prozentpunkte sie bringt oder kostet. Pflicht zählt doppelt, Wunsch einfach,
+   Grundlagen halb. Gezählt werden nur Fähigkeiten aus SKILLS und Profil-Skills, die wörtlich im Text stehen. */
+function atsBreakdown(text, profile) {
+  const t = String(text || '');
+  const parts = t.split(/\n+|(?<=[.!?;])\s+|•/);
+  const reqs = [], skipped = [], seen = {};
+  const add = (name, type, re, state) => {
+    const hits = parts.filter((x) => re.test(x));
+    const mustHit = hits.find((x) => !NICE_RE.test(x));
+    const q = String(mustHit || hits[0] || '').replace(/\s+/g, ' ').replace(/^[-–•*]\s*/, '').trim();
+    reqs.push({ name: name, type: type, must: !!mustHit, weight: mustHit ? 2 : 1, state: state, quote: q.length > 110 ? q.slice(0, 109).trimEnd() + '…' : q });
+  };
+  SKILLS.forEach(([name, type, re]) => {
+    if (!re.test(t)) return;
+    seen[name.toLowerCase()] = 1;
+    if (GAP_SKIP_RE.test(name)) { skipped.push(name); return; }
+    add(name, type, re, profileState(name, re, profile));
+  });
+  (profile || []).forEach((p) => {
+    const low = p.skill.toLowerCase();
+    if (seen[low] || SKILLS.some(([n, , re]) => n.toLowerCase() === low || re.test(p.skill))) return;
+    const re = new RegExp('(^|[^\\wäöüß])' + p.skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '([^\\wäöüß]|$)', 'i');
+    if (!re.test(t)) return;
+    seen[low] = 1;
+    add(p.skill, p.type, re, /teilweise|grundlagen|grundkenntnisse/i.test(p.note || '') ? 'partial' : 'have');
+  });
+  const totalWeight = reqs.reduce((a, x) => a + x.weight, 0);
+  reqs.forEach((x) => { x.share = 100 * x.weight / totalWeight; x.gain = x.share * (x.state === 'have' ? 1 : x.state === 'partial' ? 0.5 : 0); x.loss = x.share - x.gain; });
+  reqs.sort((a, b) => b.loss - a.loss || b.gain - a.gain);
+  return { score: reqs.length ? Math.round(reqs.reduce((a, x) => a + x.gain, 0)) : null, items: reqs, skipped: skipped, totalWeight: totalWeight };
+}
+function atsPp(n) { const v = n < 10 ? Math.round(n * 10) / 10 : Math.round(n); const s = String(v); return LANG === 'en' ? s : s.replace('.', ','); }
+function atsHtml(j, r) {
+  if (!r.items.length) return '<p class="sub">In dieser Stellenausschreibung erkennt die App keine Fähigkeiten aus ihrer Liste.</p>' + (r.skipped.length ? '<p class="sub">Nicht gewertet: <span class="notr">' + esc(r.skipped.join(', ')) + '</span></p>' : '');
+  const fit = j.fit ? fitPct(j.fit) : 0;
+  let h = '<p><span>App-Rechnung:</span> <b>' + r.score + ' %</b>' + (fit ? ' · <span>Claude:</span> <b>' + fit + ' %</b>' : '') + '</p>';
+  if (fit && Math.abs(r.score - fit) >= 10) h += '<p class="sub">Claude bewertet zusätzlich Erfahrung, Branche und Aufgaben. Die App zählt nur Fähigkeiten aus ihrer Stichwortliste.</p>';
+  h += '<p class="sub">Pflicht zählt doppelt, Wunsch einfach. Grundlagen bringen die Hälfte der Punkte.</p>';
+  const row = (x) => {
+    const pp = x.state === 'missing' ? '−' + atsPp(x.loss) + ' Pp.' : x.state === 'partial' ? '+' + atsPp(x.gain) + ' / −' + atsPp(x.loss) + ' Pp.' : '+' + atsPp(x.gain) + ' Pp.';
+    return '<div class="atsr ' + (x.state === 'missing' ? 'atmiss' : x.state === 'partial' ? 'part' : 'have') + '"><div class="atl"><b class="notr">' + esc(x.name) + '</b><span class="atm"><span>' + (x.must ? 'Pflicht' : 'Wunsch') + '</span>' + (x.quote ? ' <span class="notr">„' + esc(x.quote) + '“</span>' : '') + '</span></div><span class="atp">' + pp + '</span></div>';
+  };
+  [['missing', 'Fehlt'], ['partial', 'Nur Grundlagen'], ['have', 'Bringst du mit']].forEach(([st, title]) => {
+    const L = r.items.filter((x) => x.state === st);
+    if (L.length) h += '<h4>' + title + '</h4>' + L.map(row).join('');
+  });
+  const miss = r.items.filter((x) => x.state === 'missing');
+  if (miss.length) { const m = miss.reduce((a, x) => (x.loss > a.loss ? x : a), miss[0]); h += '<p>Am meisten bringt dir: <b class="notr">' + esc(m.name) + '</b> <span>(+' + atsPp(m.loss) + ' Pp.)</span></p>'; }
+  if (r.skipped.length) h += '<p class="sub">Nicht gewertet: <span class="notr">' + esc(r.skipped.join(', ')) + '</span></p>';
+  return h;
+}
+function atsFill(j, p) {
+  const body = $('atsBody'); if (!body) return;
+  if (!p || !p.text) { body.innerHTML = '<p class="sub">Stellenausschreibung nicht gefunden.</p>'; return; }
+  const r = atsBreakdown(htmlText(p.text), profile);
+  body.innerHTML = atsHtml(j, r);
+  const sum = $('atsSum');
+  if (sum && r.score !== null) {
+    const lack = r.items.filter((x) => x.loss > 0), loss = lack.length ? 100 - r.score : 0;
+    sum.textContent = 'App-Rechnung ' + r.score + ' %' + (lack.length ? ' · ' + lack.length + (lack.length === 1 ? ' Lücke kostet ' : ' Lücken kosten ') + atsPp(loss) + ' Pp.' : ' · keine Lücken');
+  }
+}
+function wireAts(j) {
+  const box = $('atsBox'); if (!box) return;
+  const cached = ls.get('jt-post-' + j.id);
+  if (cached && cached.text) { atsFill(j, cached); return; }
+  let started = false;
+  box.addEventListener('toggle', async () => {
+    if (!box.open || started) return; started = true;
+    try { const p = await api('apiGetPosting', j.id); if (p) ls.set('jt-post-' + j.id, p); atsFill(j, p); }
+    catch (e) { if ($('atsBody')) $('atsBody').innerHTML = '<p class="sub">' + esc(e.message) + '</p>'; }
+  });
 }
 function skillsHtml(sk) {
   const chips = (arr) => arr.map((x) => '<span class="sk' + (x.have ? ' have' : '') + '">' + (x.have ? '✓ ' : '') + esc(x.name) + '</span>').join('');

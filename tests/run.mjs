@@ -199,6 +199,38 @@ await test('A-s Oberfläche: Dublette fragt nach', () => {
   } finally { ev('closeSheet()'); }
 });
 
+await test('A-t atsBreakdown Rechnung', () => {
+  const r = JSON.parse(ev(`JSON.stringify(atsBreakdown('Sehr gute SQL-Kenntnisse.\\nPython ist ein Plus.\\nErfahrung im technischen Support.', [{ skill: 'Technischer Support', type: 'hard', note: '' }, { skill: 'Python', type: 'hard', note: 'teilweise' }]))`));
+  const by = Object.fromEntries(r.items.map((x) => [x.name, x]));
+  assert.equal(by['SQL'].weight, 2); assert.equal(by['SQL'].state, 'missing');
+  assert.equal(by['Python'].weight, 1); assert.equal(by['Python'].state, 'partial');
+  assert.equal(by['Technischer Support'].weight, 2); assert.equal(by['Technischer Support'].state, 'have');
+  assert.equal(r.totalWeight, 5); assert.equal(r.score, 50); assert.equal(by['SQL'].loss, 40);
+  assert.equal(r.items[0].name, 'SQL');
+});
+await test('A-u atsBreakdown leerer Text', () => {
+  const r = JSON.stringify(ev(`atsBreakdown('', [])`));
+  assert.equal(r, JSON.stringify({ score: null, items: [], skipped: [], totalWeight: 0 }));
+});
+await test('A-v Oberfläche: ATS-Aufschlüsselung und XSS', async () => {
+  try {
+    ev(`profile.push({ skill: '<img src=x>', type: 'hard', note: '' })`);
+    ev(`openDetail('d1')`);
+    const box = w.document.getElementById('atsBox');
+    assert.ok(box, '#atsBox fehlt');
+    box.open = true; box.dispatchEvent(new w.Event('toggle'));
+    await sleep(400);
+    assert.ok(w.document.querySelectorAll('#atsBody .atsr').length >= 3, 'weniger als 3 .atsr');
+    assert.ok(w.document.getElementById('atsSum').textContent.includes('%'), 'Zusammenfassung ohne %');
+    assert.equal(w.document.querySelectorAll('#atsBody img').length, 0);
+    ev(`$('atsBody').innerHTML = atsHtml({ fit: 0 }, atsBreakdown('Wir nutzen <img src=x> und Python.', profile))`);
+    assert.equal(w.document.querySelectorAll('#atsBody img').length, 0, 'img in ATS-Block');
+  } finally { ev(`profile = profile.filter((p) => p.skill !== '<img src=x>'); closeSheet()`); }
+});
+await test('A-w CSS gegen seitliches Wischen', () => {
+  assert.ok(html.includes('overflow-x:clip'));
+});
+
 /* ---------- Teil B: Apps Script ---------- */
 const gs = read('google/Code.gs') + '\n' + read('google/Mail.gs');
 await test('B Syntax Code.gs + Mail.gs', () => { new Function(gs); });

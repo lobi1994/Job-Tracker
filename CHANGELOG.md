@@ -11,6 +11,12 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.43 – 16.11.2026 (nur App)
+- iPhone: Die Startseite lässt sich nicht mehr seitlich verschieben. Ursache war die Kopfzeile, die auf schmalen Geräten ein paar Pixel zu breit war.
+- **ATS-Aufschlüsselung** in jedem Job mit gespeicherter Stellenausschreibung: „So setzt sich die Passung zusammen“ zeigt je Fähigkeit, ob sie Pflicht oder Wunsch ist, den Satz aus der Anzeige und wie viele Prozentpunkte sie bringt oder kostet. Pflicht zählt doppelt, Grundlagen halb.
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.6.42 – 16.11.2026 (nur App) – Dubletten-Warnung
 - Legst du über „+“ einen Job an, den es schon gibt (gleicher Link, gleiche Stellen-ID im Link oder gleiche Firma und Stelle), fragt die App nach. „Abbrechen“ öffnet den vorhandenen Job, „OK“ legt ihn trotzdem an.
 - Beim Speichern über den Kurzbefehl prüft das Apps Script das schon länger selbst. Dort ändert sich nichts.
