@@ -8,7 +8,7 @@
  * (z. B. {fn:"apiSavePosting", key, data:{url, title, text}} – data darf auch JSON-Text sein).
  */
 
-const VERSION = '1.6.44'; // siehe CHANGELOG.md
+const VERSION = '1.6.47'; // siehe CHANGELOG.md
 const APP_PAGE = 'https://lobi1994.github.io/Job-Tracker/';
 const SHEET = 'Bewerbungen';
 const POSTINGS = 'Anzeigen';
@@ -823,6 +823,180 @@ function apiCvLink(key, name) {
   if (!known) return null;
   const it = DriveApp.getFilesByName(name);
   return it.hasNext() ? it.next().getUrl() : null;
+}
+
+/* ------------------------------------------------------------------ */
+/* ATS-Bewertung ohne Claude (seit 1.6.47)                             */
+/* Der Kurzbefehl lässt Apple Intelligence eine Anforderungsliste       */
+/* (JSON) erstellen; hier wird daraus der ATS-Wert in Prozent gerechnet. */
+/* ------------------------------------------------------------------ */
+
+const PROFILETEXT = 'Profiltext';
+const ATS_SPEC_HEAD = 'ATS-Spec';
+const ATS_STOP = ['erfahrung', 'experience', 'kenntnisse', 'knowledge', 'team', 'projekt', 'project', 'gut', 'sehr', 'good', 'skills', 'fähigkeit', 'ability', 'arbeit', 'work'];
+const ATS_UNREADABLE = 'Die Antwort der KI war nicht lesbar.';
+
+/** Text kleinschreiben, weiche Trennzeichen weg, Silbentrennung am Zeilenende zusammenziehen, Leerraum zu einem Leerzeichen. */
+function atsNorm_(t) {
+  return String(t || '').toLowerCase().replace(/­/g, '').replace(/-\s*\n\s*/g, '').replace(/\s+/g, ' ');
+}
+
+/** Begriff im normalisierten Text: vorne Wortgrenze (kein Buchstabe a–z/äöüß davor), hinten offen. */
+function atsHas_(t, term) {
+  term = String(term || '').toLowerCase();
+  if (!term) return false;
+  let i = t.indexOf(term);
+  while (i >= 0) {
+    if (i === 0 || !/[a-zäöüß]/.test(t.charAt(i - 1))) return true;
+    i = t.indexOf(term, i + 1);
+  }
+  return false;
+}
+
+/** Profiltext für die Bewertung: Tab „Profiltext“ plus Tab „Profil“. basic = nur Grundlagen. */
+function profileText_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const full = [], basic = [];
+  const pt = ss.getSheetByName(PROFILETEXT);
+  if (pt && pt.getLastRow() >= 2) {
+    pt.getRange(2, 1, pt.getLastRow() - 1, 1).getValues().forEach(function (r) {
+      const s = String(r[0] === null || r[0] === undefined ? '' : r[0]).trim();
+      if (!s) return;
+      (/^Grundlagen/i.test(s) ? basic : full).push(s);
+    });
+  }
+  profile_().forEach(function (p) {
+    if (/teilweise|grundlagen|grundkenntnisse/i.test(p.note)) basic.push('Grundlagen in ' + p.skill + (p.note ? ': ' + p.note : ''));
+    else full.push(p.skill + (p.note ? ': ' + p.note : ''));
+  });
+  return { full: atsNorm_(full.join('\n')), basic: atsNorm_(basic.join('\n')) };
+}
+
+/**
+ * Reine Rechnung ohne Sheet-Zugriff. full → 1, partial → 0,5. Ein full-Begriff, der nur in prof.basic
+ * (Grundlagen) vorkommt, zählt 0,5. Ergebnis round(100·Σ(w·s)/Σw).
+ */
+function atsScore_(spec, prof) {
+  let tot = 0, got = 0;
+  const rows = [];
+  (spec.reqs || []).forEach(function (r) {
+    const w = r.w === undefined || r.w === null ? 1 : r.w;
+    tot += w;
+    const fulls = r.full || [], parts = r.partial || [];
+    const f = fulls.filter(function (x) { return atsHas_(prof.full, x); });
+    const fb = fulls.filter(function (x) { return !atsHas_(prof.full, x) && atsHas_(prof.basic, x); });
+    const p = parts.filter(function (x) { return atsHas_(prof.full, x) || atsHas_(prof.basic, x); });
+    const s = f.length ? 1 : (fb.length || p.length ? 0.5 : 0);
+    got += w * s;
+    rows.push({ name: r.name, w: w, score: s, hit: (f.length ? f : fb.length ? fb : p).slice(0, 3) });
+  });
+  return { pct: tot ? Math.round(100 * got / tot) : 0, rows: rows };
+}
+
+/** Antwort der KI (Objekt oder Text, evtl. mit ```json-Zaun und Vortext) prüfen und aufräumen. */
+function parseSpec_(raw) {
+  let o = raw;
+  if (typeof raw === 'string') {
+    let s = raw.replace(/```[a-zA-Z]*/g, ' ');
+    const a = s.indexOf('{'), b = s.lastIndexOf('}');
+    if (a < 0 || b <= a) throw new Error(ATS_UNREADABLE);
+    try { o = JSON.parse(s.slice(a, b + 1)); } catch (e) { throw new Error(ATS_UNREADABLE); }
+  }
+  if (!o || typeof o !== 'object' || !Array.isArray(o.reqs) || o.reqs.length < 3) throw new Error(ATS_UNREADABLE);
+  const terms = function (v) {
+    const seen = {}, out = [];
+    (Array.isArray(v) ? v : []).forEach(function (x) {
+      if (typeof x !== 'string') return;
+      const t = x.trim().toLowerCase();
+      if (t.length < 2 || t.length > 60 || seen[t] || ATS_STOP.indexOf(t) >= 0) return;
+      seen[t] = 1; out.push(t);
+    });
+    return out.slice(0, 8);
+  };
+  const reqs = [];
+  o.reqs.slice(0, 20).forEach(function (r) {
+    if (!r || typeof r !== 'object' || typeof r.name !== 'string' || !r.name.trim()) return;
+    const w = (r.w === 2 || /^(2|pflicht|must)$/i.test(String(r.w).trim())) ? 2 : 1;
+    const full = terms(r.full), partial = terms(r.partial).filter(function (x) { return full.indexOf(x) < 0; });
+    if (!full.length && !partial.length) return;
+    reqs.push({ name: r.name.trim().slice(0, 80), w: w, full: full, partial: partial });
+  });
+  if (reqs.length < 3) throw new Error(ATS_UNREADABLE);
+  return { job: typeof o.job === 'string' ? o.job.trim().slice(0, 120) : '', reqs: reqs };
+}
+
+/** Begründungstext „Lokal (Apple) ATS …“, höchstens 220 Zeichen, nur ganze Namen, am Ende „…“. */
+function atsNote_(r) {
+  const nm = function (a) { return a.map(function (x) { return x.name; }); };
+  const miss = nm(r.rows.filter(function (x) { return x.score === 0 && x.w === 2; })).concat(nm(r.rows.filter(function (x) { return x.score === 0 && x.w !== 2; })));
+  const secs = [['Fehlt: ', miss], ['Teilweise: ', nm(r.rows.filter(function (x) { return x.score === 0.5; }))], ['Passt: ', nm(r.rows.filter(function (x) { return x.score === 1; }))]];
+  const full = 'Lokal (Apple) ATS ' + r.pct + ' %. ' + secs.map(function (x) { return x[0] + (x[1].length ? x[1].join(', ') : '–'); }).join('. ');
+  if (full.length <= 220) return full;
+  let s = 'Lokal (Apple) ATS ' + r.pct + ' %. ';
+  for (let i = 0; i < secs.length; i++) {
+    if (s.length + secs[i][0].length > 218) return s.replace(/[,.:]?\s*$/, '') + '…';
+    s += secs[i][0];
+    const list = secs[i][1];
+    for (let j = 0; j < list.length; j++) {
+      const t = s + (j ? ', ' : '') + list[j];
+      if (t.length > 219) return s.replace(/[,.:]?\s*$/, '') + '…';
+      s = t;
+    }
+    if (!list.length) s += '–';
+    s += i < secs.length - 1 ? '. ' : '';
+  }
+  return s;
+}
+
+function atsPageUrl_(page) {
+  let p = page;
+  if (typeof p === 'string') {
+    const t = p.trim();
+    try { p = JSON.parse(t); } catch (e) { p = /^https?:\/\//i.test(t) ? { url: t } : {}; }
+  }
+  return p && typeof p === 'object' && p.url ? String(p.url).trim() : '';
+}
+
+/**
+ * Kurzbefehl „Job speichern“, optionaler Teil 4: data = {page, spec, model}. page = Ergebnis von
+ * „JavaScript auf Webseite ausführen“ (Objekt oder JSON-Text, Feld url), spec = Antwort von „Modell verwenden“.
+ * doPost reicht data als Objekt durch (JSON-Text wird dort geparst; ohne data auch die Felder auf oberster Ebene).
+ */
+function apiSaveAtsSpec(key, data) {
+  check_(key);
+  data = data || {};
+  const url = atsPageUrl_(data.page);
+  if (!url) throw new Error('Kein Link gefunden');
+  return withLock_(function () {
+    const sh = sheet_(), map = colMap_(sh);
+    const r = findByUrl_(sh, map, url);
+    if (!r) throw new Error('Job noch nicht gespeichert. Erst speichern, dann bewerten.');
+    const spec = parseSpec_(data.spec);
+    const res = atsScore_(spec, profileText_());
+    const job = rowToJob_(sh.getRange(r, 1, 1, sh.getLastColumn()).getValues()[0], map);
+
+    // Spec im Tab „Anzeigen“ merken
+    const ps = postingsSheet_();
+    const pr = findPosting_(ps, job.id);
+    if (pr) {
+      let col = ps.getRange(1, 1, 1, ps.getLastColumn()).getValues()[0].map(function (h) { return String(h).trim(); }).indexOf(ATS_SPEC_HEAD) + 1;
+      if (!col) {
+        col = ps.getLastColumn() + 1;
+        ps.getRange(1, col).setValue(ATS_SPEC_HEAD).setFontWeight('bold');
+      }
+      ps.getRange(pr, col).setValue(textCell_(JSON.stringify(spec)));
+    }
+
+    const label = (job.company || '') + ' – ' + (job.role || '');
+    const own = !job.fitNote || /^Lokal/.test(String(job.fitNote));
+    if (!own) return { pct: res.pct, message: 'ATS ' + res.pct + ' % (lokal) · ' + label + ' – Claude-Bewertung bleibt' };
+    if (map.fit) sh.getRange(r, map.fit).setValue(res.pct);
+    if (map.fitNote) sh.getRange(r, map.fitNote).setValue(textCell_(atsNote_(res)));
+    if (res.pct >= 70 && job.status === STATUS[0] && !job.cvLink && !job.cvRequest && map.cvRequest) {
+      sh.getRange(r, map.cvRequest).setValue('angefordert ' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'dd.MM.yyyy HH:mm'));
+    }
+    return { pct: res.pct, message: 'ATS ' + res.pct + ' % (lokal) · ' + label };
+  });
 }
 
 /* ------------------------------------------------------------------ */

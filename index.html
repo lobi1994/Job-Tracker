@@ -351,7 +351,7 @@ html,body{overflow-x:hidden;overflow-x:clip}body{max-width:100%}
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.46', NEED_SCRIPT = '1.6.44'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.47', NEED_SCRIPT = '1.6.44'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Careerway ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
@@ -511,7 +511,8 @@ const EN_PAT = [
   [/^Auf (\d+) Jobs? anwenden$/, (m, n) => 'Apply to ' + n + ' job' + (n === '1' ? '' : 's')],
   [/^(\d+) Jobs? geändert$/, (m, n) => n + ' job' + (n === '1' ? '' : 's') + ' updated'],
   [/^(\d+) Jobs? ändern\?([\s\S]*)$/, (m, n, r) => 'Change ' + n + ' job' + (n === '1' ? '' : 's') + '?' + r.replace('Status auf ', 'Status to ').replace('Notiz anhängen: ', 'Append note: ')],
-  [/^Claude: /, 'Claude: ']
+  [/^Claude: /, 'Claude: '],
+  [/^Apple-KI: /, 'Apple AI: ']
 ];
 function trText(s) {
   if (LANG !== 'en' || !s) return s;
@@ -842,7 +843,7 @@ async function openPrep(j) {
   openSheet(head('Gesprächsvorbereitung', (j.company || '–') + ' · ' + j.role, '') +
     '<div class="sec">Termin</div>' + (ivs.length ? (fut.length ? fut : ivs.slice(-1)).map((e) => '<p class="prepiv"><b class="notr">' + esc(ivLine(e)) + '</b>' + (e.dt && e.dt.slice(0, 10) >= today ? ' <span>' + dayWord(-daysSince(e.dt, now)) + '</span>' : ' <span>schon vorbei</span>') + '</p>').join('') : '<p class="sub">Noch kein Termin eingetragen.</p>') +
     '<div class="sec">Eckdaten</div><dl class="prepdl">' + fact('Ort', j.location) + fact('Beworben am', deDay(j.appliedOn)) + fact('Weg / Portal', j.channel) + fact('Gehalt angegeben', j.salary) + fact('Lebenslauf', j.cv) + '</dl>' +
-    (j.fitNote ? '<p class="fitnote">Claude: <span class="notr">' + esc(j.fitNote) + '</span></p>' : '') +
+    (j.fitNote ? '<p class="fitnote">' + (/^Lokal/.test(j.fitNote) ? 'Apple-KI: <span class="notr">' + esc(j.fitNote.replace(/^Lokal \(Apple\) /, '')) : 'Claude: <span class="notr">' + esc(j.fitNote)) + '</span></p>' : '') +
     '<div class="sec">Was die Stelle verlangt</div><div id="prepSk"><p class="sub">' + (j.postingSaved ? 'Lade Stellenausschreibung …' : 'Keine Stellenausschreibung gespeichert. Ohne sie kann die App Stärken und Lücken nicht zeigen.') + '</p></div>' +
     '<div class="sec">Vor dem Gespräch</div><ol class="prepol"><li>Stellenausschreibung noch einmal lesen.</li><li>Zu jeder Lücke einen ehrlichen Satz vorbereiten.</li><li>Drei eigene Fragen an die Firma notieren.</li><li>Gehaltswunsch und frühesten Starttermin parat haben.</li><li>Technik oder Anfahrt am Vortag prüfen.</li></ol>' +
     '<label class="fl"><span>Meine Notizen und Fragen</span><textarea id="pNotes" style="min-height:150px" placeholder="Fragen an die Firma, Beispiele aus meiner Arbeit, Namen der Gesprächspartner">' + esc(sp.prep) + '</textarea></label>' +
@@ -1382,7 +1383,7 @@ function openDetail(id) {
     '<div class="sec">Bewertung</div>' +
     '<div class="fl"><span>Gefällt mir</span>' + starRow('fLike', j.like) + '</div>' +
     '<div class="fl"><span>Lebenslauf passt (ATS-Bewertung, %)</span><input id="fFit" class="notr" type="number" inputmode="numeric" min="0" max="100" step="1" placeholder="z. B. 80" value="' + (j.fit ? fitPct(j.fit) : '') + '"></div>' +
-    (j.fitNote ? '<p class="fitnote">Claude: <span class="notr">' + esc(j.fitNote) + '</span></p>' : '') +
+    (j.fitNote ? '<p class="fitnote">' + (/^Lokal/.test(j.fitNote) ? 'Apple-KI: <span class="notr">' + esc(j.fitNote.replace(/^Lokal \(Apple\) /, '')) : 'Claude: <span class="notr">' + esc(j.fitNote)) + '</span></p>' : '') +
     (j.postingSaved ? '<details class="atsbox" id="atsBox"><summary>So setzt sich die Passung zusammen<span class="sub" id="atsSum"></span></summary><div id="atsBody"><p class="sub">Lade Stellenausschreibung …</p></div></details>' : '') +
     (j.status === statuses[0] ? '<div class="cvbox" id="cvBox">' + cvBoxHtml(j) + '</div>' : '') +
     '<div class="sec">Details</div>' +

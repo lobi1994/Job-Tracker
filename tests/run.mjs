@@ -328,6 +328,48 @@ await test('B textCell_', () => {
   assert.equal(textCell_('- Rückruf'), '- Rückruf');
 });
 
+
+/* ---------- Teil B (seit 1.6.47): lokale ATS-Bewertung ---------- */
+{
+  const code = read('google/Code.gs');
+  const grab = (n) => { const m = code.match(new RegExp('function ' + n + '[\\s\\S]*?\\n}\\n')); assert.ok(m, n + ' nicht gefunden'); return m[0]; };
+  const lib = new Function(
+    "const ATS_STOP = " + code.match(/const ATS_STOP = (\[[^\]]*\]);/)[1] + "; const ATS_UNREADABLE = " + code.match(/const ATS_UNREADABLE = ('[^']*');/)[1] + ';\n' +
+    ['atsNorm_', 'atsHas_', 'atsScore_', 'parseSpec_'].map(grab).join('\n') + '\nreturn { atsNorm_, atsScore_, parseSpec_ };')();
+  await test('B parseSpec_ Zaun, Vortext, pflicht, Stoppwörter', () => {
+    const raw = 'Hier ist das Ergebnis:\n```json\n{"job":"X | Y","reqs":[' +
+      '{"name":"A","w":"pflicht","full":["Linux","erfahrung","Linux"],"partial":["Team"]},' +
+      '{"name":"B","w":1,"full":["Jira"]},{"name":"C","w":2,"partial":["testing"]},{"name":"leer","w":1,"full":["team"]}]}\n```';
+    const s = lib.parseSpec_(raw);
+    assert.equal(s.reqs.length, 3); assert.equal(s.reqs[0].w, 2); assert.deepEqual(s.reqs[0].full, ['linux']);
+    assert.deepEqual(s.reqs[0].partial, []); assert.equal(s.reqs[1].w, 1);
+  });
+  await test('B parseSpec_ zu wenig Anforderungen -> Fehler', () => {
+    assert.throws(() => lib.parseSpec_('{"reqs":[{"name":"A","full":["linux"]}]}'), /nicht lesbar/);
+    assert.throws(() => lib.parseSpec_('kein json'), /nicht lesbar/);
+  });
+  await test('B atsScore_ von Hand, inkl. Grundlagen-Regel', () => {
+    const prof = { full: lib.atsNorm_('Linux, Jira und Test-\nmanagement'), basic: lib.atsNorm_('Grundlagen in Git GitHub') };
+    const spec = { reqs: [
+      { name: 'Linux', w: 2, full: ['linux'] },            // 1 x 2
+      { name: 'Git', w: 2, full: ['git'] },                // nur Grundlagen: 0,5 x 2
+      { name: 'Test', w: 1, full: ['testmanagement'] },    // Silbentrennung: 1 x 1
+      { name: 'Cloud', w: 1, full: ['aws'], partial: ['jira'] }, // 0,5 x 1
+      { name: 'SAP', w: 1, full: ['sap'] }                 // 0
+    ] };
+    const r = lib.atsScore_(spec, prof);
+    assert.deepEqual(r.rows.map((x) => x.score), [1, 0.5, 1, 0.5, 0]);
+    assert.equal(r.pct, Math.round(100 * (2 + 1 + 1 + 0.5) / 7)); // 64
+  });
+}
+await test('A fitnote „Lokal (Apple)“ zeigt „Apple-KI:“', () => {
+  const n = (html.match(/Apple-KI: /g) || []).length;
+  assert.ok(n >= 2, 'Apple-KI-Präfix fehlt (' + n + ')');
+  const f = (note) => { const j = { fitNote: note }; return (j.fitNote ? '<p class="fitnote">' + (/^Lokal/.test(j.fitNote) ? 'Apple-KI: ' + j.fitNote.replace(/^Lokal \(Apple\) /, '') : 'Claude: ' + j.fitNote) : ''); };
+  assert.ok(html.includes("/^Lokal/.test(j.fitNote) ? 'Apple-KI: "));
+  assert.ok(f('Lokal (Apple) ATS 70 %. Fehlt: x').includes('Apple-KI: ATS 70 %'));
+});
+
 /* ---------- Teil C: Konsistenz ---------- */
 await test('C APP_VERSION im CHANGELOG', () => {
   const m = html.match(/const APP_VERSION = '([^']+)'/);

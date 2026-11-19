@@ -11,6 +11,16 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.47 – 19.11.2026 (App und Apps Script) – ATS-Bewertung ohne Claude
+- Neuer, optionaler Teil im Kurzbefehl „Job speichern“: Apple Intelligence („Modell verwenden“, Private Cloud Compute) liest die Anzeige und macht daraus eine Liste der Anforderungen.
+- Das Apps Script rechnet daraus den ATS-Wert in Prozent und trägt ihn samt Kurzbegründung beim Job ein. Ein Begriff, den du nur als „Grundlagen“ kannst, zählt halb.
+- Dein Profil für die Rechnung steht im neuen Tab „Profiltext“ (zusammen mit dem Tab „Profil“). Der Tab ist schon angelegt.
+- In der App steht bei solchen Bewertungen „Apple-KI:“ statt „Claude:“. Bewertungen von Claude werden nie überschrieben.
+
+**Apps Script: Bereitstellen nötig: ja** (Code.gs)
+Beschreibung für die Bereitstellung: `1.6.47 ATS-Bewertung lokal mit Apple Intelligence`
+**Kurzbefehl: ändern nötig: ja, optional** (Abschnitt 4 in der Kurzbefehl-Anleitung)
+
 ## 1.6.46 – 16.11.2026 (nur App)
 - Links zu Google Drive (z. B. dein Lebenslauf) und Google-Tabellen öffnen auf dem iPhone direkt die Google-Drive-App statt erst Safari. Damit bleibt in Safari keine weiße Seite mehr zurück. Klappt der Direktsprung nicht, öffnet sich wie bisher Safari.
 

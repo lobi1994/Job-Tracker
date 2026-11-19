@@ -124,6 +124,37 @@ td:first-child{white-space:nowrap;color:var(--mute);width:1%}
     <p class="note"><b>Ablauf:</b> Neue Anzeige für einen Job, der schon eine hat → Frage „Durch die neue ersetzen?“ → <b class="ui">OK</b> ersetzt sie (Mitteilung „Anzeige ersetzt ✓“), <b class="ui">Abbrechen</b> lässt die alte stehen. Die Frage gilt 30 Minuten. Ist der Text gleich, kommt keine Frage.</p>
   </div>
 
+  <h2 id="d">4 · ATS-Bewertung mit Apple Intelligence (optional)</h2>
+  <p class="note">Hängt an „Job speichern“ (Abschnitt 1) an: Apple Intelligence zerlegt die Anzeige in Anforderungen, der Careerway rechnet daraus den ATS-Wert und trägt ihn beim Job ein. Bewertungen von Claude bleiben dabei erhalten.</p>
+  <div class="card">
+    <ol>
+      <li><b>Voraussetzung:</b> iPhone 15 Pro oder neuer mit Apple Intelligence, iOS 26.</li>
+      <li>Ganz unten im Kurzbefehl „Job speichern“ (nach <a href="#c">Abschnitt 3</a>) die Aktion <b class="ui">Modell verwenden</b> hinzufügen → Modell <b class="ui">Private Cloud Compute</b> (bzw. <b class="ui">Cloud</b>) → in das Prompt-Feld diesen Text einfügen:
+        <div class="copy"><code id="atsPrompt" style="white-space:pre-wrap">Du bist ein Bewerbermanagement-System (ATS). Lies die Stellenanzeige am Ende und zerlege sie in 8 bis 14 Anforderungen. Antworte NUR mit JSON in genau diesem Format, ohne weiteren Text:
+{"job":"Firma | Stelle","reqs":[{"name":"kurzer Name","w":2,"full":["begriff"],"partial":["begriff"]}]}
+Regeln:
+- w=2 für Pflicht: muss, erforderlich, Voraussetzung, abgeschlossenes Studium, Jahre Berufserfahrung, Sprachen, Zertifikate.
+- w=1 für wünschenswert, von Vorteil, Plus und für Aufgaben.
+- full: 2 bis 6 genaue Fachbegriffe, die ein ATS als vollen Treffer zählt, auf Deutsch und Englisch, kleingeschrieben (z. B. "projektmanagement", "project management").
+- partial: 1 bis 4 verwandte Begriffe, die nur halb zählen.
+- Nur konkrete Fachbegriffe, keine allgemeinen Wörter wie "erfahrung", "kenntnisse", "team".
+Stellenanzeige:</code><button data-copy="atsPrompt">Kopieren</button></div>
+        Danach im Prompt-Feld hinter „Stellenanzeige:“ die Variable <b class="ui">JavaScript-Ergebnis</b> einsetzen.</li>
+      <li>Darunter <b class="ui">Inhalte von URL abrufen</b>: URL = <b>App-Link</b>, Methode <b class="ui">POST</b>, Anfragetext <b class="ui">JSON</b>:
+        <table>
+          <tr><td>Schlüssel</td><td>Wert</td></tr>
+          <tr><td><code>fn</code></td><td><div class="copy"><code id="fnD">apiSaveAtsSpec</code><button data-copy="fnD">Kopieren</button></div></td></tr>
+          <tr><td><code>key</code></td><td>dein <b>Schlüssel</b></td></tr>
+          <tr><td><code>data</code></td><td>Typ <b class="ui">Wörterbuch</b> mit drei Feldern (je Text):<br>
+            <code>page</code> = Variable <b class="ui">JavaScript-Ergebnis</b><br>
+            <code>spec</code> = Variable <b class="ui">Antwort</b> (das Ergebnis von „Modell verwenden“)<br>
+            <code>model</code> = <div class="copy"><code id="mD">Apple PCC</code><button data-copy="mD">Kopieren</button></div></td></tr>
+        </table></li>
+      <li><b class="ui">Wörterbuchwert abrufen</b> → Schlüssel <code>message</code> → Eingabe: <b class="ui">Inhalte von URL</b> (die Anfrage direkt darüber) → danach <b class="ui">Mitteilung anzeigen</b>.</li>
+    </ol>
+    <p class="note"><b>Wichtig:</b> Der Job muss zuerst gespeichert sein (das passiert weiter oben im Kurzbefehl). Es dauert 5–20 Sekunden. Ohne Netz klappt Private Cloud Compute nicht, dann bleibt die Anzeige trotzdem gespeichert. Das Modell <b class="ui">Auf diesem iPhone</b> geht auch, ist aber ungenauer.</p>
+  </div>
+
   <h2>Etwas klappt nicht?</h2>
   <div class="card">
     <p class="note">Die Mitteilung ist leer: Füge hinter <b class="ui">Inhalte von URL abrufen</b> vorübergehend <b class="ui">Ergebnis anzeigen</b> ein. Dort steht der Grund, z. B. <code>"error": "Kein Zugriff"</code> (Schlüssel falsch) oder eine Seite von Google (App-Link falsch oder Apps Script nicht neu bereitgestellt).</p>
