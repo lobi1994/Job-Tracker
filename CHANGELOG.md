@@ -16,6 +16,7 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 - Das Apps Script rechnet daraus den ATS-Wert in Prozent und trägt ihn samt Kurzbegründung beim Job ein. Ein Begriff, den du nur als „Grundlagen“ kannst, zählt halb.
 - Dein Profil für die Rechnung steht im neuen Tab „Profiltext“ (zusammen mit dem Tab „Profil“). Der Tab ist schon angelegt.
 - In der App steht bei solchen Bewertungen „Apple-KI:“ statt „Claude:“. Bewertungen von Claude werden nie überschrieben.
+- Kurzbefehl-Anleitung Abschnitt 4 vereinfacht: 5 einfache Textfelder statt eines Wörterbuchs.
 
 **Apps Script: Bereitstellen nötig: ja** (Code.gs)
 Beschreibung für die Bereitstellung: `1.6.47 ATS-Bewertung lokal mit Apple Intelligence`

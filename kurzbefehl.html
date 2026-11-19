@@ -140,16 +140,16 @@ Regeln:
 - Nur konkrete Fachbegriffe, keine allgemeinen Wörter wie "erfahrung", "kenntnisse", "team".
 Stellenanzeige:</code><button data-copy="atsPrompt">Kopieren</button></div>
         Danach im Prompt-Feld hinter „Stellenanzeige:“ die Variable <b class="ui">JavaScript-Ergebnis</b> einsetzen.</li>
-      <li>Darunter <b class="ui">Inhalte von URL abrufen</b>: URL = <b>App-Link</b>, Methode <b class="ui">POST</b>, Anfragetext <b class="ui">JSON</b>:
+      <li>Darunter <b class="ui">Inhalte von URL abrufen</b>: URL = <b>App-Link</b>, Methode <b class="ui">POST</b>, Anfragetext <b class="ui">JSON</b>. 5× <b class="ui">Neues Feld hinzufügen → Text</b>:
         <table>
           <tr><td>Schlüssel</td><td>Wert</td></tr>
           <tr><td><code>fn</code></td><td><div class="copy"><code id="fnD">apiSaveAtsSpec</code><button data-copy="fnD">Kopieren</button></div></td></tr>
           <tr><td><code>key</code></td><td>dein <b>Schlüssel</b></td></tr>
-          <tr><td><code>data</code></td><td>Typ <b class="ui">Wörterbuch</b> mit drei Feldern (je Text):<br>
-            <code>page</code> = Variable <b class="ui">JavaScript-Ergebnis</b><br>
-            <code>spec</code> = Variable <b class="ui">Antwort</b> (das Ergebnis von „Modell verwenden“)<br>
-            <code>model</code> = <div class="copy"><code id="mD">Apple PCC</code><button data-copy="mD">Kopieren</button></div></td></tr>
-        </table></li>
+          <tr><td><code>page</code></td><td>Variable <b class="ui">JavaScript-Ergebnis</b></td></tr>
+          <tr><td><code>spec</code></td><td>Variable <b class="ui">Antwort</b> (Ergebnis von „Modell verwenden“; je nach iOS auch <b class="ui">Modellantwort</b> oder <b class="ui">Response</b>)</td></tr>
+          <tr><td><code>model</code></td><td><div class="copy"><code id="mD">Apple PCC</code><button data-copy="mD">Kopieren</button></div></td></tr>
+        </table>
+        <p class="note">Variable einsetzen: Tippe ins Wert-Feld. Wische dann in der Leiste über der Tastatur nach rechts und tippe die Variable an. Findest du sie dort nicht, tippe auf <b class="ui">Variable auswählen</b> und danach auf die Aktion.</p></li>
       <li><b class="ui">Wörterbuchwert abrufen</b> → Schlüssel <code>message</code> → Eingabe: <b class="ui">Inhalte von URL</b> (die Anfrage direkt darüber) → danach <b class="ui">Mitteilung anzeigen</b>.</li>
     </ol>
     <p class="note"><b>Wichtig:</b> Der Job muss zuerst gespeichert sein (das passiert weiter oben im Kurzbefehl). Es dauert 5–20 Sekunden. Ohne Netz klappt Private Cloud Compute nicht, dann bleibt die Anzeige trotzdem gespeichert. Das Modell <b class="ui">Auf diesem iPhone</b> geht auch, ist aber ungenauer.</p>
