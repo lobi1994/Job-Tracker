@@ -315,6 +315,53 @@ await test('A-Bulk ATS unter 50 wählt genau 0 < fit < 50', () => {
   w.document.getElementById('bDone').click();
 });
 
+/* ---------- Teil A (seit 1.6.50): Mail-Hinweis schneller ---------- */
+const staleSug = `[{ vid: 'v1', company: 'Beispiel AG', role: 'Tester', art: 'Absage', status: 'Abgelehnt', date: '2026-11-18', from: 'hr@example.org', subject: 'Betreff', excerpt: '', link: '' }]`;
+await test('A Mail-Hinweis: Mails und Jobliste werden gleichzeitig abgefragt', async () => {
+  ev(`window.__log = []; window.__orig = api; shownSug = true;
+      api = function (fn) { const a = arguments; window.__log.push('start ' + fn); return new Promise((res) => setTimeout(() => { window.__log.push('ende ' + fn); res(window.__orig.apply(null, a)); }, 40)); };`);
+  try { await ev('load(false, true)'); await sleep(100); }
+  finally { ev('api = window.__orig'); }
+  const log = Array.from(ev('window.__log'));
+  assert.deepEqual(log.slice(0, 2).sort(), ['start apiList', 'start apiSuggestions'], 'beide Abfragen müssen zuerst starten: ' + log.join(', '));
+  assert.ok(log.indexOf('ende apiList') > 1 && log.indexOf('ende apiSuggestions') > 1, log.join(', '));
+});
+await test('A Mail-Hinweis: Stand vom letzten Mal erscheint sofort, Speicher nur außerhalb der Demo', () => {
+  ev(`suggestions = []; loadBar(); ls.del(SK);`);
+  assert.ok(!ev(`$('mailbar').classList.contains('show')`));
+  ev(`DEMO = false; ls.set(SK, { s: ${staleSug}, at: 1 }); restoreSug(); DEMO = true;`);
+  assert.ok(ev(`$('mailbar').classList.contains('show')`), 'Hinweis fehlt');
+  assert.ok(ev(`$('mailbar').textContent`).includes('1 neue Rückmeldung per Mail'));
+  assert.equal(ev('suggestions.length'), 1);
+  ev(`ls.del(SK); saveSug();`);                       // Demo: nichts speichern
+  assert.equal(ev(`ls.get(SK)`), null, 'Demo darf nichts speichern');
+  ev(`DEMO = false; saveSug(); DEMO = true;`);
+  assert.equal(ev(`ls.get(SK).s.length`), 1, 'Speichern außerhalb der Demo fehlt');
+  ev(`ls.del(SK); suggestions = []; loadBar();`);
+});
+await test('A Mail-Hinweis: Tippen auf den alten Stand öffnet nichts Veraltetes', async () => {
+  for (let i = 0; i < 20 && ev('sugPending'); i++) await sleep(50); // laufende Abfragen früherer Tests abwarten
+  ev('closeSheet()');
+  ev(`shownSug = true; suggestions = ${staleSug}; loadBar(); window.__o2 = api;
+      api = function (fn) { return fn === 'apiSuggestions' ? new Promise((r) => setTimeout(() => r([]), 80)) : window.__o2.apply(null, arguments); };
+      loadSuggestions(false);`);
+  try {
+    w.document.getElementById('mailbar').click();
+    await sleep(30);
+    assert.ok(!ev(`$('ov').classList.contains('show')`), 'Fenster darf vor der frischen Antwort nicht aufgehen');
+    await sleep(150);
+    assert.ok(!ev(`$('ov').classList.contains('show')`), 'frische Antwort ist leer: kein Fenster');
+    assert.equal(ev('suggestions.length'), 0);
+    assert.ok(!ev(`$('mailbar').classList.contains('show')`), 'Hinweis muss verschwinden');
+  } finally { ev('api = window.__o2'); }
+});
+await test('A Mail-Hinweis: Speicher wird beim Trennen und Verbindungswechsel geleert', () => {
+  const src = html;
+  assert.ok(/ls\.del\(CK\); ls\.del\(LK\); ls\.del\(SK\);/.test(src), 'Trennen löscht SK nicht');
+  assert.ok(/ls\.set\(CK, o\); ls\.del\(LK\); ls\.del\(SK\);/.test(src), 'Neue Einrichtung löscht SK nicht');
+  assert.ok(/\{ ls\.del\(LK\); ls\.del\(SK\); \}/.test(src), 'Wechsel der Verbindung löscht SK nicht');
+});
+
 /* ---------- Teil B: Apps Script ---------- */
 const gs = read('google/Code.gs') + '\n' + read('google/Mail.gs');
 await test('B Syntax Code.gs + Mail.gs', () => { new Function(gs); });
@@ -361,6 +408,141 @@ await test('B textCell_', () => {
     assert.deepEqual(r.rows.map((x) => x.score), [1, 0.5, 1, 0.5, 0]);
     assert.equal(r.pct, Math.round(100 * (2 + 1 + 1 + 0.5) / 7)); // 64
   });
+
+  /* ---------- Teil B (seit 1.6.48): ATS-Vergleich Qwen und Claude ---------- */
+  const cmp = new Function(
+    'const COMPARE_BY = ' + code.match(/const COMPARE_BY = (\[[^\]]*\]);/)[1] + '; const MATCH_SCORE = ' + code.match(/const MATCH_SCORE = (\{[^}]*\});/)[1] + ';\n' +
+    ['parseCompare_', 'compareScore_', 'compareReport_', 'germanIso_'].map(grab).join('\n') + '\nreturn { parseCompare_, compareScore_, compareReport_, germanIso_ };')();
+  const ok3 = [{ name: 'A', w: 1, match: 'voll' }, { name: 'B', w: 1, match: 'voll' }, { name: 'C', w: 1, match: 'voll' }];
+  await test('B parseCompare_ räumt auf: Reise, Doppelte, ungültige Einstufung', () => {
+    const d = cmp.parseCompare_({ id: ' abc ', by: 'Qwen', model: 'qwen3:8b', reqs: [
+      { name: 'Projektmanagement', w: 'pflicht', match: 'VOLL', beleg: 'Profil: Projektmanagement' },
+      { name: 'projektmanagement', w: 1, match: 'fehlt' },        // doppelt
+      { name: 'Reisebereitschaft bis 50 %', w: 2, match: 'voll' }, // zählt nicht
+      { name: 'Jira', w: 1, match: 'teilweise' },
+      { name: 'SAP', w: 1, match: 'vielleicht' },                  // ungültig
+      { name: 'Deutsch und Englisch', w: 2, match: 'fehlt' }
+    ] });
+    assert.equal(d.id, 'abc'); assert.equal(d.reise, 'keine Angabe'); assert.equal(d.model, 'qwen3:8b');
+    assert.deepEqual(d.reqs.map((r) => [r.name, r.w, r.match]), [['Projektmanagement', 2, 'voll'], ['Jira', 1, 'teilweise'], ['Deutsch und Englisch', 2, 'fehlt']]);
+  });
+  await test('B parseCompare_ Fehlerfälle', () => {
+    assert.throws(() => cmp.parseCompare_({ id: 'x', by: 'GPT', reqs: ok3 }), /Bewerter/);
+    assert.throws(() => cmp.parseCompare_({ id: '', by: 'Claude', reqs: ok3 }), /ID/);
+    assert.throws(() => cmp.parseCompare_({ id: 'x', by: 'Claude', reqs: ok3.slice(0, 2) }), /Zu wenige/);
+    assert.throws(() => cmp.parseCompare_('kein json'), /nicht lesbar/);
+    assert.equal(cmp.parseCompare_(JSON.stringify({ id: 'x', by: 'Claude', reise: 'bis 50 %', reqs: ok3 })).reise, 'bis 50 %');
+  });
+  await test('B compareScore_ rechnet wie atsScore_', () => {
+    const prof = { full: lib.atsNorm_('Linux, Jira und Test-\nmanagement'), basic: lib.atsNorm_('Grundlagen in Git GitHub') };
+    const spec = { reqs: [
+      { name: 'Linux', w: 2, full: ['linux'] }, { name: 'Git', w: 2, full: ['git'] }, { name: 'Test', w: 1, full: ['testmanagement'] },
+      { name: 'Cloud', w: 1, full: ['aws'], partial: ['jira'] }, { name: 'SAP', w: 1, full: ['sap'] }
+    ] };
+    const viaSpec = lib.atsScore_(spec, prof);
+    const reqs = viaSpec.rows.map((x) => ({ name: x.name, w: x.w, match: x.score === 1 ? 'voll' : x.score === 0.5 ? 'teilweise' : 'fehlt' }));
+    const r = cmp.compareScore_(reqs);
+    assert.deepEqual(r.rows.map((x) => x.points), [2, 1, 1, 0.5, 0]);
+    assert.equal(r.pct, viaSpec.pct); assert.equal(r.pct, 64);
+  });
+  await test('B compareReport_ Differenz, Durchschnitt, Reise', () => {
+    const row = (id, by, art, name, w, points) => ({ id, company: 'Beispiel AG', role: 'Tester', by, art, name, w, points });
+    const r = cmp.compareReport_([
+      row('a1', 'Qwen', 'Anforderung', 'X', 2, 2), row('a1', 'Qwen', 'Anforderung', 'Y', 2, 1),       // 3 von 4 = 75
+      row('a1', 'Claude', 'Anforderung', 'X', 2, 2), row('a1', 'Claude', 'Anforderung', 'Y', 2, 0),   // 2 von 4 = 50
+      row('a1', 'Qwen', 'Reise', 'bis 50 %', 0, 0), row('a1', 'Claude', 'Reise', 'bis 50 %', 0, 0),
+      row('b2', 'Qwen', 'Anforderung', 'X', 1, 1), row('b2', 'Qwen', 'Anforderung', 'Y', 1, 0.5),     // 75, nur Qwen
+      row('b2', 'Qwen', 'Reise', 'keine Angabe', 0, 0),
+      row('c3', 'Qwen', 'Anforderung', 'X', 1, 1), row('c3', 'Qwen', 'Anforderung', 'Y', 1, 0),       // 50
+      row('c3', 'Claude', 'Anforderung', 'X', 1, 1), row('c3', 'Claude', 'Anforderung', 'Y', 1, 1),   // 100
+      row('c3', 'Qwen', 'Reise', 'einmal pro Quartal', 0, 0), row('c3', 'Claude', 'Reise', 'keine Angabe', 0, 0)
+    ]);
+    assert.deepEqual(r.lines[0], ['a1', 'Beispiel AG', 'Tester', 75, 50, 25, 'bis 50 %']);
+    assert.deepEqual(r.lines[1].slice(3), [75, '', '', 'keine Angabe']);
+    assert.deepEqual(r.lines[2].slice(3), [50, 100, -50, 'Qwen: einmal pro Quartal | Claude: keine Angabe']);
+    assert.deepEqual(r.stats, { n: 2, avgAbs: 37.5, avgSigned: -12.5 }); // b2 hat nur Qwen und zählt nicht mit
+  });
+  await test('B germanIso_', () => {
+    assert.equal(cmp.germanIso_('12.11.2026 06:16:33'), '2026-11-12');
+    assert.equal(cmp.germanIso_('3.1.2027'), '2027-01-03');
+    assert.equal(cmp.germanIso_('kein Datum'), '');
+  });
+  await test('B ATS-Vergleich: API vorhanden, Schutz ohne since, Bewerbungen bleiben unverändert', () => {
+    for (const n of ['apiSaveAtsCompare', 'apiAtsPending', 'apiAtsProfile', 'apiAtsRefresh']) assert.ok(new RegExp('function ' + n + '\\(key').test(code), n + ' fehlt');
+    assert.ok(/function apiAtsPending[\s\S]*?„since“[\s\S]*?\n}\n/.test(code), 'Schutz ohne since fehlt');
+    assert.ok(!/\.setValue\(|map\.fit|map\.cvRequest/.test(grab('apiSaveAtsCompare')), 'apiSaveAtsCompare darf Fit und CV-Auftrag nicht ändern');
+  });
+}
+
+/* ---------- Teil D (seit 1.6.48): lokales Programm lokal/ats-qwen.mjs ---------- */
+{
+  const loc = await import(new URL('../lokal/ats-qwen.mjs', import.meta.url).href);
+  const good = { scriptUrl: 'https://script.google.com/macros/s/AKfycbTEST_123-x/exec', key: 'abc123', since: '2026-11-20' };
+  await test('D validateConfig: Platzhalter und Formfehler', () => {
+    assert.throws(() => loc.validateConfig({ ...good, scriptUrl: 'DEINE_WEB_APP_URL' }), /scriptUrl/);
+    assert.throws(() => loc.validateConfig({ ...good, scriptUrl: 'http://example.org/exec' }), /scriptUrl/);
+    assert.throws(() => loc.validateConfig({ ...good, scriptUrl: 'https://example.github.io/Job-Tracker/#abc' }), /Web-App-URL/); // App-Link
+    assert.throws(() => loc.validateConfig({ ...good, scriptUrl: 'https://script.google.com/macros/s/AKfycbTEST/dev' }), /Web-App-URL/);
+    assert.ok(loc.validateConfig({ ...good, scriptUrl: 'https://script.google.com/a/macros/firma.de/s/AKfycbTEST/exec' }));
+    assert.throws(() => loc.validateConfig({ ...good, key: 'DEIN_SCHLUESSEL' }), /key/);
+    assert.throws(() => loc.validateConfig({ ...good, key: '' }), /key/);
+    assert.throws(() => loc.validateConfig({ ...good, since: '20.11.2026' }), /since/);
+    assert.throws(() => loc.validateConfig({ ...good, since: '' }), /since oder testIds/);
+    assert.throws(() => loc.validateConfig(null), /leer/);
+  });
+  await test('D validateConfig: Standardwerte und Grenzen', () => {
+    const c = loc.validateConfig(good);
+    assert.equal(c.model, 'qwen3:8b'); assert.equal(c.limitPerRun, 5); assert.deepEqual(c.hatNicht, []); assert.equal(c.ollamaUrl, 'http://localhost:11434');
+    assert.equal(loc.validateConfig({ ...good, limitPerRun: 99 }).limitPerRun, 10);
+    assert.deepEqual(loc.validateConfig({ ...good, since: '', testIds: ['a', 7] }).testIds, ['a', '7']);
+    assert.ok(loc.validateConfig({ ...good, scriptUrl: 'http://localhost:8787/exec' }));
+  });
+  await test('D buildSystemPrompt: Profil, „Hat nicht“ nur wenn vorhanden', () => {
+    const p = { full: 'PROFIL-VOLL-ZEILE', basic: 'PROFIL-BASIS-ZEILE' };
+    const a = loc.buildSystemPrompt(p, []);
+    assert.ok(a.includes('PROFIL-VOLL-ZEILE') && a.includes('PROFIL-BASIS-ZEILE'));
+    assert.ok(!a.includes('HAT NICHT: '));
+    assert.ok(loc.buildSystemPrompt(p, ['SQL', 'Vertriebsquote']).includes('HAT NICHT: SQL, Vertriebsquote'));
+    assert.ok(a.includes('KEINE Anforderung'), 'Reise-Regel fehlt');
+  });
+  await test('D parseModelAnswer: Reise, Doppelte, ungültige Einstufung, Mindestzahl', () => {
+    const raw = JSON.stringify({ reise: ' bis 50 % ', reqs: [
+      { name: 'Linux', w: 2, beleg: 'x', match: 'Voll' },
+      { name: 'linux', w: 1, beleg: '', match: 'fehlt' },
+      { name: 'Reisebereitschaft', w: 2, beleg: '', match: 'voll' },
+      { name: 'Jira', w: 1, beleg: '', match: 'teilweise' },
+      { name: 'SAP', w: 1, beleg: '', match: 'unklar' },
+      { name: 'Sprachen', w: 2, beleg: '', match: 'fehlt' },
+    ] });
+    const a = loc.parseModelAnswer(raw);
+    assert.equal(a.reise, 'bis 50 %');
+    assert.deepEqual(a.reqs.map((r) => [r.name, r.w, r.match]), [['Linux', 2, 'voll'], ['Jira', 1, 'teilweise'], ['Sprachen', 2, 'fehlt']]);
+    assert.equal(loc.parseModelAnswer(JSON.stringify({ reise: '', reqs: a.reqs })).reise, 'keine Angabe');
+    assert.throws(() => loc.parseModelAnswer('kein json'), /kein JSON/);
+    assert.throws(() => loc.parseModelAnswer(JSON.stringify({ reqs: a.reqs.slice(0, 2) })), /Zu wenige/);
+  });
+  await test('D scorePct rechnet wie das Apps Script (Beispiel 64 %)', () => {
+    const reqs = [['voll', 2], ['teilweise', 2], ['voll', 1], ['teilweise', 1], ['fehlt', 1]].map(([match, w], i) => ({ name: 'R' + i, w, match }));
+    assert.equal(loc.scorePct(reqs), 64);
+    assert.equal(loc.scorePct([]), 0);
+  });
+  await test('D redact entfernt Schlüssel und Link aus dem Log', () => {
+    const s = loc.redact('Fehler bei https://script.example/exec mit abc123', { key: 'abc123', scriptUrl: 'https://script.example/exec' });
+    assert.ok(!s.includes('abc123') && !s.includes('script.example'), s);
+    assert.equal(loc.redact('ohne Config'), 'ohne Config');
+  });
+  await test('D Shell-Skripte und Startdatei sind in Ordnung, nichts Privates im Ordner', async () => {
+    const { spawnSync } = await import('node:child_process');
+    for (const f of ['installieren.sh', 'deinstallieren.sh']) {
+      const r = spawnSync('sh', ['-n', new URL('../lokal/' + f, import.meta.url).pathname]);
+      assert.equal(r.status, 0, f + ': ' + r.stderr);
+    }
+    const plist = read('lokal/de.careerway.ats-qwen.plist');
+    for (const k of ['__NODE__', '__SCRIPT__', '__HOME__', 'de.careerway.ats-qwen', 'StartInterval']) assert.ok(plist.includes(k), k + ' fehlt in der Startdatei');
+    for (const f of ['ats-qwen.mjs', 'installieren.sh', 'deinstallieren.sh', 'de.careerway.ats-qwen.plist']) {
+      assert.ok(!/script\.google(usercontent)?\.com\/macros\/s\/[\w-]{10,}|docs\.google\.com\/spreadsheets\/d\/[\w-]{10,}/.test(read('lokal/' + f)), f + ' enthält einen privaten Link');
+    }
+  });
 }
 await test('A fitnote „Lokal (Apple)“ zeigt „Apple-KI:“', () => {
   const n = (html.match(/Apple-KI: /g) || []).length;
@@ -374,6 +556,12 @@ await test('A fitnote „Lokal (Apple)“ zeigt „Apple-KI:“', () => {
 await test('C APP_VERSION im CHANGELOG', () => {
   const m = html.match(/const APP_VERSION = '([^']+)'/);
   assert.ok(m, 'APP_VERSION nicht gefunden');
+  const esc = m[1].replace(/\./g, '\\.');
+  assert.ok(new RegExp('^## ' + esc + '(\\s|$)', 'm').test(read('CHANGELOG.md')), 'Überschrift "## ' + m[1] + '" fehlt');
+});
+await test('C VERSION in Code.gs im CHANGELOG', () => {
+  const m = read('google/Code.gs').match(/const VERSION = '([^']+)'/);
+  assert.ok(m, 'VERSION nicht gefunden');
   const esc = m[1].replace(/\./g, '\\.');
   assert.ok(new RegExp('^## ' + esc + '(\\s|$)', 'm').test(read('CHANGELOG.md')), 'Überschrift "## ' + m[1] + '" fehlt');
 });

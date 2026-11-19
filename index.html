@@ -351,11 +351,11 @@ html,body{overflow-x:hidden;overflow-x:clip}body{max-width:100%}
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.47', NEED_SCRIPT = '1.6.44'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.50', NEED_SCRIPT = '1.6.44'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Careerway ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
-const CK = 'jt-cfg', LK = 'jt-cache', FK = 'jt-filter';
+const CK = 'jt-cfg', LK = 'jt-cache', FK = 'jt-filter', SK = 'jt-sug';
 
 /* ---------- Sprache Deutsch / Englisch ----------
    Die App ist auf Deutsch geschrieben. Im englischen Modus übersetzt diese Schicht alle sichtbaren Texte
@@ -643,7 +643,7 @@ $('sSave').onclick = () => {
   let o = parseSetup($('sLink').value);
   if (!o) o = { u: $('sUrl').value.trim().replace(/\?.*$/, ''), k: $('sKey').value.trim() };
   if (!valid(o)) { $('sErr').textContent = 'Link oder Schlüssel stimmen nicht. Der App-Link beginnt mit https://script.google.com/ und endet auf /exec.'; return; }
-  CFG = o; DEMO = false; ls.set(CK, o); ls.del(LK);
+  CFG = o; DEMO = false; ls.set(CK, o); ls.del(LK); ls.del(SK);
   location.replace(location.pathname + '#setup=' + encSetup(o));
   showApp(); load(true);
 };
@@ -921,7 +921,7 @@ $('bSettings').onclick = () => {
     try { const r = await api('apiCheckMail'); closeSheet(); toast(r.added ? r.added + ' neue Rückmeldung(en) gefunden' : 'Mails geprüft – Liste aktualisiert'); shownSug = false; await load(true); }
     catch (e) { toast(e.message, 6000); b.disabled = false; b.querySelector('b').textContent = 'Mails jetzt prüfen'; }
   };
-  if ($('xOut')) $('xOut').onclick = () => { if (confirm('Verbindung auf diesem Gerät trennen?')) { ls.del(CK); ls.del(LK); ls.del(OK_KEY); outbox = []; CFG = null; closeSheet(); showSetup(); } };
+  if ($('xOut')) $('xOut').onclick = () => { if (confirm('Verbindung auf diesem Gerät trennen?')) { ls.del(CK); ls.del(LK); ls.del(SK); ls.del(OK_KEY); outbox = []; CFG = null; closeSheet(); showSetup(); } };
   $('xClose').onclick = closeSheet;
 };
 
@@ -1021,6 +1021,7 @@ async function load(spin, quiet) {
   load._at = Date.now();
   try {
     const epoch = writeEpoch, t0 = performance.now();
+    loadSuggestions(!shownSug); // seit 1.6.50 gleichzeitig mit der Jobliste, nicht erst danach
     const r = await api('apiList');
     if (!DEMO) perfSet('list', performance.now() - t0);
     // Wurde während des Ladens etwas gespeichert, kann diese Antwort schon veraltet sein: verwerfen und neu laden.
@@ -1029,7 +1030,6 @@ async function load(spin, quiet) {
     if (!DEMO && vLess(scriptVersion, NEED_SCRIPT) && !load._warned) { load._warned = true; toast('Dein Apps Script ist veraltet (' + (scriptVersion || 'alt') + '). Bitte Code aus GitHub neu kopieren und neue Version bereitstellen – siehe CHANGELOG.', 9000); }
     applyPending(); saveCache(); prunePostCache();
     render();
-    loadSuggestions(!shownSug);
   } catch (e) {
     if (e.message !== 'Kein Zugriff' && !quiet) toast('Laden fehlgeschlagen: ' + e.message, 8000);
   } finally { $('bRefresh').classList.remove('spin'); }
@@ -1840,16 +1840,30 @@ function formatPosting(text) {
 }
 
 /* ---------- Rückmeldungen aus Gmail ---------- */
-let suggestions = [], shownSug = false;
-async function loadSuggestions(autoOpen) {
-  try { suggestions = await api('apiSuggestions') || []; }
-  catch (e) { suggestions = []; }  // Gmail-Abgleich nicht eingerichtet oder alte Skriptversion: still ignorieren
-  const bar = $('mailbar');
-  bar.classList.toggle('show', suggestions.length > 0);
-  bar.textContent = suggestions.length + (suggestions.length === 1 ? ' neue Rückmeldung per Mail' : ' neue Rückmeldungen per Mail') + ' – ansehen';
-  if (autoOpen && suggestions.length && !$('ov').classList.contains('show')) { shownSug = true; openSuggestion(0); }
+/* Seit 1.6.50: Der Hinweis „x neue Rückmeldungen per Mail“ erscheint sofort beim Öffnen (Stand vom letzten Mal aus dem
+   Zwischenspeicher), und die Abfrage läuft gleichzeitig mit der Jobliste. Das automatische Fenster öffnet erst mit der
+   frischen Antwort, damit kein schon erledigter Vorschlag noch einmal angenommen wird. */
+let suggestions = [], shownSug = false, sugPending = null;
+function saveSug() { if (!DEMO) ls.set(SK, { s: suggestions, at: Date.now() }); }
+function restoreSug() {
+  const c = DEMO ? null : ls.get(SK);
+  if (!c || !Array.isArray(c.s) || !c.s.length) return;
+  suggestions = c.s; loadBar();
 }
-$('mailbar').onclick = () => openSuggestion(0);
+function loadSuggestions(autoOpen) {
+  if (sugPending) return sugPending; // läuft schon: nicht doppelt abfragen
+  sugPending = (async () => {
+    let fresh = false;
+    try { suggestions = await api('apiSuggestions') || []; fresh = true; }
+    catch (e) { suggestions = []; ls.del(SK); }  // Gmail-Abgleich nicht eingerichtet, alte Skriptversion oder offline: still ignorieren
+    loadBar();
+    if (fresh) saveSug();
+    if (autoOpen && suggestions.length && !$('ov').classList.contains('show')) { shownSug = true; openSuggestion(0); }
+  })().finally(() => { sugPending = null; });
+  return sugPending;
+}
+// Tippt man auf den Hinweis, bevor die frische Antwort da ist, wird erst darauf gewartet (Stand aus dem Zwischenspeicher kann veraltet sein).
+$('mailbar').onclick = async () => { if (sugPending) await sugPending; openSuggestion(0); };
 
 function openSuggestion(i) {
   const s = suggestions[i]; if (!s) { closeSheet(); return; }
@@ -1867,7 +1881,7 @@ function openSuggestion(i) {
     try {
       const r = await api('apiResolveSuggestion', s.vid, accept);
       if (r && r.job) { const j = jobs.find((x) => x.id === r.job.id); if (j) Object.assign(j, r.job); }
-      suggestions.splice(i, 1); render(); loadBar(); toast(accept ? 'Status geändert' : 'Ignoriert');
+      suggestions.splice(i, 1); saveSug(); render(); loadBar(); toast(accept ? 'Status geändert' : 'Ignoriert');
       if (suggestions.length) openSuggestion(Math.min(i, suggestions.length - 1)); else closeSheet();
     } catch (e) { toast(e.message, 5000); $('gYes').disabled = $('gNo').disabled = false; }
   };
@@ -2055,7 +2069,7 @@ function showKeyForInstall() {
   if (fromHash && fromHash.k === ls.get('jt-badkey')) fromHash = null;
   // Den #setup-Teil absichtlich in der Adresse lassen: „Zum Home-Bildschirm“ übernimmt so die Verbindung
   // (die Home-Bildschirm-App hat auf dem iPhone einen eigenen Speicher, getrennt von Safari).
-  if (fromHash) { const old = ls.get(CK); if (!old || old.u !== fromHash.u || old.k !== fromHash.k) ls.del(LK); ls.set(CK, fromHash); }
+  if (fromHash) { const old = ls.get(CK); if (!old || old.u !== fromHash.u || old.k !== fromHash.k) { ls.del(LK); ls.del(SK); } ls.set(CK, fromHash); }
   // Seit 1.6.36: Im Browser-Tab den Schlüssel sofort aus der Adresszeile nehmen (sonst landet er in Screenshots, im Verlauf
   // und im Teilen-Menü). Die Home-Bildschirm-App hat keine Adresszeile und braucht den Teil beim Start, dort bleibt er.
   if (fromHash && !STANDALONE && ls.get(CK)) hideKey();
@@ -2067,6 +2081,7 @@ function showKeyForInstall() {
   const c = ls.get(LK);
   outbox = (ls.get(OK_KEY) || []).filter((e) => e && e.id && e.ch);
   if (c && c.jobs) { jobs = c.jobs; statuses = c.statuses || STATUS_DEF; sheetUrl = c.sheetUrl || ''; profile = c.profile || []; scriptVersion = c.version || ''; applyPending(); render(); perfSet('start', performance.now()); }
+  restoreSug();
   syncBadge(); flushOutbox();
   load(!c);
 })();

@@ -8,7 +8,7 @@
  * (z. B. {fn:"apiSavePosting", key, data:{url, title, text}} – data darf auch JSON-Text sein).
  */
 
-const VERSION = '1.6.47'; // siehe CHANGELOG.md
+const VERSION = '1.6.49'; // siehe CHANGELOG.md
 const APP_PAGE = 'https://lobi1994.github.io/Job-Tracker/';
 const SHEET = 'Bewerbungen';
 const POSTINGS = 'Anzeigen';
@@ -853,8 +853,8 @@ function atsHas_(t, term) {
   return false;
 }
 
-/** Profiltext für die Bewertung: Tab „Profiltext“ plus Tab „Profil“. basic = nur Grundlagen. */
-function profileText_() {
+/** Profilzeilen im Originaltext: Tab „Profiltext“ plus Tab „Profil“. basic = nur Grundlagen. */
+function profileLines_() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const full = [], basic = [];
   const pt = ss.getSheetByName(PROFILETEXT);
@@ -869,7 +869,13 @@ function profileText_() {
     if (/teilweise|grundlagen|grundkenntnisse/i.test(p.note)) basic.push('Grundlagen in ' + p.skill + (p.note ? ': ' + p.note : ''));
     else full.push(p.skill + (p.note ? ': ' + p.note : ''));
   });
-  return { full: atsNorm_(full.join('\n')), basic: atsNorm_(basic.join('\n')) };
+  return { full: full, basic: basic };
+}
+
+/** Profiltext für die Bewertung, kleingeschrieben und bereinigt (für atsScore_). */
+function profileText_() {
+  const p = profileLines_();
+  return { full: atsNorm_(p.full.join('\n')), basic: atsNorm_(p.basic.join('\n')) };
 }
 
 /**
@@ -996,6 +1002,215 @@ function apiSaveAtsSpec(key, data) {
       sh.getRange(r, map.cvRequest).setValue('angefordert ' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'dd.MM.yyyy HH:mm'));
     }
     return { pct: res.pct, message: 'ATS ' + res.pct + ' % (lokal) · ' + label };
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* ATS-Vergleich (seit 1.6.48): Qwen (lokal) und Claude bewerten       */
+/* dieselbe Anzeige getrennt. Jede Anforderung bekommt Gewicht,        */
+/* Einstufung und Punkte. Es werden weder Fit noch CV-Auftrag geändert. */
+/* ------------------------------------------------------------------ */
+
+const COMPARE = 'ATS-Vergleich';
+const REPORT = 'ATS-Auswertung';
+const COMPARE_HEAD = ['ID', 'Firma', 'Stelle', 'Bewerter', 'Datum', 'Art', 'Anforderung', 'Gewicht', 'Einstufung', 'Punkte', 'Beleg'];
+const COMPARE_BY = ['Qwen', 'Claude'];
+const MATCH_SCORE = { voll: 1, teilweise: 0.5, fehlt: 0 };
+
+/** Eingabe prüfen und aufräumen. Reise-Anforderungen fliegen raus (sie zählen nicht), doppelte Namen auch. */
+function parseCompare_(data) {
+  let o = data;
+  if (typeof o === 'string') { try { o = JSON.parse(o); } catch (e) { throw new Error('Die Bewertung war nicht lesbar.'); } }
+  if (!o || typeof o !== 'object' || !Array.isArray(o.reqs)) throw new Error('Die Bewertung war nicht lesbar.');
+  const id = String(o.id === null || o.id === undefined ? '' : o.id).trim();
+  if (!id) throw new Error('Keine ID angegeben.');
+  const by = String(o.by || '').trim();
+  if (COMPARE_BY.indexOf(by) < 0) throw new Error('Bewerter muss „Qwen“ oder „Claude“ sein.');
+  const seen = {}, reqs = [];
+  o.reqs.slice(0, 30).forEach(function (r) {
+    if (!r || typeof r !== 'object') return;
+    const name = String(r.name || '').trim().slice(0, 120);
+    const match = String(r.match || '').trim().toLowerCase();
+    if (!name || !Object.prototype.hasOwnProperty.call(MATCH_SCORE, match)) return;
+    if (/reise|travel/i.test(name)) return;
+    const key = name.toLowerCase();
+    if (seen[key] || reqs.length >= 20) return;
+    seen[key] = 1;
+    reqs.push({ name: name, w: (r.w === 2 || /^(2|pflicht|must)$/i.test(String(r.w).trim())) ? 2 : 1, match: match, beleg: String(r.beleg || '').trim().slice(0, 160) });
+  });
+  if (reqs.length < 3) throw new Error('Zu wenige Anforderungen (mindestens 3).');
+  const reise = String(o.reise || '').trim().slice(0, 120) || 'keine Angabe';
+  return { id: id, by: by, model: String(o.model || '').trim().slice(0, 40), reise: reise, reqs: reqs };
+}
+
+/** Punkte je Anforderung = Gewicht × (voll 1, teilweise 0,5, fehlt 0). Ergebnis round(100·Σ/Σw), wie atsScore_. */
+function compareScore_(reqs) {
+  let tot = 0, got = 0;
+  const rows = reqs.map(function (r) {
+    const p = r.w * MATCH_SCORE[r.match];
+    tot += r.w; got += p;
+    return { name: r.name, w: r.w, match: r.match, beleg: r.beleg || '', points: p };
+  });
+  return { pct: tot ? Math.round(100 * got / tot) : 0, rows: rows };
+}
+
+/**
+ * Auswertung je Anzeige: Prozent von Qwen und Claude, Differenz, Reise. Dazu Durchschnitt über alle Anzeigen,
+ * die beide Bewerter haben. rows: {id, company, role, by, art, name, w, points}.
+ */
+function compareReport_(rows) {
+  const ads = {}, order = [];
+  rows.forEach(function (r) {
+    if (!r.id) return;
+    let a = ads[r.id];
+    if (!a) { a = ads[r.id] = { id: r.id, company: r.company, role: r.role, got: {}, tot: {}, reise: {} }; order.push(r.id); }
+    if (r.art === 'Reise') { a.reise[r.by] = r.name; return; }
+    a.tot[r.by] = (a.tot[r.by] || 0) + r.w;
+    a.got[r.by] = (a.got[r.by] || 0) + r.points;
+  });
+  const pct = function (a, by) { return a.tot[by] ? Math.round(100 * a.got[by] / a.tot[by]) : ''; };
+  let n = 0, sumAbs = 0, sum = 0;
+  const lines = order.map(function (id) {
+    const a = ads[id], q = pct(a, 'Qwen'), c = pct(a, 'Claude');
+    const diff = q !== '' && c !== '' ? q - c : '';
+    if (diff !== '') { n++; sumAbs += Math.abs(diff); sum += diff; }
+    const rq = a.reise.Qwen || '', rc = a.reise.Claude || '';
+    const reise = rq && rc && rq.toLowerCase() !== rc.toLowerCase() ? 'Qwen: ' + rq + ' | Claude: ' + rc : (rc || rq);
+    return [a.id, a.company, a.role, q, c, diff, reise];
+  });
+  const r1 = function (x) { return Math.round(x * 10) / 10; };
+  return { lines: lines, stats: { n: n, avgAbs: n ? r1(sumAbs / n) : '', avgSigned: n ? r1(sum / n) : '' } };
+}
+
+function compareSheet_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let cs = ss.getSheetByName(COMPARE);
+  if (!cs) {
+    cs = ss.insertSheet(COMPARE);
+    cs.getRange(1, 1, 1, COMPARE_HEAD.length).setValues([COMPARE_HEAD]).setFontWeight('bold');
+    cs.setFrozenRows(1);
+    cs.setColumnWidth(7, 420);
+    cs.setColumnWidth(11, 420);
+  }
+  return cs;
+}
+
+/** Tab „ATS-Auswertung“ komplett neu schreiben (rechnet das Skript, keine Tabellenformeln). */
+function refreshCompareReport_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const cs = compareSheet_();
+  const last = cs.getLastRow();
+  const v = last < 2 ? [] : cs.getRange(2, 1, last - 1, COMPARE_HEAD.length).getValues();
+  const rep = compareReport_(v.map(function (r) {
+    return { id: String(r[0]), company: String(r[1]), role: String(r[2]), by: String(r[3]), art: String(r[5]), name: String(r[6]), w: Number(r[7]) || 0, points: Number(r[9]) || 0 };
+  }));
+  let rs = ss.getSheetByName(REPORT);
+  if (!rs) { rs = ss.insertSheet(REPORT); rs.setFrozenRows(1); rs.setColumnWidth(7, 320); }
+  rs.clearContents();
+  const head = ['ID', 'Firma', 'Stelle', 'Qwen %', 'Claude %', 'Differenz (Qwen minus Claude)', 'Reise'];
+  rs.getRange(1, 1, 1, head.length).setValues([head]).setFontWeight('bold');
+  if (rep.lines.length) {
+    rs.getRange(2, 1, rep.lines.length, head.length).setValues(rep.lines.map(function (l) {
+      return [textCell_(l[0]), textCell_(l[1]), textCell_(l[2]), l[3], l[4], l[5], textCell_(l[6])];
+    }));
+  }
+  rs.getRange(1, 9, 3, 2).setValues([
+    ['Verglichene Anzeigen', rep.stats.n],
+    ['Ø Abweichung (Betrag, Prozentpunkte)', rep.stats.avgAbs],
+    ['Ø Differenz Qwen minus Claude (Prozentpunkte)', rep.stats.avgSigned]
+  ]);
+  rs.getRange(1, 9, 3, 1).setFontWeight('bold');
+}
+
+/**
+ * Bewertung einer Anzeige speichern. data = {id, by: "Qwen"|"Claude", model, reise, reqs: [{name, w, match, beleg}]}.
+ * Ersetzt frühere Zeilen desselben Bewerters für diese Anzeige. Ändert nichts im Blatt „Bewerbungen“.
+ */
+function apiSaveAtsCompare(key, data) {
+  check_(key);
+  const d = parseCompare_(data);
+  return withLock_(function () {
+    const sh = sheet_(), map = colMap_(sh);
+    const r = findRow_(sh, map, d.id);
+    if (!r) throw new Error('Job nicht gefunden.');
+    const job = rowToJob_(sh.getRange(r, 1, 1, sh.getLastColumn()).getValues()[0], map);
+    const res = compareScore_(d.reqs);
+    const cs = compareSheet_();
+    const last = cs.getLastRow();
+    if (last >= 2) {
+      const v = cs.getRange(2, 1, last - 1, 4).getValues();
+      for (let i = v.length - 1; i >= 0; i--) if (String(v[i][0]) === d.id && String(v[i][3]) === d.by) cs.deleteRow(i + 2);
+    }
+    const when = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'dd.MM.yyyy HH:mm');
+    const lead = [textCell_(d.id), textCell_(job.company), textCell_(job.role), d.by, textCell_(when)];
+    const rows = res.rows.map(function (x) {
+      return lead.concat(['Anforderung', textCell_(x.name), x.w, x.match, x.points, textCell_(x.beleg)]);
+    });
+    rows.push(lead.concat(['Reise', textCell_(d.reise), 0, '', 0, textCell_(d.model ? 'Modell: ' + d.model : '')]));
+    const start = cs.getLastRow() + 1;
+    cs.getRange(start, 1, rows.length, COMPARE_HEAD.length).setValues(rows);
+    cs.getRange(start + rows.length - 1, 1, 1, COMPARE_HEAD.length).setBackground('#fff2cc'); // Reise-Zeile gelb
+    refreshCompareReport_();
+    return { pct: res.pct, message: 'ATS ' + res.pct + ' % (' + d.by + ') · ' + (job.company || '') + ' – ' + (job.role || '') };
+  });
+}
+
+/** „12.11.2026 06:16:33“ -> „2026-11-12“, sonst leer. */
+function germanIso_(s) {
+  const m = String(s || '').match(/^\s*(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+  return m ? m[3] + '-' + ('0' + m[2]).slice(-2) + '-' + ('0' + m[1]).slice(-2) : '';
+}
+
+/**
+ * Anzeigen, die der Bewerter (by) noch nicht bewertet hat. data = {by, since: "JJJJ-MM-TT" und/oder ids: [...], limit}.
+ * Ohne since und ohne ids passiert nichts (Schutz davor, versehentlich alle alten Anzeigen zu bewerten).
+ * Übersprungen werden Anzeigen ohne Job im Blatt und Jobs mit Status „Nicht bewerben“.
+ */
+function apiAtsPending(key, data) {
+  check_(key);
+  data = data || {};
+  const by = String(data.by || 'Qwen');
+  if (COMPARE_BY.indexOf(by) < 0) throw new Error('Bewerter muss „Qwen“ oder „Claude“ sein.');
+  const ids = Array.isArray(data.ids) ? data.ids.map(String) : null;
+  const since = /^\d{4}-\d{2}-\d{2}$/.test(String(data.since || '')) ? String(data.since) : '';
+  if (!ids && !since) throw new Error('„since“ (JJJJ-MM-TT) oder „ids“ fehlt.');
+  const limit = Math.max(1, Math.min(Number(data.limit) || 5, 20));
+  const sh = sheet_(), map = colMap_(sh);
+  const jobs = {};
+  const lj = sh.getLastRow();
+  if (lj >= 2) sh.getRange(2, 1, lj - 1, sh.getLastColumn()).getValues().forEach(function (row) { const j = rowToJob_(row, map); if (j.id) jobs[j.id] = j; });
+  const done = {};
+  const cs = compareSheet_(), lc = cs.getLastRow();
+  if (lc >= 2) cs.getRange(2, 1, lc - 1, 4).getValues().forEach(function (r) { if (String(r[3]) === by) done[String(r[0])] = 1; });
+  const ps = postingsSheet_(), lp = ps.getLastRow();
+  const items = [];
+  let pending = 0;
+  if (lp >= 2) {
+    ps.getRange(2, 1, lp - 1, 4).getValues().forEach(function (v) {
+      const id = String(v[0]), job = jobs[id];
+      if (!job || job.status === NOT_APPLYING || done[id]) return;
+      if (ids && ids.indexOf(id) < 0) return;
+      if (since) { const day = v[2] instanceof Date ? iso_(v[2]) : germanIso_(v[2]); if (!day || day < since) return; }
+      pending++;
+      if (items.length < limit) items.push({ id: id, company: job.company, role: job.role, url: String(v[1]), text: normalizePosting_(v[3]) });
+    });
+  }
+  return { items: items, pending: pending };
+}
+
+/** Dein Profil im Originaltext für die lokale Bewertung: full = belegt, basic = nur Grundlagen. */
+function apiAtsProfile(key) {
+  check_(key);
+  const p = profileLines_();
+  return { full: p.full.join('\n'), basic: p.basic.join('\n') };
+}
+
+/** Tab „ATS-Auswertung“ neu berechnen, z. B. nachdem Claude Zeilen direkt in „ATS-Vergleich“ geschrieben hat. */
+function apiAtsRefresh(key) {
+  check_(key);
+  return withLock_(function () {
+    refreshCompareReport_();
+    return { message: 'ATS-Auswertung aktualisiert' };
   });
 }
 

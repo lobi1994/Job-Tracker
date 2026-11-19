@@ -11,6 +11,35 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.50 – 19.11.2026 (nur App) – Mail-Hinweis erscheint schneller
+- Der Hinweis „x neue Rückmeldungen per Mail“ erscheint jetzt sofort beim Öffnen der App. Er zeigt den Stand vom letzten Mal und wird danach aktualisiert.
+- Die App fragt die Mail-Vorschläge gleichzeitig mit der Jobliste ab. Vorher kam die zweite Abfrage erst, wenn die erste fertig war.
+- Das Fenster „Rückmeldung per Mail“ öffnet sich weiter automatisch, aber erst mit der frischen Antwort. So wird kein Vorschlag angenommen, der schon erledigt ist. Tippst du auf den Hinweis, bevor die frische Antwort da ist, wartet die App kurz darauf.
+- Beim Trennen der Verbindung oder beim Wechsel auf ein anderes Konto wird der gemerkte Stand gelöscht.
+
+**Apps Script: Bereitstellen nötig: nein**
+
+## 1.6.49 – 19.11.2026 (nur Apps Script) – ATS-Auswertung aktualisieren
+- Neue Funktion `apiAtsRefresh`: Sie berechnet den Tab „ATS-Auswertung“ neu. Das braucht es, weil Claude seine Zeilen direkt in den Tab „ATS-Vergleich“ schreibt (er hat keinen Schlüssel). Das Mac-Programm ruft sie bei jedem Lauf auf, damit Claudes Prozentwerte in der Auswertung erscheinen.
+- Sonst ändert sich nichts.
+
+**Apps Script: Bereitstellen nötig: ja** (Code.gs)
+Beschreibung für die Bereitstellung: `1.6.49 ATS-Auswertung aktualisieren`
+**App und Kurzbefehl: nichts zu tun**
+
+## 1.6.48 – 19.11.2026 (nur Apps Script) – ATS-Vergleich Qwen und Claude
+- Neuer Tab „ATS-Vergleich“: Für jede Anzeige steht dort, wie ein lokales Modell (Qwen) und Claude sie bewerten, getrennt voneinander. Jede Anforderung hat ein Gewicht (Pflicht = 2, sonst 1), eine Einstufung (voll, teilweise, fehlt) und Punkte. Die Rechnung ist dieselbe wie bei der ATS-Bewertung: voll = 1, teilweise = 0,5.
+- Die Reise steht in einer eigenen gelben Zeile und zählt nicht für den Wert. Anforderungen mit „Reise“ im Namen werden beim Speichern aussortiert.
+- Neuer Tab „ATS-Auswertung“: pro Anzeige die Prozent von Qwen und Claude, die Differenz und die Reise. Rechts oben steht die durchschnittliche Abweichung. Das Skript rechnet das selbst, im Blatt sind keine Formeln.
+- Dein Fit-Wert und der CV-Auftrag werden nicht verändert. Der Vergleich ist nur dafür da, dass du dich später entscheiden kannst.
+- Neue Funktionen für den Mac und die Claude-Aufgabe: Bewertung speichern, offene Anzeigen holen, Profil holen. Offene Anzeigen gibt es nur mit einem Startdatum, damit nie versehentlich alle alten Anzeigen bewertet werden.
+- Beide Tabs legt das Skript beim ersten Speichern selbst an.
+- Neuer Ordner `lokal/`: Ein Programm für den Mac holt neue Anzeigen, lässt Qwen3 (über Ollama) sie gegen dein Profil prüfen und speichert das Ergebnis im Tab „ATS-Vergleich“. Es läuft stündlich über launchd, ist aber erst aktiv, wenn du `lokal/installieren.sh` ausführst. Link und Schlüssel stehen nur in `~/.careerway/config.json` auf deinem Mac. Das Programm lehnt jeden Link ab, der nicht die Web-App-URL aus Apps Script ist. Anleitung: `lokal/README.md`.
+
+**Apps Script: Bereitstellen nötig: ja** (Code.gs)
+Beschreibung für die Bereitstellung: `1.6.48 ATS-Vergleich Qwen und Claude`
+**App und Kurzbefehl: nichts zu tun**
+
 ## 1.6.47 – 19.11.2026 (App und Apps Script) – ATS-Bewertung ohne Claude
 - Neuer, optionaler Teil im Kurzbefehl „Job speichern“: Apple Intelligence („Modell verwenden“, Private Cloud Compute) liest die Anzeige und macht daraus eine Liste der Anforderungen.
 - Das Apps Script rechnet daraus den ATS-Wert in Prozent und trägt ihn samt Kurzbegründung beim Job ein. Ein Begriff, den du nur als „Grundlagen“ kannst, zählt halb.
