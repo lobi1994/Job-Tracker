@@ -11,6 +11,13 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.53 – 24.11.2026 (nur App) – Ansprechperson und Gehalt sauberer
+- Das Gehalt steht jetzt nur noch als „Gehalt“ mit den Zahlen, zum Beispiel „90.000–105.000 USD“. Der lange Satz aus der Anzeige ist weg. Auch Angaben wie „90–105k USD“ werden erkannt.
+- Die Ansprechperson wird jetzt auch gefunden, wenn sie mitten im Satz steht, zum Beispiel „Hiring contact: Name (Rolle)“.
+- Die App liest zusätzlich deine Notizen. Steht dort ein LinkedIn-Link der Person, führt der Knopf direkt zum Profil.
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.6.52 – 24.11.2026 (nur App) – Ansprechperson und Gehaltsspanne oben in der Anzeige
 - In der Stellenausschreibung erscheint direkt unter den Skills ein neuer Block. Er zeigt die Ansprechperson (HR oder Hiring Manager) mit Rolle, E-Mail, Telefon und einem Knopf zum LinkedIn-Profil. Steht ein LinkedIn-Link im Anzeigentext, führt der Knopf direkt dorthin. Sonst öffnet er die LinkedIn-Suche mit Name und Firma.
 - Eine genannte Gehaltsspanne wird groß und farbig hervorgehoben, mit dem Satz aus der Anzeige darunter.

@@ -77,6 +77,16 @@ await test('A-f2 extractPostingMeta: Ansprechperson und Gehaltsspanne', () => {
   const d = ev(`metaHtml(extractPostingMeta("Kontakt: Max Muster"), "Firma GmbH")`);
   assert.ok(/linkedin\.com\/search\/results\/people/.test(d));
 });
+await test('A-f3 extractPostingMeta: Hiring contact mitten im Satz, Gehalt ohne Satz', () => {
+  const m = ev(`extractPostingMeta("Technical PM. 90.000–105.000 USD + Stock Options. Remote. Hiring contact: Yesenia Parker (Sr. Director of People Operations).\\nHiring contact: Yesenia Parker (Sr. Director People Ops) https://www.linkedin.com/in/yeseniaparker/; Mail bestätigt")`);
+  assert.equal(m.contacts.length, 1); assert.equal(m.contacts[0].name, 'Yesenia Parker');
+  assert.equal(m.contacts[0].role, 'Sr. Director of People Operations');
+  assert.ok(/linkedin\.com\/in\/yeseniaparker/.test(m.contacts[0].linkedin));
+  assert.equal(m.salary.range, '90.000–105.000 USD');
+  const h = ev(`metaHtml(extractPostingMeta("Gehalt 90.000–105.000 USD pro Jahr, viele Worte drumherum."), "X")`);
+  assert.ok(/Gehalt<\/span> <b>90\.000–105\.000 USD<\/b><\/div>/.test(h) && !/viele Worte/.test(h), h);
+  assert.equal(ev(`extractPostingMeta("Notiz 90–105k USD").salary.range`), '90–105k USD');
+});
 await test('A-g computeGaps', () => {
   const r = ev(`computeGaps([{id:'1',role:'Projektmanager',status:'Beworben',company:'A'},{id:'2',role:'Support',status:'Nicht bewerben',company:'B'}], [{id:'1',text:'Sehr gute SQL-Kenntnisse. Python ist von Vorteil.'},{id:'2',text:'SAP erforderlich'}], [])`);
   assert.equal(r.total, 1);

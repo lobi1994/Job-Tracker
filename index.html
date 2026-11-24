@@ -353,7 +353,7 @@ html,body{overflow-x:hidden;overflow-x:clip}body{max-width:100%}
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.52', NEED_SCRIPT = '1.6.44'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.53', NEED_SCRIPT = '1.6.44'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Careerway ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
@@ -1493,7 +1493,7 @@ async function openPosting(j) {
       : en ? '' : '<div class="trnote notr" id="trWait">🌐 Translating to English …</div>');
     const f = p ? formatPosting(p.text) : null;
     openSheet(head('Stellenausschreibung', j.company + ' · ' + j.role + (p ? (LANG === 'en' ? ' · saved ' : ' · gespeichert ') + fmtDate(p.savedAt) : ''), '') +
-      note + (f ? f.nav + '<div id="pFmt">' + skillsHtml(extractSkills(htmlText(p.text), profile)) + metaHtml(extractPostingMeta(htmlText(p.text)), j.company) + f.html + '</div><div id="pRaw" class="ptext" hidden>' + esc(htmlText(p.text)) + '</div>' +
+      note + (f ? f.nav + '<div id="pFmt">' + skillsHtml(extractSkills(htmlText(p.text), profile)) + metaHtml(extractPostingMeta(htmlText(p.text) + '\n' + String(j.notes || '')), j.company) + f.html + '</div><div id="pRaw" class="ptext" hidden>' + esc(htmlText(p.text)) + '</div>' +
         '<button class="toggle" id="pToggle">Originaltext anzeigen</button>' : '<p>Nichts gespeichert.</p>'),
       '<button class="ib" id="tBack">Zurück</button>' + (p && webUrl(p.url) ? '<a class="ib" href="' + esc(webUrl(p.url)) + '" target="_blank" rel="noopener" data-ext="1">Original öffnen</a>' : ''));
     $('tBack').onclick = () => openDetail(j.id);
@@ -1724,7 +1724,7 @@ function skillsHtml(sk) {
    Gibt es nichts, bleibt der Block ganz weg. */
 const CUR = '(?:€|EUR|£|GBP|\\$|USD|CHF)';
 const NUM = '\\d{1,3}(?:[.,\' ]\\d{3})+|\\d{2,3}\\s?[kK]\\b|\\d{4,6}';
-const SAL_RANGE = new RegExp('(?:' + CUR + '\\s?(?:' + NUM + ')\\s?(?:-|–|—|bis|to|und|and)\\s?(?:' + CUR + '\\s?)?(?:' + NUM + ')(?:\\s?' + CUR + ')?)|(?:(?:' + NUM + ')\\s?' + CUR + '?\\s?(?:-|–|—|bis|to|und|and)\\s?(?:' + NUM + ')\\s?' + CUR + ')', 'i');
+const SAL_RANGE = new RegExp('(?:\\d{2,3}\\s?(?:-|–|—|bis|to)\\s?\\d{2,3}\\s?[kK]\\b\\s?' + CUR + '?)|(?:' + CUR + '\\s?(?:' + NUM + ')\\s?(?:-|–|—|bis|to|und|and)\\s?(?:' + CUR + '\\s?)?(?:' + NUM + ')(?:\\s?' + CUR + ')?)|(?:(?:' + NUM + ')\\s?' + CUR + '?\\s?(?:-|–|—|bis|to|und|and)\\s?(?:' + NUM + ')\\s?' + CUR + ')', 'i');
 const SAL_KEY = /gehalt|salary|vergütung|verguetung|compensation|brutto|jahresgehalt|p\.\s?a\.|per (year|annum)|pro jahr|jährlich|annual|bandbreite|spanne|range|pay\b|monat|month/i;
 function numVal(s) { // „65.000“, „65,000“, „65k“ → 65000
   const m = String(s).match(/(\d{1,3}(?:[.,' ]\d{3})+|\d+)\s?(k)?/i); if (!m) return 0;
@@ -1735,7 +1735,8 @@ function findSalary(lines) {
   for (const raw of lines) {
     const l = raw.replace(/^[-•*\s]+/, '').trim(); if (!l || l.length > 400) continue;
     const m = l.match(SAL_RANGE); if (!m) continue;
-    const vals = (m[0].match(new RegExp(NUM, 'gi')) || []).map(numVal);
+    let vals = (m[0].match(/\d{1,3}(?:[.,' ]\d{3})+|\d+/g) || []).map(numVal);
+    if (/\dk\b|\d\sk\b/i.test(m[0])) vals = vals.map((v) => (v < 1000 ? v * 1000 : v));
     if (vals.length < 2) continue;
     const lo = Math.min(...vals), hi = Math.max(...vals);
     const plausibleYear = lo >= 20000 && hi <= 500000, plausibleMonth = lo >= 1500 && hi <= 25000;
@@ -1770,13 +1771,19 @@ function findContacts(lines) {
         if (m && !NOT_NAME.test(m[1])) {
           name = m[1].trim();
           const rest = w.slice(m[0].length).replace(/^\s*[,–—|·(-]\s*/, '').replace(/\)$/, '').trim();
-          if (rest && rest.length < 60 && !/[@\d]/.test(rest)) role = rest;
+          if (rest && rest.length < 60 && !/[@\d]/.test(rest)) role = rest.split(/\.\s/)[0];
           else if (!role && win[k + 1] && win[k + 1].length < 60 && !/[@\d:\/]/.test(win[k + 1])) role = win[k + 1];
         }
       }
     });
     add({ name, role, email, phone, linkedin });
   }
+  // Inline: „Hiring contact: Anna Beispiel (Sr. Director People Ops) https://linkedin.com/in/…“ mitten in einer Zeile
+  const INLINE = /(?:hiring\s+contact|hiring\s+manager|recruiter(?:in)?|recruiting\s+contact|ansprechpartner(?:in)?|ansprechperson|contact\s+person|kontaktperson)\s*[:–-]\s*((?:(?:Herr|Frau|Mr\.?|Ms\.?|Mrs\.?|Dr\.?)\s+)?[A-ZÄÖÜ][\p{L}'’.-]+(?:\s+[A-ZÄÖÜ][\p{L}'’.-]+){1,2})(?:\s*\(([^)\n]{2,80})\)|\s*[,–]\s*([^\n.;(]{2,60}))?/iu;
+  lines.forEach((l) => {
+    const m = l.match(INLINE); if (!m || NOT_NAME.test(m[1])) return;
+    add({ name: m[1].trim(), role: (m[2] || m[3] || '').trim(), email: emailOf(l), phone: phoneOf(l), linkedin: liOf(l) });
+  });
   lines.map(liOf).filter(Boolean).forEach((u) => {
     if (out.some((o) => o.linkedin === u)) return;
     const o = out.find((x) => !x.linkedin); if (o && out.length === 1) o.linkedin = u; else add({ name: '', role: '', email: '', phone: '', linkedin: u });
@@ -1794,9 +1801,9 @@ function metaHtml(meta, company) {
   const ppl = meta.contacts.map((c) => '<div class="mc"><b>' + esc(c.name || 'Ansprechperson') + '</b>' + (c.role ? ' <span class="sub">· ' + esc(c.role) + '</span>' : '') +
     '<div class="mcl">' + (c.email ? '<a class="ib" href="mailto:' + esc(c.email) + '">' + esc(c.email) + '</a>' : '') +
     (c.phone ? '<a class="ib" href="tel:' + esc(c.phone.replace(/[^\d+]/g, '')) + '">' + esc(c.phone) + '</a>' : '') + li(c) + '</div></div>').join('');
-  const sal = meta.salary ? '<div class="msal"><span class="sub">Gehaltsspanne</span> <b>' + esc(meta.salary.range) + '</b>' + (meta.salary.line.length > meta.salary.range.length + 4 ? '<div class="sub">' + esc(meta.salary.line) + '</div>' : '') + '</div>' : '';
+  const sal = meta.salary ? '<div class="msal"><span class="sub">Gehalt</span> <b>' + esc(meta.salary.range) + '</b></div>' : '';
   return '<section class="psec metasec" id="psecMeta" style="--pc:var(--s4)">' +
-    (meta.contacts.length ? '<h3>Ansprechperson (HR / Hiring Manager)</h3>' + ppl : '') + (sal ? (meta.contacts.length ? '' : '<h3>Gehalt</h3>') + sal : '') + '</section>';
+    (meta.contacts.length ? '<h3>Ansprechperson (HR / Hiring Manager)</h3>' + ppl : '') + sal + '</section>';
 }
 
 /* ---------- Stellenausschreibung gegliedert anzeigen ----------
