@@ -268,7 +268,8 @@ await test('A-y Skill-Lücken: Kann ich doch speichern', async () => {
 await test('A-appUrl', () => {
   assert.equal(ev(`appUrl('https://drive.google.com/file/d/abc/view?usp=drivesdk')`), 'googledrive://https://drive.google.com/file/d/abc/view?usp=drivesdk');
   assert.equal(ev(`appUrl('https://docs.google.com/spreadsheets/d/xyz/edit#gid=0')`), 'googledrive://https://docs.google.com/spreadsheets/d/xyz/edit#gid=0');
-  assert.equal(ev(`appUrl('https://www.linkedin.com/jobs/view/4488834282/')`), 'linkedin://jobs/view/4488834282');
+  assert.equal(ev(`appUrl('https://www.linkedin.com/jobs/view/4488834282/')`), null);
+  assert.equal(ev(`appUrl('https://de.linkedin.com/jobs/search/?currentJobId=4123456789')`), null);
   assert.equal(ev(`appUrl('https://example.com/x')`), null);
   assert.equal(ev(`appUrl('https://evil.com/drive.google.com/x')`), null);
 });

@@ -11,6 +11,13 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.51 – 24.11.2026 (nur App) – LinkedIn-Stellen wieder in Safari
+- LinkedIn-Anzeigen öffnen auf dem iPhone und iPad wieder in Safari statt in der LinkedIn-App.
+- Grund: Nur in Safari funktioniert der Kurzbefehl „Job speichern“.
+- Google-Drive-Links springen weiter in die Drive-App.
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.6.50 – 19.11.2026 (nur App) – Mail-Hinweis erscheint schneller
 - Der Hinweis „x neue Rückmeldungen per Mail“ erscheint jetzt sofort beim Öffnen der App. Er zeigt den Stand vom letzten Mal und wird danach aktualisiert.
 - Die App fragt die Mail-Vorschläge gleichzeitig mit der Jobliste ab. Vorher kam die zweite Abfrage erst, wenn die erste fertig war.

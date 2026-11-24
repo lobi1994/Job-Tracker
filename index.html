@@ -351,7 +351,7 @@ html,body{overflow-x:hidden;overflow-x:clip}body{max-width:100%}
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.50', NEED_SCRIPT = '1.6.44'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.51', NEED_SCRIPT = '1.6.44'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Careerway ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
@@ -1165,8 +1165,8 @@ $('bEdit').onclick = () => {
   };
 };
 
-/* Stellenausschreibungen auf iPhone/iPad immer in Safari öffnen (nicht in der LinkedIn-App o. Ä.).
-   x-safari-https:// öffnet ab iOS 17 direkt Safari; dort greift „Job speichern“. */
+/* Stellenausschreibungen auf iPhone/iPad immer in Safari öffnen (auch LinkedIn, nicht in der LinkedIn-App).
+   x-safari-https:// öffnet ab iOS 17 direkt Safari; nur dort greift der Kurzbefehl „Job speichern“. */
 const IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 // LinkedIn-Job-ID aus einem Link ziehen (…/jobs/view/<titel>-<id> oder ?currentJobId=<id>), sonst null
 function linkedInJobId(url) {
@@ -1175,11 +1175,10 @@ function linkedInJobId(url) {
   const m = u.match(/\/jobs\/view\/(?:[^/?#]*-)?(\d{6,})/) || u.match(/[?&]currentJobId=(\d{6,})/);
   return m ? m[1] : null;
 }
-// App-URL für den iOS-Direktsprung (LinkedIn-Job, Google Drive/Docs), sonst null
+// App-URL für den iOS-Direktsprung: nur Google Drive/Docs, sonst null.
+// LinkedIn bleibt bewusst in Safari, weil nur dort der Kurzbefehl „Job speichern“ funktioniert.
 function appUrl(url) {
   const u = String(url || '').trim();
-  const lid = linkedInJobId(u);
-  if (lid) return 'linkedin://jobs/view/' + lid;
   if (/^https:\/\/(drive|docs)\.google\.com(\/|\?|#|$)/i.test(u)) return 'googledrive://' + u;
   return null;
 }
@@ -1188,7 +1187,7 @@ function openExt(url) {
   if (!url) { toast('Kein gültiger Link (muss mit https:// beginnen).'); return; }
   const app = IOS ? appUrl(url) : null;
   if (app) {
-    // Die App-Schemas (linkedin://jobs/view/<id>, googledrive://<https-Link>) sind nicht offiziell dokumentiert. Greift es nicht (Seite bleibt sichtbar),
+    // Das App-Schema (googledrive://<https-Link>) ist nicht offiziell dokumentiert. Greift es nicht (Seite bleibt sichtbar),
     // öffnet nach 1,5 s wie bisher Safari. Wechselt iOS in die App, wird die Seite unsichtbar und der Timer abgebrochen.
     let t = 0;
     const stop = () => { clearTimeout(t); document.removeEventListener('visibilitychange', onVis); window.removeEventListener('pagehide', stop); };
