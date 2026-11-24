@@ -11,6 +11,14 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.52 – 24.11.2026 (nur App) – Ansprechperson und Gehaltsspanne oben in der Anzeige
+- In der Stellenausschreibung erscheint direkt unter den Skills ein neuer Block. Er zeigt die Ansprechperson (HR oder Hiring Manager) mit Rolle, E-Mail, Telefon und einem Knopf zum LinkedIn-Profil. Steht ein LinkedIn-Link im Anzeigentext, führt der Knopf direkt dorthin. Sonst öffnet er die LinkedIn-Suche mit Name und Firma.
+- Eine genannte Gehaltsspanne wird groß und farbig hervorgehoben, mit dem Satz aus der Anzeige darunter.
+- Gefunden wird nur, was wörtlich in der Anzeige steht. Gibt es nichts, erscheint der Block gar nicht.
+- Das LinkedIn-Profil kann die App nicht automatisch holen, weil LinkedIn dafür eine Anmeldung verlangt.
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.6.51 – 24.11.2026 (nur App) – LinkedIn-Stellen wieder in Safari
 - LinkedIn-Anzeigen öffnen auf dem iPhone und iPad wieder in Safari statt in der LinkedIn-App.
 - Grund: Nur in Safari funktioniert der Kurzbefehl „Job speichern“.

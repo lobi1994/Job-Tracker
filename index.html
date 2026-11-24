@@ -126,6 +126,8 @@ main{padding:12px 16px calc(env(safe-area-inset-bottom) + 90px);max-width:820px;
 .psec ul{margin:6px 0;padding-left:20px}
 .psec li{margin:5px 0;font-size:15px;line-height:1.5}
 .sks{display:flex;flex-wrap:wrap;gap:6px}
+.metasec .mc{margin:6px 0}.metasec .mcl{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}.metasec .mcl .ib{font-size:13px;padding:5px 10px;text-decoration:none}
+.msal{margin:8px 0 2px;padding:8px 12px;border-radius:10px;background:rgba(255,184,0,.16);color:var(--ink);border:1px solid var(--s4)}.msal b{font-size:19px}
 .sync{font-size:12px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:42vw}.sync.warn{color:#d6b25e}
 .gapsec{margin:14px 0 6px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
 .gap{border:1px solid var(--line);border-radius:12px;margin:8px 0;background:var(--card)}
@@ -351,7 +353,7 @@ html,body{overflow-x:hidden;overflow-x:clip}body{max-width:100%}
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.51', NEED_SCRIPT = '1.6.44'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.52', NEED_SCRIPT = '1.6.44'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Careerway ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
@@ -433,7 +435,7 @@ const EN = {
   'Text der Stellenausschreibung einfügen': 'Paste job posting text', 'Text der Stellenausschreibung': 'Job posting text',
   'Bitte den ganzen Text der Stellenausschreibung einfügen.': 'Please paste the full job posting text.',
   'Originaltext anzeigen': 'Show original text', 'Gegliederte Ansicht': 'Structured view', 'Original öffnen': 'Open original', 'Nichts gespeichert.': 'Nothing saved.', 'Lade …': 'Loading …',
-  'Skills': 'Skills', 'Hard Skills': 'Hard skills', 'Soft Skills': 'Soft skills', 'Skills aus der Stellenausschreibung': 'Skills from the job posting',
+  'Skills': 'Skills', 'Hard Skills': 'Hard skills', 'Soft Skills': 'Soft skills', 'Skills aus der Stellenausschreibung': 'Skills from the job posting', 'Ansprechperson (HR / Hiring Manager)': 'Contact (HR / hiring manager)', 'Ansprechperson': 'Contact person', 'Gehaltsspanne': 'Salary range', 'Gehalt': 'Salary', 'LinkedIn-Profil ↗': 'LinkedIn profile ↗', 'Auf LinkedIn suchen ↗': 'Search on LinkedIn ↗',
   '✓ = steht in deinem Profil (Tabelle, Blatt „Profil“). Grau = fehlt dort – ggf. ergänzen, wenn du es kannst.': '✓ = in your profile (sheet “Profil”). Grey = missing there – add it if you have it.',
   'Aufgaben': 'Tasks', 'Profil': 'Profile', 'Benefits': 'Benefits', 'Über die Firma': 'About the company', 'Bewerbung & Kontakt': 'Application & contact', 'Weitere Informationen': 'More information',
   'Analytisches Denken': 'Analytical thinking', 'Strukturiertes Arbeiten': 'Structured working', 'Interkulturelle Kompetenz': 'Intercultural competence', 'Agile Methoden': 'Agile methods',
@@ -1491,7 +1493,7 @@ async function openPosting(j) {
       : en ? '' : '<div class="trnote notr" id="trWait">🌐 Translating to English …</div>');
     const f = p ? formatPosting(p.text) : null;
     openSheet(head('Stellenausschreibung', j.company + ' · ' + j.role + (p ? (LANG === 'en' ? ' · saved ' : ' · gespeichert ') + fmtDate(p.savedAt) : ''), '') +
-      note + (f ? f.nav + '<div id="pFmt">' + skillsHtml(extractSkills(htmlText(p.text), profile)) + f.html + '</div><div id="pRaw" class="ptext" hidden>' + esc(htmlText(p.text)) + '</div>' +
+      note + (f ? f.nav + '<div id="pFmt">' + skillsHtml(extractSkills(htmlText(p.text), profile)) + metaHtml(extractPostingMeta(htmlText(p.text)), j.company) + f.html + '</div><div id="pRaw" class="ptext" hidden>' + esc(htmlText(p.text)) + '</div>' +
         '<button class="toggle" id="pToggle">Originaltext anzeigen</button>' : '<p>Nichts gespeichert.</p>'),
       '<button class="ib" id="tBack">Zurück</button>' + (p && webUrl(p.url) ? '<a class="ib" href="' + esc(webUrl(p.url)) + '" target="_blank" rel="noopener" data-ext="1">Original öffnen</a>' : ''));
     $('tBack').onclick = () => openDetail(j.id);
@@ -1715,6 +1717,86 @@ function skillsHtml(sk) {
     (sk.hard.length ? '<h4>Hard Skills</h4><div class="sks">' + chips(sk.hard) + '</div>' : '') +
     (sk.soft.length ? '<h4>Soft Skills</h4><div class="sks">' + chips(sk.soft) + '</div>' : '') +
     '<p class="sub" style="font-size:12.5px;margin-top:8px">✓ = steht in deinem Profil (Tabelle, Blatt „Profil“). Grau = fehlt dort – ggf. ergänzen, wenn du es kannst.</p></section>';
+}
+
+/* ---------- Ansprechperson und Gehaltsspanne aus der Anzeige (seit 1.6.51) ----------
+   Nur Darstellung: Der gespeicherte Text bleibt unverändert. Gefunden wird nur, was wörtlich in der Anzeige steht.
+   Gibt es nichts, bleibt der Block ganz weg. */
+const CUR = '(?:€|EUR|£|GBP|\\$|USD|CHF)';
+const NUM = '\\d{1,3}(?:[.,\' ]\\d{3})+|\\d{2,3}\\s?[kK]\\b|\\d{4,6}';
+const SAL_RANGE = new RegExp('(?:' + CUR + '\\s?(?:' + NUM + ')\\s?(?:-|–|—|bis|to|und|and)\\s?(?:' + CUR + '\\s?)?(?:' + NUM + ')(?:\\s?' + CUR + ')?)|(?:(?:' + NUM + ')\\s?' + CUR + '?\\s?(?:-|–|—|bis|to|und|and)\\s?(?:' + NUM + ')\\s?' + CUR + ')', 'i');
+const SAL_KEY = /gehalt|salary|vergütung|verguetung|compensation|brutto|jahresgehalt|p\.\s?a\.|per (year|annum)|pro jahr|jährlich|annual|bandbreite|spanne|range|pay\b|monat|month/i;
+function numVal(s) { // „65.000“, „65,000“, „65k“ → 65000
+  const m = String(s).match(/(\d{1,3}(?:[.,' ]\d{3})+|\d+)\s?(k)?/i); if (!m) return 0;
+  const n = parseFloat(m[1].replace(/[.,' ]/g, '')); return m[2] ? n * 1000 : n;
+}
+function findSalary(lines) {
+  let best = null;
+  for (const raw of lines) {
+    const l = raw.replace(/^[-•*\s]+/, '').trim(); if (!l || l.length > 400) continue;
+    const m = l.match(SAL_RANGE); if (!m) continue;
+    const vals = (m[0].match(new RegExp(NUM, 'gi')) || []).map(numVal);
+    if (vals.length < 2) continue;
+    const lo = Math.min(...vals), hi = Math.max(...vals);
+    const plausibleYear = lo >= 20000 && hi <= 500000, plausibleMonth = lo >= 1500 && hi <= 25000;
+    if (!(plausibleYear || plausibleMonth)) continue;
+    if (!SAL_KEY.test(l) && !plausibleYear) continue;
+    const hit = { range: m[0].replace(/\s+/g, ' ').trim(), line: l, key: SAL_KEY.test(l) };
+    if (!best || (hit.key && !best.key)) best = hit;
+  }
+  return best;
+}
+const NAME_RE = /^(?:(?:Herr|Frau|Mr\.?|Ms\.?|Mrs\.?|Dr\.?|Prof\.?)\s+)*([A-ZÄÖÜ][\p{L}'’.-]+(?:\s+(?:von|van|de|der|zu|di|da)?\s*[A-ZÄÖÜ][\p{L}'’.-]+){1,3})/u;
+const CONTACT_HEAD = /^(?:ihr(?:e)?\s+)?(?:ansprechpartner(?:in)?|ansprechperson|kontakt(?:person)?|recruiter(?:in)?|recruiting|hiring\s+(?:manager|team)|meet the hiring team|talent acquisition|personalabteilung|human resources|your contact|contact person|contact|fragen zur stelle|bewerbung an|bei fragen|job poster|posted by|ihre bewerbung an)\b\s*[:–-]?\s*(.*)$/i;
+const NOT_NAME = /^(Jetzt|Bitte|Ihre|Deine|Gerne|Haben|Wir|Unser|Contact|Apply|Your|Please|Send|Reach|Für|Bei|Zur|Zum|Der|Die|Das)\b/;
+function findContacts(lines) {
+  const out = [];
+  const add = (c) => { if ((c.name || c.email || c.linkedin) && !out.some((o) => (o.name && o.name === c.name) || (o.email && o.email === c.email) || (o.linkedin && o.linkedin === c.linkedin))) out.push(c); };
+  const emailOf = (s) => { const m = String(s).match(/[\w.+-]+@[\w-]+(?:\.[\w-]+)+/); return m && !/no-?reply|donotreply|^(info|jobs?|karriere|bewerbung(en)?|career|careers|hr)@/i.test(m[0]) ? m[0] : ''; };
+  const phoneOf = (s) => { const m = String(s).match(/(?:tel\.?|telefon|phone|mobil|fon)[:.\s]*(\+?\d[\d\s()\/.-]{7,}\d)/i); return m ? m[1].trim() : ''; };
+  const liOf = (s) => { const m = String(s).match(/https?:\/\/(?:[a-z]{2,3}\.)?linkedin\.com\/in\/[\w%-]+/i); return m ? m[0] : ''; };
+  const clean = (x) => x.replace(/^[-•*\s]+/, '').trim();
+  for (let i = 0; i < lines.length; i++) {
+    const t = clean(lines[i]); if (!t || t.length > 160) continue;
+    const h = t.match(CONTACT_HEAD); if (!h) continue;
+    const win = [h[1] || ''].concat(lines.slice(i + 1, i + 7).map(clean)).filter(Boolean);
+    let name = '', role = '', email = '', phone = '', linkedin = '';
+    win.forEach((w, k) => {
+      if (!email) email = emailOf(w);
+      if (!phone) phone = phoneOf(w);
+      if (!linkedin) linkedin = liOf(w);
+      if (!name && k < 3) {
+        const m = w.match(NAME_RE);
+        if (m && !NOT_NAME.test(m[1])) {
+          name = m[1].trim();
+          const rest = w.slice(m[0].length).replace(/^\s*[,–—|·(-]\s*/, '').replace(/\)$/, '').trim();
+          if (rest && rest.length < 60 && !/[@\d]/.test(rest)) role = rest;
+          else if (!role && win[k + 1] && win[k + 1].length < 60 && !/[@\d:\/]/.test(win[k + 1])) role = win[k + 1];
+        }
+      }
+    });
+    add({ name, role, email, phone, linkedin });
+  }
+  lines.map(liOf).filter(Boolean).forEach((u) => {
+    if (out.some((o) => o.linkedin === u)) return;
+    const o = out.find((x) => !x.linkedin); if (o && out.length === 1) o.linkedin = u; else add({ name: '', role: '', email: '', phone: '', linkedin: u });
+  });
+  return out.slice(0, 3);
+}
+function extractPostingMeta(text) {
+  const lines = String(text || '').replace(/\r/g, '').split('\n');
+  return { contacts: findContacts(lines), salary: findSalary(lines) };
+}
+function metaHtml(meta, company) {
+  if (!meta || (!meta.contacts.length && !meta.salary)) return '';
+  const li = (c) => c.linkedin ? '<a class="ib" href="' + esc(c.linkedin) + '" target="_blank" rel="noopener" data-ext="1">LinkedIn-Profil ↗</a>'
+    : c.name ? '<a class="ib" href="https://www.linkedin.com/search/results/people/?keywords=' + encodeURIComponent((c.name + ' ' + (company || '')).trim()) + '" target="_blank" rel="noopener" data-ext="1">Auf LinkedIn suchen ↗</a>' : '';
+  const ppl = meta.contacts.map((c) => '<div class="mc"><b>' + esc(c.name || 'Ansprechperson') + '</b>' + (c.role ? ' <span class="sub">· ' + esc(c.role) + '</span>' : '') +
+    '<div class="mcl">' + (c.email ? '<a class="ib" href="mailto:' + esc(c.email) + '">' + esc(c.email) + '</a>' : '') +
+    (c.phone ? '<a class="ib" href="tel:' + esc(c.phone.replace(/[^\d+]/g, '')) + '">' + esc(c.phone) + '</a>' : '') + li(c) + '</div></div>').join('');
+  const sal = meta.salary ? '<div class="msal"><span class="sub">Gehaltsspanne</span> <b>' + esc(meta.salary.range) + '</b>' + (meta.salary.line.length > meta.salary.range.length + 4 ? '<div class="sub">' + esc(meta.salary.line) + '</div>' : '') + '</div>' : '';
+  return '<section class="psec metasec" id="psecMeta" style="--pc:var(--s4)">' +
+    (meta.contacts.length ? '<h3>Ansprechperson (HR / Hiring Manager)</h3>' + ppl : '') + (sal ? (meta.contacts.length ? '' : '<h3>Gehalt</h3>') + sal : '') + '</section>';
 }
 
 /* ---------- Stellenausschreibung gegliedert anzeigen ----------

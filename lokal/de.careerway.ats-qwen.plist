@@ -6,6 +6,8 @@
   <string>de.careerway.ats-qwen</string>
   <key>ProgramArguments</key>
   <array>
+    <string>/usr/bin/caffeinate</string>
+    <string>-i</string>
     <string>__NODE__</string>
     <string>__SCRIPT__</string>
   </array>
