@@ -353,7 +353,7 @@ html,body{overflow-x:hidden;overflow-x:clip}body{max-width:100%}
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.53', NEED_SCRIPT = '1.6.44'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.54', NEED_SCRIPT = '1.6.44'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Careerway ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
@@ -1749,6 +1749,8 @@ function findSalary(lines) {
 }
 const NAME_RE = /^(?:(?:Herr|Frau|Mr\.?|Ms\.?|Mrs\.?|Dr\.?|Prof\.?)\s+)*([A-ZÄÖÜ][\p{L}'’.-]+(?:\s+(?:von|van|de|der|zu|di|da)?\s*[A-ZÄÖÜ][\p{L}'’.-]+){1,3})/u;
 const CONTACT_HEAD = /^(?:ihr(?:e)?\s+)?(?:ansprechpartner(?:in)?|ansprechperson|kontakt(?:person)?|recruiter(?:in)?|recruiting|hiring\s+(?:manager|team)|meet the hiring team|talent acquisition|personalabteilung|human resources|your contact|contact person|contact|fragen zur stelle|bewerbung an|bei fragen|job poster|posted by|ihre bewerbung an)\b\s*[:–-]?\s*(.*)$/i;
+const ROLE_BAD = /^(about|über|what|was |wir |the |our |unser|why|your|deine|ihre|key|job|das |die |der |we |you )/i;
+const NOT_ORG = /\b(GmbH|AG|SE|KG|Group|Gruppe|Inc|Ltd|LLC|Corp|Company|Team)\b/;
 const NOT_NAME = /^(Jetzt|Bitte|Ihre|Deine|Gerne|Haben|Wir|Unser|Contact|Apply|Your|Please|Send|Reach|Für|Bei|Zur|Zum|Der|Die|Das)\b/;
 function findContacts(lines) {
   const out = [];
@@ -1768,20 +1770,22 @@ function findContacts(lines) {
       if (!linkedin) linkedin = liOf(w);
       if (!name && k < 3) {
         const m = w.match(NAME_RE);
-        if (m && !NOT_NAME.test(m[1])) {
+        if (m && !NOT_NAME.test(m[1]) && !NOT_ORG.test(m[1])) {
           name = m[1].trim();
           const rest = w.slice(m[0].length).replace(/^\s*[,–—|·(-]\s*/, '').replace(/\)$/, '').trim();
-          if (rest && rest.length < 60 && !/[@\d]/.test(rest)) role = rest.split(/\.\s/)[0];
-          else if (!role && win[k + 1] && win[k + 1].length < 60 && !/[@\d:\/]/.test(win[k + 1])) role = win[k + 1];
+          if (rest && rest.length < 60 && !/[@\d]/.test(rest)) { const r0 = rest.split(/\.\s/)[0]; if (!ROLE_BAD.test(r0)) role = r0; }
+          else if (!role && win[k + 1] && win[k + 1].length < 60 && !/[@\d:\/]/.test(win[k + 1]) && !ROLE_BAD.test(win[k + 1])) role = win[k + 1];
         }
       }
     });
     add({ name, role, email, phone, linkedin });
   }
   // Inline: „Hiring contact: Anna Beispiel (Sr. Director People Ops) https://linkedin.com/in/…“ mitten in einer Zeile
-  const INLINE = /(?:hiring\s+contact|hiring\s+manager|recruiter(?:in)?|recruiting\s+contact|ansprechpartner(?:in)?|ansprechperson|contact\s+person|kontaktperson)\s*[:–-]\s*((?:(?:Herr|Frau|Mr\.?|Ms\.?|Mrs\.?|Dr\.?)\s+)?[A-ZÄÖÜ][\p{L}'’.-]+(?:\s+[A-ZÄÖÜ][\p{L}'’.-]+){1,2})(?:\s*\(([^)\n]{2,80})\)|\s*[,–]\s*([^\n.;(]{2,60}))?/iu;
+  const KW = /(?:hiring\s+contact|hiring\s+manager|recruiter(?:in)?|recruiting\s+contact|ansprechpartner(?:in)?|ansprechperson|contact\s+person|kontaktperson)\s*[:–-]\s*/i;
+  const NM = /^((?:(?:Herr|Frau|Mr\.?|Ms\.?|Mrs\.?|Dr\.?)\s+)?[A-ZÄÖÜ][\p{L}'’.-]+(?:\s+[A-ZÄÖÜ][\p{L}'’.-]+){1,2})(?:\s*\(([^)\n]{2,80})\)|\s*[,–]\s*([^\n.;(]{2,60}))?/u;
   lines.forEach((l) => {
-    const m = l.match(INLINE); if (!m || NOT_NAME.test(m[1])) return;
+    const k = l.match(KW); if (!k) return;
+    const m = l.slice(k.index + k[0].length).match(NM); if (!m || NOT_NAME.test(m[1]) || NOT_ORG.test(m[1])) return;
     add({ name: m[1].trim(), role: (m[2] || m[3] || '').trim(), email: emailOf(l), phone: phoneOf(l), linkedin: liOf(l) });
   });
   lines.map(liOf).filter(Boolean).forEach((u) => {

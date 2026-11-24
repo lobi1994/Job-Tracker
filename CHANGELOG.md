@@ -11,6 +11,12 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.54 – 24.11.2026 (nur App) – Weniger falsche Treffer bei der Ansprechperson
+- Firmennamen (zum Beispiel „… GmbH“) und Überschriften (zum Beispiel „About Us“) werden nicht mehr als Person oder Rolle angezeigt.
+- Namen werden nur noch erkannt, wenn sie mit Großbuchstaben beginnen.
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.6.53 – 24.11.2026 (nur App) – Ansprechperson und Gehalt sauberer
 - Das Gehalt steht jetzt nur noch als „Gehalt“ mit den Zahlen, zum Beispiel „90.000–105.000 USD“. Der lange Satz aus der Anzeige ist weg. Auch Angaben wie „90–105k USD“ werden erkannt.
 - Die Ansprechperson wird jetzt auch gefunden, wenn sie mitten im Satz steht, zum Beispiel „Hiring contact: Name (Rolle)“.
