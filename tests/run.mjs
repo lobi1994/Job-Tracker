@@ -220,7 +220,7 @@ await test('A-r findDuplicate kein Treffer', () => {
   })()`);
   assert.equal(r, JSON.stringify([null, null, null, null]));
 });
-await test('A-s Oberfläche: Dublette fragt nach', () => {
+await test('A-s Oberfläche: schon gespeicherter Job fragt nach', () => {
   const n0 = ev('jobs.length');
   ev(`window.__cf = null; window.confirm = (t) => { window.__cf = t; return false; };`);
   ev(`$('bAdd').click(); $('nCompany').value = jobs[0].company; $('nRole').value = jobs[0].role; $('nSave').click();`);

@@ -109,7 +109,7 @@ Beschreibung für die Bereitstellung: `1.6.44 Fähigkeiten aus der App ins Profi
 
 **Apps Script: Bereitstellen nötig: nein**
 
-## 1.6.42 – 16.11.2026 (nur App) – Dubletten-Warnung
+## 1.6.42 – 16.11.2026 (nur App) – Warnung, wenn ein Job bereits gespeichert ist
 - Legst du über „+“ einen Job an, den es schon gibt (gleicher Link, gleiche Stellen-ID im Link oder gleiche Firma und Stelle), fragt die App nach. „Abbrechen“ öffnet den vorhandenen Job, „OK“ legt ihn trotzdem an.
 - Beim Speichern über den Kurzbefehl prüft das Apps Script das schon länger selbst. Dort ändert sich nichts.
 

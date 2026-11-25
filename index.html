@@ -1994,7 +1994,7 @@ function loadBar() {
 }
 
 /* ---------- Neuer Job ---------- */
-/* Dublette? Gleiche Regeln wie findSameJob_ / normUrl_ im Apps Script (google/Code.gs). */
+/* Job schon vorhanden? Gleiche Regeln wie findSameJob_ / normUrl_ im Apps Script (google/Code.gs). */
 function findDuplicate(job, list) {
   const normUrl = (u) => String(u || '').trim().toLowerCase().replace(/^https?:\/\/(www\.|de\.)?/, '').replace(/[?#].*$/, '').replace(/\/+$/, '');
   const norm = (t) => String(t || '').toLowerCase().replace(/\((m|w|d|f|x|all genders?|alle)[^)]*\)/g, ' ').replace(/[^a-z0-9äöüß]+/g, '');
