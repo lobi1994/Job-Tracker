@@ -20,6 +20,8 @@ Created by [Matthias Lobinger](https://www.linkedin.com/in/matthias-lobinger)
 
 All screenshots show made-up sample data.
 
+The [wiki](https://github.com/lobi1994/Job-Tracker/wiki/Home-EN) explains requirements, features, architecture, decisions and lessons learned.
+
 ## Why
 
 When you apply through many portals, you lose track of where you stand. Job postings disappear before the interview invitation arrives. And across dozens of postings it is hard to see which skills you are missing.

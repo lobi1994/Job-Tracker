@@ -87,6 +87,11 @@ await test('A-f3 extractPostingMeta: Hiring contact mitten im Satz, Gehalt ohne 
   assert.ok(/Gehalt<\/span> <b>90\.000–105\.000 USD<\/b><\/div>/.test(h) && !/viele Worte/.test(h), h);
   assert.equal(ev(`extractPostingMeta("Notiz 90–105k USD").salary.range`), '90–105k USD');
 });
+await test('A-f4 extractPostingMeta: „Kontakt“ über der Ansprechperson ergibt nur einen Eintrag', () => {
+  const m = ev(`extractPostingMeta("Kontakt\\nAnsprechpartnerin: Lena Sommer (Talent Acquisition)\\nlena.sommer@example.com")`);
+  assert.equal(m.contacts.length, 1); assert.equal(m.contacts[0].name, 'Lena Sommer');
+  assert.equal(m.contacts[0].email, 'lena.sommer@example.com');
+});
 await test('A-g computeGaps', () => {
   const r = ev(`computeGaps([{id:'1',role:'Projektmanager',status:'Beworben',company:'A'},{id:'2',role:'Support',status:'Nicht bewerben',company:'B'}], [{id:'1',text:'Sehr gute SQL-Kenntnisse. Python ist von Vorteil.'},{id:'2',text:'SAP erforderlich'}], [])`);
   assert.equal(r.total, 1);

@@ -20,6 +20,8 @@ Erstellt von [Matthias Lobinger](https://www.linkedin.com/in/matthias-lobinger)
 
 Alle Screenshots zeigen erfundene Beispieldaten.
 
+Das [Wiki](https://github.com/lobi1994/Job-Tracker/wiki) erklärt Anforderungen, Funktionen, Architektur, Entscheidungen und Lessons learned.
+
 ## Warum
 
 Wer sich über viele Portale bewirbt, verliert schnell den Überblick. Stellenanzeigen verschwinden, bevor die Einladung zum Gespräch kommt. Und über viele Anzeigen hinweg ist schwer zu sehen, welche Fähigkeiten einem fehlen.

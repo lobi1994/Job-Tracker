@@ -11,6 +11,12 @@ Welche Version gerade läuft, steht in der App unter **Einstellungen (Zahnrad)**
 
 ---
 
+## 1.6.55 – 25.11.2026 (nur App) – Demo zeigt Ansprechperson und Gehalt
+- Die Beispiel-Anzeige im Demo-Modus nennt jetzt eine erfundene Ansprechperson und eine erfundene Gehaltsspanne. So sieht man den Block auch ohne eigene Daten.
+- Steht „Kontakt“ als Überschrift über der Ansprechperson, erscheint die Person nur noch einmal, mit E-Mail.
+
+**Apps Script: Bereitstellen nötig: nein**
+
 ## 1.6.54 – 24.11.2026 (nur App) – Weniger falsche Treffer bei der Ansprechperson
 - Firmennamen (zum Beispiel „… GmbH“) und Überschriften (zum Beispiel „About Us“) werden nicht mehr als Person oder Rolle angezeigt.
 - Namen werden nur noch erkannt, wenn sie mit Großbuchstaben beginnen.

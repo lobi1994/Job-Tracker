@@ -28,6 +28,7 @@ Private Werte (Sheet-ID, Drive-Ordner, CV-Fakten, Budgets) stehen NICHT hier, so
 - Muss das Apps Script neu bereitgestellt werden: Matthias Schritt für Schritt sagen, wie (Code.gs kopieren, Bereitstellen → Bereitstellungen verwalten → Stift → Neue Version) und eine kurze Beschreibung für die Bereitstellung mitgeben, z. B. `1.6.47 ATS-Bewertung lokal`.
 - Muss ein Kurzbefehl geändert werden: genaue Anleitung, und `kurzbefehl.html` anpassen.
 - `NEED_SCRIPT` in `index.html` nur erhöhen, wenn die App eine neue Script-Funktion braucht.
+- Wiki: Ändert eine Version eine Funktion, die im Wiki steht (Seiten Funktionen, Architektur, Entscheidungen, ATS-Bewertung, Sicherheit), wird die deutsche und die englische Seite (Endung `-EN`) im selben Zug angepasst und im Wiki-Repository gepusht. Neue Entscheidungen bekommen einen Eintrag mit Grund. Das Wiki ist öffentlich: keine privaten Daten. Das Wiki-Repository liegt im Ordner `../Job-Tracker.wiki` (fehlt er: `git clone https://github.com/lobi1994/Job-Tracker.wiki.git ../Job-Tracker.wiki`).
 
 ## Öffentliches Repo: keine privaten Daten
 Das Repo ist öffentlich. Nie in Code, Commits oder Git-Historie: Schlüssel, Sheet-IDs, Drive-IDs, Script-URLs, Namen von Firmen, bei denen Matthias sich beworben hat, oder andere persönliche Daten. Beispiele und Demo-Daten nur mit erfundenen Firmen. Vor jedem Commit kurz prüfen (`git diff`).

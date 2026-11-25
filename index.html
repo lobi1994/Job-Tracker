@@ -353,7 +353,7 @@ html,body{overflow-x:hidden;overflow-x:clip}body{max-width:100%}
 
 <script>
 'use strict';
-const APP_VERSION = '1.6.54', NEED_SCRIPT = '1.6.44'; // siehe CHANGELOG.md
+const APP_VERSION = '1.6.55', NEED_SCRIPT = '1.6.44'; // siehe CHANGELOG.md
 const CREDIT = '<p class="credit">Careerway ' + APP_VERSION + ' · Created by <a href="https://www.linkedin.com/in/matthias-lobinger" target="_blank" rel="noopener">Matthias Lobinger</a></p>';
 const STATUS_DEF = ['Noch nicht beworben','Beworben','Zum Gespräch eingeladen','Persönliches Gespräch','Jobangebot','Abgelehnt','Nicht bewerben'];
 const SHORT = {'Noch nicht beworben':'Offen','Beworben':'Beworben','Zum Gespräch eingeladen':'Gespräch','Persönliches Gespräch':'Vor Ort','Jobangebot':'Angebot','Abgelehnt':'Abgelehnt','Nicht bewerben':'Nicht bewerben'};
@@ -1792,6 +1792,13 @@ function findContacts(lines) {
     if (out.some((o) => o.linkedin === u)) return;
     const o = out.find((x) => !x.linkedin); if (o && out.length === 1) o.linkedin = u; else add({ name: '', role: '', email: '', phone: '', linkedin: u });
   });
+  // Eintrag ohne Namen (nur Mail, Telefon oder Link) in die erste benannte Person übernehmen
+  const named = out.find((c) => c.name);
+  if (named) for (let i = out.length - 1; i >= 0; i--) {
+    const c = out[i]; if (c.name) continue;
+    if (['email', 'phone', 'linkedin'].some((k) => c[k] && named[k] && c[k] !== named[k])) continue;
+    ['email', 'phone', 'linkedin'].forEach((k) => { named[k] = named[k] || c[k]; }); out.splice(i, 1);
+  }
   return out.slice(0, 3);
 }
 function extractPostingMeta(text) {
@@ -2082,7 +2089,7 @@ function demoApi(fn, args) {
     if (fn === 'apiResolveSuggestion') { const sg = demoSug.find((x) => x.vid === args[0]); demoSug = demoSug.filter((x) => x.vid !== args[0]);
       const j = jobs.find((x) => x.id === (sg || {}).jobId); return res({ job: args[1] && j ? Object.assign({}, j, { status: sg.status }) : null }); }
     if (fn === 'apiTranslatePosting') return res({ id: args[0], translated: true, text: 'We build autonomous robots for intralogistics.\n\nYour tasks\n- Support customers with technical questions (2nd/3rd level support)\n- Analyse errors and solve them together with development\n- Run training sessions for customers\n\nYour profile\n- Technical degree\n- Experience with Linux, networking and CAN bus\n- Good German and English skills\n- Customer focus, teamwork and a structured way of working\n\nWhat we offer\n- Hybrid working\n- 30 days of vacation' });
-    if (fn === 'apiGetPosting') return res({ url: '', savedAt: '2026-11-10', text: 'Wir bauen autonome Roboter für die Intralogistik.\n\nDeine Aufgaben\n- Kunden bei technischen Fragen unterstützen (2nd/3rd Level Support)\n- Fehler analysieren und mit der Entwicklung lösen\n- Schulungen für Kunden durchführen\n\nDein Profil\n- Technisches Studium\n- Erfahrung mit Linux, Netzwerktechnik und CAN-Bus\n- Gute Deutsch- und Englischkenntnisse\n- Kundenorientierung, Teamfähigkeit und strukturierte Arbeitsweise\n\nWas wir bieten\n- Hybrides Arbeiten\n- 30 Tage Urlaub' });
+    if (fn === 'apiGetPosting') return res({ url: '', savedAt: '2026-11-10', text: 'Wir bauen autonome Roboter für die Intralogistik.\n\nDeine Aufgaben\n- Kunden bei technischen Fragen unterstützen (2nd/3rd Level Support)\n- Fehler analysieren und mit der Entwicklung lösen\n- Schulungen für Kunden durchführen\n\nDein Profil\n- Technisches Studium\n- Erfahrung mit Linux, Netzwerktechnik und CAN-Bus\n- Gute Deutsch- und Englischkenntnisse\n- Kundenorientierung, Teamfähigkeit und strukturierte Arbeitsweise\n\nWas wir bieten\n- Gehalt: 62.000 € - 70.000 € brutto pro Jahr\n- Hybrides Arbeiten\n- 30 Tage Urlaub\n\nKontakt\nAnsprechpartnerin: Lena Sommer (Talent Acquisition)\nlena.sommer@example.com' });
     if (fn === 'apiDeletePosting') { const j = jobs.find((x) => x.id === args[0]) || {}; return res(Object.assign({}, j, { postingSaved: '', fitNote: '' })); }
     if (fn === 'apiSavePosting') { const j = jobs.find((x) => x.id === (args[0] || {}).id) || {};
       if (j.postingSaved && (args[0] || {}).replace === false) return res({ ask: true, job: j, chars: 0, message: 'Für ' + j.company + ' ist schon eine Stellenausschreibung gespeichert. Durch die neue ersetzen?' }); return res({ chars: 1234, job: Object.assign({}, j, { postingSaved: new Date().toLocaleDateString('de-DE') }) }); }
